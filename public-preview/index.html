@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="zh-HK" data-mode="public-preview">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#121310">
+  <meta name="description" content="行入玄與九爺辦公室，慢慢傾你掛心嘅事。填寫出生日期及逐題資料，由三個完整互動故事開始。">
+  <meta name="prototype-version" content="0.3.1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; form-action 'none'; base-uri 'none'; object-src 'none'">
+  <title>玄與九爺｜入嚟坐，慢慢講</title>
+  <link rel="preload" as="image" href="assets/office-scene-v1.webp">
+  <link rel="stylesheet" href="styles.css?v=0.3.1">
+</head>
+<body>
+  <a class="skip" href="#main">跳到主要內容</a>
+  <header class="site-header">
+    <a class="brand" href="#main" aria-label="玄與九爺故事館首頁"><span class="brand-seal" aria-hidden="true">玄</span><span>玄與九爺<small>故事館</small></span></a>
+    <nav aria-label="主要導覽"><button class="nav-entry" data-action="account" id="account-control">預覽說明</button><a href="#stories">揀個故事</a><a href="#companions">認識佢哋</a><button class="nav-entry" data-action="enter">行入辦公室 <span aria-hidden="true">↗</span></button></nav>
+  </header>
+
+  <main id="main"><p class="test-notice">公開預覽：只用虛構資料。不設登入、不保存；關閉或重新整理會清除本頁填寫。</p>
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-scene"><img src="assets/office-scene-v1.webp" width="1536" height="1024" alt="玄持摺扇，銀灰狐狸九爺戴住綠玉吊墜，喺現代辦公室等你" fetchpriority="high"></div>
+      <div class="hero-copy">
+        <p class="eyebrow">玄與九爺 / 今晚，留少少時間畀自己</p>
+        <h1 id="hero-title">入嚟坐，慢慢講。</h1>
+        <p class="hero-desc">工作、感情，定係你自己？由一件掛心嘅事開始。</p>
+        <div class="hero-actions"><button class="button primary" data-action="enter">行入辦公室 <span aria-hidden="true">↗</span></button><button class="text-link" data-action="direct">直接開始 <span aria-hidden="true">↗</span></button></div>
+        <p class="entry-note">出生日期必填 · 問卷預覽不保存 · 3 個完整故事</p>
+      </div>
+      <button id="motion-control" class="motion-control" type="button" aria-pressed="false">暫停動效</button>
+    </section>
+
+    <section class="stories section-shell" id="stories" aria-labelledby="stories-title">
+      <div class="section-intro reveal"><h2 id="stories-title">你而家，卡喺邊一度？</h2><p>有啲說話，借個故事先講得出口。</p></div>
+      <div class="filters reveal" role="group" aria-label="按煩惱揀故事">
+        <button class="filter" data-filter="all" aria-pressed="true">全部故事</button><button class="filter" data-filter="work" aria-pressed="false">工作</button><button class="filter" data-filter="love" aria-pressed="false">感情</button><button class="filter" data-filter="self" aria-pressed="false">自己</button>
+      </div>
+      <div class="story-grid">
+        <button class="story-card featured reveal" data-action="story" data-story="work">
+          <span class="card-art hall-art"><img src="assets/story-hall.webp" alt="玄同九爺喺雨夜故事館等你" width="1672" height="941" loading="lazy"></span>
+          <span class="card-copy"><span class="card-topic">工作</span><span class="card-title">留低，定係轉個彎？</span><span class="card-desc">朝早未返到公司，已經想走。</span><span class="card-open">行入故事 <span aria-hidden="true">↗</span></span></span>
+        </button>
+        <button class="story-card reveal" data-action="story" data-story="love">
+          <span class="card-art portrait-art"><img src="assets/xuan-v2.webp" alt="玄手持星盤摺扇，帶住淡淡笑意" width="1672" height="941" loading="lazy"></span>
+          <span class="card-copy"><span class="card-topic">感情</span><span class="card-title">嗰句訊息，仲傳唔傳？</span><span class="card-desc">想講清楚，又怕打擾。</span><span class="card-open">行入故事 <span aria-hidden="true">↗</span></span></span>
+        </button>
+        <button class="story-card reveal" data-action="story" data-story="self">
+          <span class="card-art portrait-art fox-art"><img src="assets/jiuye-v2.webp" alt="銀灰狐狸九爺，戴住綠玉吊墜" width="1672" height="941" loading="lazy"></span>
+          <span class="card-copy"><span class="card-topic">自己</span><span class="card-title">點解總係覺得，自己慢咗？</span><span class="card-desc">身邊個個向前，你卻停喺原地。</span><span class="card-open">行入故事 <span aria-hidden="true">↗</span></span></span>
+        </button>
+      </div>
+      <p class="sr-only" id="filter-status" role="status" aria-live="polite"></p>
+      <div class="entry-promise"><span>出生日期必填</span><span>預覽不保存資料</span><span>免費故事有完整結尾</span></div>
+    </section>
+
+    <section class="companions section-shell" id="companions" aria-labelledby="companions-title">
+      <div class="section-intro reveal"><h2 id="companions-title">一個陪你拆解，<br>一個陪你講真話。</h2></div>
+      <div class="companion-grid">
+        <article class="companion xuan reveal"><div class="companion-art"><img src="assets/xuan-v2.webp" alt="玄的黑金長衣與星盤摺扇造型" width="1672" height="941" loading="lazy"></div><div class="companion-copy"><span class="name-latin">XUAN</span><h3>玄</h3><p>走過低谷，所以唔急住教你點行。<br>佢會問，亦會聽；決定始終留返畀你。</p><blockquote>「未有答案，唔代表你冇路揀。」</blockquote></div></article>
+        <article class="companion jiuye reveal"><div class="companion-art"><img src="assets/jiuye-v2.webp" alt="九爺的成年銀灰狐狸造型" width="1672" height="941" loading="lazy"></div><div class="companion-copy"><span class="name-latin">JIU YE</span><h3>九爺</h3><p>眼光利，說話更利。<br>嘴上寸你兩句，心裏一直企喺你嗰邊。</p><blockquote>「諗清楚先行，唔等於你行得慢。」</blockquote></div></article>
+      </div>
+    </section>
+
+    <section class="how section-shell reveal" aria-labelledby="how-title">
+      <h2 id="how-title">入嚟坐，再慢慢揀。</h2>
+      <ol class="steps"><li><h3>先同玄、九爺見面</h3><p>聽幾句說話，或略過開場填資料。出生年月日必須填寫。</p></li><li><h3>講低主題同目標</h3><p>逐題填寫虛構資料、核對後，喺故事裏試揀一次；隨時可以修改，資料不會保存。</p></li><li><h3>帶一個小行動離開</h3><p>完整故事、反思同下一步；唔係個人命盤或預言。</p></li></ol>
+    </section>
+
+    <section class="questions section-shell reveal" aria-labelledby="questions-title">
+      <h2 id="questions-title">入館之前，你可能想知。</h2>
+      <div class="faq-list">
+        <details><summary>故事會幫我預測未來？</summary><p>唔會。呢度用原創故事陪你整理選擇，唔會斷言邊件事一定發生，亦唔會代你做決定。</p></details>
+        <details><summary>要輸入生日嗎？</summary><p>要，出生年月日必須填寫。請只用虛構資料試問卷，其餘問題逐步顯示，可返回核對。公開預覽不設登入、不保存，未提供個人命盤。</p></details>
+        <details><summary>睇到一半會唔會要付款？</summary><p>唔會。呢度展示嘅故事、結局同反思都可以完整睇完，冇付款步驟。</p></details>
+      </div>
+    </section>
+  </main>
+  <footer class="site-footer section-shell"><a class="footer-brand" href="#main">玄與九爺</a><p>陪你睇清選擇，唔替你決定。</p><small>內容只作文化與生活反思參考，唔代替專業意見。</small></footer>
+
+  <dialog id="story-dialog" aria-labelledby="dialog-title">
+    <button class="dialog-close" type="button" data-action="close" aria-label="關閉故事">×</button>
+    <div class="dialog-grid">
+      <div class="dialog-art"><img src="assets/office-scene-v1.webp" alt="辦公室內的玄與九爺" width="1536" height="1024"><span class="office-door door-left" aria-hidden="true"></span><span class="office-door door-right" aria-hidden="true"></span><div class="dialog-art-caption">今晚，慢慢講。</div></div>
+      <div class="dialog-panel"><div id="story-content" tabindex="-1"></div></div>
+    </div>
+  </dialog>
+  <script type="module" src="app.js?v=0.3.1"></script>
+</body>
+</html>
