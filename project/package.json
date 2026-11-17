@@ -1,0 +1,10 @@
+{
+  "name": "xuan-jiuye-private-draft",
+  "version": "0.6.2",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test test.mjs ziwei.test.mjs reading.test.mjs journey.test.mjs motion/motion.test.mjs ui.test.mjs",
+    "build": "node build.mjs"
+  }
+}
