@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="zh-Hant" data-mode="local-test">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="prototype-version" content="0.6.2">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; media-src 'self' data:; connect-src 'self'; form-action 'none'; base-uri 'none'; object-src 'none'">
+  <meta name="referrer" content="no-referrer">
+  <title>玄與九爺｜入嚟坐，慢慢講。</title>
+  <meta name="description" content="同玄與九爺入室傾談，核對出生資料，睇清紫微十二宮，再慢慢整理自己、工作同關係。">
+  <link rel="stylesheet" href="styles.css?v=0.6.2">
+  <link rel="stylesheet" href="motion/motion.css?v=0.6.2">
+</head>
+<body class="journey-site">
+  <a class="skip" href="#main">跳到主要內容</a>
+  <header class="site-header">
+    <a class="brand" href="#main"><span class="brand-seal" aria-hidden="true">玄</span><span>玄與九爺<small>XUAN &amp; JIU YE</small></span></a>
+    <nav aria-label="主要導覽"><a href="#before-enter">入室須知</a><button class="text-link" id="account-control" data-action="account" type="button">登入／我的資料</button></nav>
+  </header>
+  <main id="main">
+    <section class="hero journey-home" aria-labelledby="hero-title">
+      <h1 id="hero-title" class="sr-only">玄與九爺</h1>
+      <div class="home-stage">
+        <div id="home-scene" class="scene-slot"><figure class="scene-motion" id="scene-motion"><img id="scene-poster" src="assets/journey-door.webp" alt="玄與九爺會客室門口" width="480" height="720" fetchpriority="high"><video id="scene-video" muted playsinline preload="none" aria-hidden="true" hidden></video></figure><div class="hero-actions"><button class="button primary" data-action="enter" type="button">推門入內</button><button class="text-link" data-action="direct" type="button">直接排盤</button></div></div>
+        <div id="home-controls"><div class="scene-motion-controls" id="scene-motion-controls"><button class="scene-skip" id="scene-skip" type="button" aria-label="略過動畫與音效">略過</button><p id="scene-status" class="sr-only" role="status"></p></div></div>
+      </div>
+    </section>
+    <p class="preview-banner section-shell">只用虛構資料試排。資料只留本頁。</p>
+    <section class="before-enter section-shell" id="before-enter" aria-labelledby="before-title">
+      <div><h2 id="before-title">入室須知</h2></div>
+      <div class="faq-list">
+        <details><summary>會唔會預測我一定發生乜事？</summary><p>唔會。只作傳統文化閱讀與生活反思；宮位及星曜有列出依據，唔代替醫療、投資或其他專業意見。</p></details>
+        <details><summary>資料會保存或傳送嗎？</summary><p>排盤只留本頁，關閉或重新整理便清除。現階段只用虛構資料，唔需要電郵、姓名或詳細地址。</p></details>
+        <details><summary>唔想睇動畫，可以直接填嗎？</summary><p>可以。按「略過」可略過動畫與音效。開啟減少動態時用靜態畫面。</p></details>
+        <details><summary>有冇付款或中途鎖住結果？</summary><p>冇。呢個版本可完整睇命盤、三個方面嘅文化閱讀，同修改資料重算，冇付款步驟。</p></details>
+      </div>
+    </section>
+    <details class="story-shelf section-shell"><summary>另外，借個故事整理選擇</summary><p>以下係原創互動故事，唔係個人命理解讀。</p><div class="story-links"><button class="text-link" data-action="story" data-story="work" type="button">工作 · 留低，定係轉個彎？ ↗</button><button class="text-link" data-action="story" data-story="love" type="button">感情 · 嗰句訊息，仲傳唔傳？ ↗</button><button class="text-link" data-action="story" data-story="self" type="button">自己 · 點解總係覺得慢咗？ ↗</button></div><p class="sr-only" id="filter-status" role="status"></p></details>
+  </main>
+  <footer class="site-footer section-shell"><a class="footer-brand" href="#main">玄與九爺</a><p>陪你睇清選擇，唔替你決定。</p><small>傳統文化參考，不作吉凶預言。</small></footer>
+  <dialog id="story-dialog" aria-labelledby="dialog-title">
+    <button class="dialog-close" type="button" data-action="close" aria-label="關閉並返回首頁">×</button>
+    <div class="dialog-grid"><div class="dialog-art scene-slot" id="dialog-scene"></div><div id="dialog-controls"></div><div class="dialog-panel"><div id="story-content" tabindex="-1"></div></div></div>
+  </dialog>
+  <script defer src="vendor/iztro-v2.6.5.min.js"></script>
+  <script type="module" src="app.js?v=0.6.2"></script>
+</body>
+</html>

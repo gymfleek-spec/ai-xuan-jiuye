@@ -1,0 +1,115 @@
+{
+  "recorded_at": "2026-11-16T14:47:33.582319+08:00",
+  "version": "0.3.0",
+  "origin": "Structured transcription of own OpenBot browser assertions, not a recording or independent review. No browser passwords or real customer data entered.",
+  "url": "http://127.0.0.1:4188/",
+  "owned_tab": "be5a7f75-654c-4f96-af3f-93ab0765a1ba",
+  "source_sha256": {
+    "index.html": "9d700e680f1b8fcb121593e2f23c3e20e05d102b923326fecb2edb1e274b4f2b",
+    "styles.css": "e64735e4524a4f143c49eec47f4693f281c5f9a6f6eea01926473e19445cb774",
+    "app.js": "720710fbc4a1992fdbbf8589c3e0b95c18cf472cff2755d20396b618b7cb242f",
+    "content.js": "d07b28dc32e4a9913e6ae2614ac7ae931ed151cda95c9d9e077e761448ac2dde",
+    "customer.js": "34e62a8046958fc100fed0063181c1f766fc8afd51f64bed8aa001bd36d94b52",
+    "customer/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "customer/migrations/0001_initial.py": "568a5e9e041ef22590117862775951279244cd791a2e06df34241520b406242f",
+    "customer/migrations/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "customer/models.py": "c157f126a836ee873866ea85ef67118b7441cdddf60fe0205c6fcbe2f745890d",
+    "customer/settings.py": "96ef4fbf7bb4c3c0e8adcea5a5e3a7160f117dcac8eada46722a790556c47d41",
+    "customer/tests.py": "580c77b4f5fe20f7f02f1358b20fd08b8f52f99af7c2a7a7dc46467a2486e6c2",
+    "customer/urls.py": "b37760f4d964836a197a6e5d28f7fed9f86bda9a7bc2389efacb8c478deb429b",
+    "customer/views.py": "772b20c2b4cf73e84afe7bc9400d601abfe5d1d82f933a1b394286ca9fa5940c"
+  },
+  "desktop": {
+    "viewport_requested": [
+      1440,
+      900
+    ],
+    "entrances_gated": [
+      "direct",
+      "work-card",
+      "love-card",
+      "self-card"
+    ],
+    "empty_birth_cannot_advance": true,
+    "R1_entry_after_return": 3,
+    "R2_five_digit_year_preserved_and_rejected": true,
+    "unknown_time_clears_old_display_value": true,
+    "review_rows": 11,
+    "user_html_is_text": true,
+    "injected_image_elements": 0,
+    "unchecked_save_denied": true,
+    "anonymous_save_requires_account": true,
+    "signup_confirmation_field_present": true,
+    "signup_password_minimum": 12,
+    "review_draft_retained_after_account_screen": true,
+    "page_errors": [],
+    "CSP_events": [],
+    "browser_local_storage_entries": 0,
+    "browser_session_storage_entries": 0,
+    "final_source_recheck": "PASS"
+  },
+  "mobile": {
+    "viewport": [
+      390,
+      844
+    ],
+    "empty_required_birth_error_focus": "birth-year",
+    "input_font_px": 16,
+    "exact_time_without_value_rejected": true,
+    "unknown_time_input_blank_and_disabled": true,
+    "birth_and_residence_separate": true,
+    "relationship_options": [
+      "",
+      "single",
+      "dating",
+      "married",
+      "other",
+      "private"
+    ],
+    "relationship_font_px": 16,
+    "private_relationship_review_correct": true,
+    "ancient_year_review_and_edit_retained": true,
+    "consent_default_unchecked": true,
+    "horizontal_overflow": false,
+    "running_animations_reduced": 0,
+    "close_clears_unsaved_DOM": true
+  },
+  "short_viewport": {
+    "viewport": [
+      320,
+      420
+    ],
+    "home_horizontal_overflow": false,
+    "invalid_year_length": 5,
+    "error_focus_visible": true,
+    "input_font_px": 16,
+    "dialog_horizontal_overflow": false
+  },
+  "portable_http": {
+    "version": "0.3.0",
+    "images_inline": true,
+    "required_birth_gate": true,
+    "five_digit_year_rejected": true,
+    "full_anonymous_questionnaire_to_review": true,
+    "review_rows": 11,
+    "consent_default_unchecked": true,
+    "anonymous_save_requires_account": true,
+    "horizontal_overflow": false
+  },
+  "browser_authenticated_signup_login_save_read_update_delete": "NOT RUN; only actual HTTP/API and Node controller tests cover authenticated operations",
+  "six_story_routes": "29 Node suite includes actual controller execution for all six with a synthetic saved-record context, not authenticated live browser paths",
+  "real_cross_device": "NOT RUN; independent HTTP cookie jars only",
+  "not_run": [
+    "browser password entry and end-to-end authenticated UI",
+    "real phone and OS keyboard",
+    "Safari/Firefox/screen reader",
+    "file protocol",
+    "full reference-video question inventory",
+    "production hosting, HTTPS and secure-cookie configuration",
+    "formal retention, backups, account recovery and security audit",
+    "independent same-version acceptance",
+    "astrology engine or results",
+    "fan animation and draggable panorama"
+  ],
+  "writes": "Own source and original delivery updated; fixture accounts/sessions removed; no cloud or real customer records. Own screenshot copy and browser cache; own browser tab closed at end."
+}

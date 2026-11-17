@@ -1,0 +1,1 @@
+Single source v0.3.0: required questionnaire, Django local accounts/profile API, schema migration, actual DB tests, native browser tests, synchronized portable/source archive. No cloud, release, analytics or astrology engine.

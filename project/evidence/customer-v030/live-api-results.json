@@ -1,0 +1,16 @@
+{
+  "status": "PASS",
+  "checks": [
+    "signup with CSRF and actual password hashing",
+    "actual HTTP save and authoritative readback",
+    "separate database connection reads persisted SQLite row",
+    "independent cookie jar login reads same record; not real hardware",
+    "other account cannot read or delete first account record",
+    "update increments revision; stale client cannot overwrite",
+    "confirmed deletion visible to other session",
+    "logout invalidates this session"
+  ],
+  "synthetic_accounts_and_sessions_removed": true,
+  "real_devices": "NOT RUN",
+  "external_service": false
+}

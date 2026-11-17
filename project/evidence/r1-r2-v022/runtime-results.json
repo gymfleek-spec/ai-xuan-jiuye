@@ -1,0 +1,527 @@
+{
+  "title": "AI玄學 v0.2.2 R1/R2 producer regression rerun",
+  "recorded_at": "2026-11-16T12:22:59.274544+08:00",
+  "origin": "Structured transcription of this writer own live OpenBot browser results with throwing assertions. Not an independent acceptance, not a recording, not a relabel of the v0.2.1 report.",
+  "source_root": "/Users/simsonpersonal/OpenBot/Shared/AI玄學/web-draft-qiang-20261116",
+  "version": "0.2.2",
+  "baseline_version": "0.2.1",
+  "four_source_sha256": {
+    "app.js": "d21564b649eb9dcf50ee13ab7bc0b2a648673b561464ab95caa94db5307e9ffd",
+    "content.js": "aa966d920a7c691e21d70bce7d84698ba4ec0d18a15349986b4cf4785bdb51fc",
+    "index.html": "a91e818d75bd3839aadc18b933048a16ba6328e987e1781dbe718a19e729cc99",
+    "styles.css": "b17ef48444f2d46c9590180e84081f043ba629157d50fdf03b589d19fd0783d1"
+  },
+  "four_source_set_sha256": "20ec8786eec01be8a162be31a55041fd48c2c7f905ec1655bbabd929b3411ed1",
+  "browser": {
+    "owned_tab": "8a1569a7-245f-418b-bf0c-e165b2b4dfa3",
+    "new_tab_for_this_task": true,
+    "other_thread_tabs_used": false,
+    "engine": "Chromium 156.0.0.0",
+    "local_url": "http://127.0.0.1:4186/",
+    "fixtures": "synthetic only; trusted CDP batch text insertion, not OS clipboard paste",
+    "time_zone": "Asia/Hong_Kong",
+    "ended_at_utc": "2026-11-16T04:23:53.525Z",
+    "owned_tab_closed": true,
+    "final_dialog_closed_and_content_empty": true
+  },
+  "baseline": {
+    "tracked_files_match": 32,
+    "manifest_sha256": "83ae3b1693a43d6d18bc93874dae9901600837e730f159b2f937100d833d04fe",
+    "own_desktop_reproduction": {
+      "R1_count_before": 3,
+      "R1_count_after_return": 6,
+      "R2_requested_year_length": 5,
+      "R2_actual_length": 4,
+      "R2_truncated_year_accepted_in_review": true
+    }
+  },
+  "R1": {
+    "desktop_1440x900_normal": {
+      "status": "PASS",
+      "first_count": 3,
+      "returned_count": 3,
+      "returned_entry_class": false,
+      "returned_animation_names": [
+        "none",
+        "none",
+        "none"
+      ],
+      "new_visit_total_count": 6
+    },
+    "mobile_390x844_normal_skip_return": {
+      "status": "PASS",
+      "entry_count": 3,
+      "returned_count": 3,
+      "returned_entry_class": false,
+      "returned_animation_names": [
+        "none",
+        "none",
+        "none"
+      ],
+      "sample_before_skip_ms": 288.80000001192093,
+      "sample_is_not_exact_skip_timestamp": true
+    },
+    "narrow_320x667_reduced": {
+      "status": "PASS",
+      "entry_count": 0,
+      "running": 0,
+      "content_opacity": "1"
+    },
+    "portable_390x844_normal": {
+      "status": "PASS",
+      "first_count": 3,
+      "returned_count": 3,
+      "returned_entry_class": false,
+      "returned_animation_names": [
+        "none",
+        "none",
+        "none"
+      ]
+    }
+  },
+  "R2": {
+    "status": "PASS",
+    "contexts": [
+      "source 1440x900 normal",
+      "source 390x844 normal",
+      "source 390x844 reduced",
+      "source 320x420 reduced",
+      "portable 390x844 normal"
+    ],
+    "year_length_retained": 5,
+    "rejected": true,
+    "aria_invalid": "true",
+    "focus": "birth-year",
+    "no_topic_advance": true,
+    "ancient_0001_accepted_in_review": true,
+    "ancient_input_retained_when_editing": true,
+    "leading_five_digit_year_rejected": true,
+    "month_and_day_three_digits_rejected_without_truncation": true
+  },
+  "date_ui_cases": [
+    {
+      "id": "year-five-digits",
+      "status": "PASS",
+      "rejected_at": "year"
+    },
+    {
+      "id": "year-leading-five",
+      "status": "PASS",
+      "rejected_at": "year"
+    },
+    {
+      "id": "month-leading-three",
+      "status": "PASS",
+      "rejected_at": "month"
+    },
+    {
+      "id": "day-leading-three",
+      "status": "PASS",
+      "rejected_at": "day"
+    },
+    {
+      "id": "century-not-leap",
+      "status": "PASS",
+      "rejected_at": "day"
+    },
+    {
+      "id": "leap-century",
+      "status": "PASS",
+      "accepted": true
+    },
+    {
+      "id": "ancient-leading",
+      "status": "PASS",
+      "accepted": true
+    },
+    {
+      "id": "missing-year",
+      "status": "PASS",
+      "rejected_at": "year"
+    },
+    {
+      "id": "nondigit",
+      "status": "PASS",
+      "rejected_at": "year"
+    },
+    {
+      "id": "year-zero",
+      "status": "PASS",
+      "rejected_at": "year"
+    },
+    {
+      "id": "month-zero",
+      "status": "PASS",
+      "rejected_at": "month"
+    },
+    {
+      "id": "month-overflow",
+      "status": "PASS",
+      "rejected_at": "month"
+    },
+    {
+      "id": "day-zero",
+      "status": "PASS",
+      "rejected_at": "day"
+    },
+    {
+      "id": "april-overflow",
+      "status": "PASS",
+      "rejected_at": "day"
+    },
+    {
+      "id": "today",
+      "status": "PASS",
+      "accepted": true
+    },
+    {
+      "id": "tomorrow",
+      "status": "PASS",
+      "rejected_at": "year"
+    }
+  ],
+  "six_routes": {
+    "source 1440x900 normal": [
+      {
+        "route": "work/talk",
+        "status": "PASS",
+        "outcome_matches_source": true,
+        "reflection_matches_source": true,
+        "action_matches_source": true,
+        "horizontal_overflow": false,
+        "action_font_px": 16,
+        "intro_beats": 2
+      },
+      {
+        "route": "work/explore",
+        "status": "PASS",
+        "outcome_matches_source": true,
+        "reflection_matches_source": true,
+        "action_matches_source": true,
+        "horizontal_overflow": false,
+        "action_font_px": 16,
+        "intro_beats": 2
+      },
+      {
+        "route": "love/send",
+        "status": "PASS",
+        "outcome_matches_source": true,
+        "reflection_matches_source": true,
+        "action_matches_source": true,
+        "horizontal_overflow": false,
+        "action_font_px": 16,
+        "intro_beats": 2
+      },
+      {
+        "route": "love/write",
+        "status": "PASS",
+        "outcome_matches_source": true,
+        "reflection_matches_source": true,
+        "action_matches_source": true,
+        "horizontal_overflow": false,
+        "action_font_px": 16,
+        "intro_beats": 2
+      },
+      {
+        "route": "self/notice",
+        "status": "PASS",
+        "outcome_matches_source": true,
+        "reflection_matches_source": true,
+        "action_matches_source": true,
+        "horizontal_overflow": false,
+        "action_font_px": 16,
+        "intro_beats": 2
+      },
+      {
+        "route": "self/pause",
+        "status": "PASS",
+        "outcome_matches_source": true,
+        "reflection_matches_source": true,
+        "action_matches_source": true,
+        "horizontal_overflow": false,
+        "action_font_px": 16,
+        "intro_beats": 2
+      }
+    ],
+    "source 320x667 reduced": [
+      {
+        "route": "work/talk",
+        "status": "PASS",
+        "outcome_matches_source": true,
+        "reflection_matches_source": true,
+        "action_matches_source": true,
+        "horizontal_overflow": false,
+        "action_font_px": 16,
+        "running_animations": 0
+      },
+      {
+        "route": "work/explore",
+        "status": "PASS",
+        "outcome_matches_source": true,
+        "reflection_matches_source": true,
+        "action_matches_source": true,
+        "horizontal_overflow": false,
+        "action_font_px": 16,
+        "running_animations": 0
+      },
+      {
+        "route": "love/send",
+        "status": "PASS",
+        "outcome_matches_source": true,
+        "reflection_matches_source": true,
+        "action_matches_source": true,
+        "horizontal_overflow": false,
+        "action_font_px": 16,
+        "running_animations": 0
+      },
+      {
+        "route": "love/write",
+        "status": "PASS",
+        "outcome_matches_source": true,
+        "reflection_matches_source": true,
+        "action_matches_source": true,
+        "horizontal_overflow": false,
+        "action_font_px": 16,
+        "running_animations": 0
+      },
+      {
+        "route": "self/notice",
+        "status": "PASS",
+        "outcome_matches_source": true,
+        "reflection_matches_source": true,
+        "action_matches_source": true,
+        "horizontal_overflow": false,
+        "action_font_px": 16,
+        "running_animations": 0
+      },
+      {
+        "route": "self/pause",
+        "status": "PASS",
+        "outcome_matches_source": true,
+        "reflection_matches_source": true,
+        "action_matches_source": true,
+        "horizontal_overflow": false,
+        "action_font_px": 16,
+        "running_animations": 0
+      }
+    ],
+    "portable 390x844 normal": [
+      {
+        "route": "work/talk",
+        "status": "PASS",
+        "outcome_matches_source": true,
+        "reflection_matches_source": true,
+        "action_matches_source": true,
+        "horizontal_overflow": false,
+        "action_font_px": 16,
+        "intro_exact_match": true,
+        "speaker_line_exact_match": true
+      },
+      {
+        "route": "work/explore",
+        "status": "PASS",
+        "outcome_matches_source": true,
+        "reflection_matches_source": true,
+        "action_matches_source": true,
+        "horizontal_overflow": false,
+        "action_font_px": 16,
+        "intro_exact_match": true,
+        "speaker_line_exact_match": true
+      },
+      {
+        "route": "love/send",
+        "status": "PASS",
+        "outcome_matches_source": true,
+        "reflection_matches_source": true,
+        "action_matches_source": true,
+        "horizontal_overflow": false,
+        "action_font_px": 16,
+        "intro_exact_match": true,
+        "speaker_line_exact_match": true
+      },
+      {
+        "route": "love/write",
+        "status": "PASS",
+        "outcome_matches_source": true,
+        "reflection_matches_source": true,
+        "action_matches_source": true,
+        "horizontal_overflow": false,
+        "action_font_px": 16,
+        "intro_exact_match": true,
+        "speaker_line_exact_match": true
+      },
+      {
+        "route": "self/notice",
+        "status": "PASS",
+        "outcome_matches_source": true,
+        "reflection_matches_source": true,
+        "action_matches_source": true,
+        "horizontal_overflow": false,
+        "action_font_px": 16,
+        "intro_exact_match": true,
+        "speaker_line_exact_match": true
+      },
+      {
+        "route": "self/pause",
+        "status": "PASS",
+        "outcome_matches_source": true,
+        "reflection_matches_source": true,
+        "action_matches_source": true,
+        "horizontal_overflow": false,
+        "action_font_px": 16,
+        "intro_exact_match": true,
+        "speaker_line_exact_match": true
+      }
+    ]
+  },
+  "returns_and_clear": {
+    "status": "PASS",
+    "skip_birth_clears_all_fields": true,
+    "edit_preserves_valid_input": true,
+    "back_welcome_preserves_input": true,
+    "back_goal_preserves_selection": true,
+    "back_topic_preserves_selection": true,
+    "escape_clears_immediately": true,
+    "reopen_blank": true,
+    "refresh_blank": true,
+    "rapid_close_reopen_rounds_then_final_blank_check": 5
+  },
+  "keyboard": {
+    "context": "source 390x844 reduced; starting on existing birthday page",
+    "status": "PASS",
+    "month_and_day_tab_order": true,
+    "review_and_love_send_to_close_without_clicks_in_suite": true,
+    "error_focus_preserved_across_motion_preference_change": true,
+    "six_routes_all_keyboard": "NOT RUN"
+  },
+  "motion_pause": {
+    "context": "source 390x844 normal; manual pause enabled",
+    "status": "PASS",
+    "screens": [
+      {
+        "name": "welcome",
+        "running_animations": 0,
+        "opacity": "1",
+        "horizontal_overflow": false
+      },
+      {
+        "name": "birth",
+        "running_animations": 0,
+        "opacity": "1",
+        "horizontal_overflow": false
+      },
+      {
+        "name": "returned-welcome",
+        "running_animations": 0,
+        "opacity": "1",
+        "horizontal_overflow": false
+      },
+      {
+        "name": "topic",
+        "running_animations": 0,
+        "opacity": "1",
+        "horizontal_overflow": false
+      },
+      {
+        "name": "review",
+        "running_animations": 0,
+        "opacity": "1",
+        "horizontal_overflow": false
+      },
+      {
+        "name": "intro",
+        "running_animations": 0,
+        "opacity": "1",
+        "horizontal_overflow": false
+      },
+      {
+        "name": "outcome",
+        "running_animations": 0,
+        "opacity": "1",
+        "horizontal_overflow": false
+      },
+      {
+        "name": "reflection",
+        "running_animations": 0,
+        "opacity": "1",
+        "horizontal_overflow": false
+      }
+    ]
+  },
+  "short_viewport": {
+    "context": "source 320x420 reduced",
+    "status": "PASS",
+    "birth_year_rect": {
+      "top": 357.2421875,
+      "bottom": 406.4375,
+      "height": 49.1953125,
+      "font": "16px"
+    },
+    "overlong_error_focus_visible": true,
+    "retained_after_back_welcome": true,
+    "horizontal_overflow": false,
+    "real_soft_keyboard": "NOT RUN"
+  },
+  "privacy": {
+    "context": "source desktop 16 date cases before/after",
+    "status": "PASS within observed scope",
+    "resource_count_before": 7,
+    "resource_count_after": 7,
+    "url_unchanged": true,
+    "local_storage_unchanged": true,
+    "session_storage_unchanged": true,
+    "cookies_unchanged": true,
+    "earlier_core_submit_observations_prevented": [
+      true,
+      true,
+      true
+    ],
+    "earlier_core_page_errors": [],
+    "earlier_core_csp_events": [],
+    "packet_capture": "NOT RUN",
+    "full_console_capture": "NOT RUN",
+    "indexedDB_and_cache_enumeration": "NOT RUN this round"
+  },
+  "portable": {
+    "context": "HTTP, 390x844 normal",
+    "version": "0.2.2",
+    "images": 7,
+    "all_images_inline": true,
+    "subresource_count": 0,
+    "R1_R2_and_six_routes": "PASS",
+    "file_protocol": "NOT RUN"
+  },
+  "resolved_test_harness_obstacles": [
+    {
+      "error": "ambiguous story selector matches home card and dialog picker",
+      "fix": "scoped selector to #story-content and reran all six; not a product defect"
+    }
+  ],
+  "not_run": [
+    "independent new-hash review",
+    "real devices and OS soft keyboard",
+    "OS clipboard paste",
+    "Safari and Firefox",
+    "screen reader and full WCAG/contrast audit",
+    "200 percent desktop zoom",
+    "portable file protocol",
+    "slow network, memory and performance",
+    "packet capture and OS/extension security",
+    "midnight/timezone transition",
+    "public site or deployment",
+    "payment, external messaging, permissions",
+    "AI or astrology backend and predictive accuracy"
+  ],
+  "overall": "Local producer regression checks passed; independent review pending; no public release approval",
+  "writes": {
+    "product_scope": "same unique source and original portable HTML/ZIP only",
+    "evidence_scope": "evidence/r1-r2-v022 plus current test-results and manifest/hash",
+    "independent_v021_reports": "not modified; hashes checked again at delivery",
+    "new_server": false,
+    "existing_preview": "PID 62854 remains; normal GET appends to shared preview-server.log",
+    "browser_state": "own tab and cache; tab closes at end",
+    "new_dependencies": false,
+    "deployment": false,
+    "external_send": false
+  }
+}

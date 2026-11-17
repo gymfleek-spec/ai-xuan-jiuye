@@ -1,0 +1,41 @@
+
+> xuan-jiuye-private-draft@0.3.0 test
+> node --test test.mjs
+
+✔ only three explicit topics; unknown or inherited keys are rejected (1.358208ms)
+✔ work: introduction and choices have complete text (0.104958ms)
+✔ work/talk: complete, distinct ending, reflection and action (0.1035ms)
+✔ work/explore: complete, distinct ending, reflection and action (0.054875ms)
+✔ love: introduction and choices have complete text (0.05175ms)
+✔ love/send: complete, distinct ending, reflection and action (0.043708ms)
+✔ love/write: complete, distinct ending, reflection and action (0.045667ms)
+✔ self: introduction and choices have complete text (0.0465ms)
+✔ self/notice: complete, distinct ending, reflection and action (0.064542ms)
+✔ self/pause: complete, distinct ending, reflection and action (0.093584ms)
+✔ client resources stay local, with no browser storage, telemetry or payment code (2.00225ms)
+✔ motion can be paused and reduced-motion is supported (0.261125ms)
+✔ welcome has explicit speakers; only three non-personal goals (0.065583ms)
+✔ birth date accepts real leap dates, today, and ancient dates without an age rule (0.168625ms)
+✔ birth date rejects non-leap centuries and impossible month lengths (0.058792ms)
+✔ birth date rejects missing, non-digit, zero and out-of-range fields (0.063541ms)
+✔ birth date rejects tomorrow and future years (0.057083ms)
+✔ date validation covers every month and year/century transitions (0.281875ms)
+✔ required birth form is labelled, stays out of the URL and clears unsaved data on close (0.327125ms)
+✔ versioned source and portable delivery have the same CSS, JS and embedded assets (114.32275ms)
+✔ dialog scroll locking follows native open state, not asynchronous close events (0.315542ms)
+✔ leaving welcome consumes the entry transition until the next visit (0.228875ms)
+✔ date fields preserve complete input and reject overlong digit strings (1.6655ms)
+✔ all story entrances require valid birth and a matching saved record (4.211416ms)
+✔ optional answer states remain explicit, separate and bounded (0.189458ms)
+✔ review uses safe text nodes and saving requires explicit server confirmation (0.20275ms)
+✔ account transport uses same-origin CSRF and never pretends network errors succeeded (0.63575ms)
+✔ saved-profile controller still completes all six original story routes (1.84475ms)
+✔ save controller confirms returned data; failure preserves draft and never shows success (0.812833ms)
+ℹ tests 29
+ℹ suites 0
+ℹ pass 29
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 182.225416

@@ -1,0 +1,154 @@
+--- v0.2.1/app.js
++++ v0.2.2/app.js
+@@ -1,4 +1,4 @@
+-import { STORIES, WELCOME, GOALS, getBirthDateError, getStory, getChoice } from './content.js?v=0.2.1';
++import { STORIES, WELCOME, GOALS, getBirthDateError, getStory, getChoice } from './content.js?v=0.2.2';
+ 
+ const dialog = document.getElementById('story-dialog');
+ const content = document.getElementById('story-content');
+@@ -17,6 +17,7 @@
+ }
+ 
+ function paint(html, phase = 'story') {
++  if (phase !== 'welcome') dialog.classList.remove('office-entering');
+   dialog.dataset.phase = phase;
+   content.innerHTML = `<div class="flow-copy">${html}</div>`;
+   dialog.scrollTop = 0;
+@@ -36,7 +37,7 @@
+ }
+ 
+ function showBirth() {
+-  paint(`<p class="dialog-label">01 / 可以跳過</p><h2 id="dialog-title">你嘅出生日期係？</h2><p class="dialog-lead">西曆，只填年月日就得。暫時唔用生日計命盤，你亦可以唔填。</p><form id="birth-form" autocomplete="off" novalidate><fieldset class="birth-fields" aria-describedby="birth-hint birth-error"><legend class="sr-only">西曆出生日期</legend><label for="birth-year">年<input id="birth-year" type="text" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="YYYY" aria-describedby="birth-error"></label><label for="birth-month">月<input id="birth-month" type="text" inputmode="numeric" maxlength="2" autocomplete="off" placeholder="MM" aria-describedby="birth-error"></label><label for="birth-day">日<input id="birth-day" type="text" inputmode="numeric" maxlength="2" autocomplete="off" placeholder="DD" aria-describedby="birth-error"></label></fieldset><p id="birth-hint" class="dialog-note">你填嘅內容只留喺呢一頁，重新整理後清除。</p><p class="form-error" id="birth-error" role="alert"></p><div class="dialog-actions"><button class="button primary" type="submit">下一步</button>${button('先唔填，睇故事', 'skip-birth', 'secondary')}</div></form><button class="dialog-back" type="button" data-action="back-welcome">返回對白</button>`, 'questions');
++  paint(`<p class="dialog-label">01 / 可以跳過</p><h2 id="dialog-title">你嘅出生日期係？</h2><p class="dialog-lead">西曆，只填年月日就得。暫時唔用生日計命盤，你亦可以唔填。</p><form id="birth-form" autocomplete="off" novalidate><fieldset class="birth-fields" aria-describedby="birth-hint birth-error"><legend class="sr-only">西曆出生日期</legend><label for="birth-year">年<input id="birth-year" type="text" inputmode="numeric" autocomplete="off" placeholder="YYYY" aria-describedby="birth-error"></label><label for="birth-month">月<input id="birth-month" type="text" inputmode="numeric" autocomplete="off" placeholder="MM" aria-describedby="birth-error"></label><label for="birth-day">日<input id="birth-day" type="text" inputmode="numeric" autocomplete="off" placeholder="DD" aria-describedby="birth-error"></label></fieldset><p id="birth-hint" class="dialog-note">你填嘅內容只留喺呢一頁，重新整理後清除。</p><p class="form-error" id="birth-error" role="alert"></p><div class="dialog-actions"><button class="button primary" type="submit">下一步</button>${button('先唔填，睇故事', 'skip-birth', 'secondary')}</div></form><button class="dialog-back" type="button" data-action="back-welcome">返回對白</button>`, 'questions');
+   for (const field of Object.keys(birth)) document.getElementById(`birth-${field}`).value = birth[field];
+ }
+ 
+--- v0.2.1/content.js
++++ v0.2.2/content.js
+@@ -12,11 +12,11 @@
+     if (!/^\d+$/.test(value)) return { field, message: '請填齊西曆年、月、日，只用數字。' };
+   }
+   const y = Number(year), m = Number(month), d = Number(day);
+-  if (y < 1 || y > 9999) return { field: 'year', message: '請輸入 1 至 9999 之間嘅西曆年份。' };
+-  if (m < 1 || m > 12) return { field: 'month', message: '月份應該係 1 至 12。' };
++  if (year.length > 4 || y < 1 || y > 9999) return { field: 'year', message: '請輸入 1 至 9999 之間嘅西曆年份。' };
++  if (month.length > 2 || m < 1 || m > 12) return { field: 'month', message: '月份應該係 1 至 12。' };
+   const leap = y % 4 === 0 && (y % 100 !== 0 || y % 400 === 0);
+   const days = [31, leap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+-  if (d < 1 || d > days[m - 1]) return { field: 'day', message: '呢個月份冇呢一日，請再核對。' };
++  if (day.length > 2 || d < 1 || d > days[m - 1]) return { field: 'day', message: '呢個月份冇呢一日，請再核對。' };
+   const date = y * 10000 + m * 100 + d;
+   const now = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
+   if (date > now) return { field: 'year', message: '出生日期唔可以係未來日子。' };
+--- v0.2.1/index.html
++++ v0.2.2/index.html
+@@ -5,11 +5,11 @@
+   <meta name="viewport" content="width=device-width,initial-scale=1">
+   <meta name="theme-color" content="#121310">
+   <meta name="description" content="行入玄與九爺辦公室，慢慢傾你掛心嘅事。出生日期可以跳過，由三個完整互動故事開始。">
+-  <meta name="prototype-version" content="0.2.1">
++  <meta name="prototype-version" content="0.2.2">
+   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; form-action 'none'; base-uri 'none'; object-src 'none'">
+   <title>玄與九爺｜入嚟坐，慢慢講</title>
+   <link rel="preload" as="image" href="assets/office-scene-v1.png">
+-  <link rel="stylesheet" href="styles.css?v=0.2.1">
++  <link rel="stylesheet" href="styles.css?v=0.2.2">
+ </head>
+ <body>
+   <a class="skip" href="#main">跳到主要內容</a>
+@@ -85,6 +85,6 @@
+       <div class="dialog-panel"><div id="story-content" tabindex="-1"></div></div>
+     </div>
+   </dialog>
+-  <script type="module" src="app.js?v=0.2.1"></script>
++  <script type="module" src="app.js?v=0.2.2"></script>
+ </body>
+ </html>
+--- v0.2.1/test.mjs
++++ v0.2.2/test.mjs
+@@ -118,3 +118,36 @@
+   assert.ok(css.includes('body:has(dialog[open]){overflow:hidden}'));
+   assert.doesNotMatch(app, /document\.body\.style\.overflow/);
+ });
++
++
++test('leaving welcome consumes the entry transition until the next visit', () => {
++  const app = readFileSync(new URL('./app.js', import.meta.url), 'utf8');
++  const paintSource = app.slice(app.indexOf('function paint('), app.indexOf('function openOffice('));
++  const classes = new Set(['office-entering']);
++  const dialog = { dataset: {}, classList: { remove: name => classes.delete(name) } };
++  const content = { focus() {} };
++  const paint = new Function('dialog', 'content', `${paintSource}; return paint;`)(dialog, content);
++  paint('first beat', 'welcome');
++  paint('next beat', 'welcome');
++  assert.ok(classes.has('office-entering'));
++  paint('birthday', 'questions');
++  assert.ok(!classes.has('office-entering'));
++  paint('return to dialogue', 'welcome');
++  assert.ok(!classes.has('office-entering'));
++  classes.add('office-entering');
++  paint('new visit', 'welcome');
++  assert.ok(classes.has('office-entering'));
++});
++
++test('date fields preserve complete input and reject overlong digit strings', () => {
++  const app = readFileSync(new URL('./app.js', import.meta.url), 'utf8');
++  const valid = { year: '0001', month: '01', day: '01' };
++  for (const field of ['year', 'month', 'day']) {
++    const input = app.match(new RegExp(`<input id="birth-${field}"[^>]*>`))[0];
++    assert.doesNotMatch(input, /maxlength=/, field);
++    for (const value of (field === 'year' ? ['10000', '00001'] : ['001', '100'])) {
++      assert.equal(getBirthDateError({ ...valid, [field]: value }, today)?.field, field);
++    }
++  }
++  assert.equal(getBirthDateError(valid, today), null);
++});
+--- v0.2.1/package.json
++++ v0.2.2/package.json
+@@ -1 +1 @@
+-{"name":"xuan-jiuye-private-draft","version":"0.2.1","private":true,"type":"module","scripts":{"test":"node --test test.mjs","build":"node build.mjs"}}
++{"name":"xuan-jiuye-private-draft","version":"0.2.2","private":true,"type":"module","scripts":{"test":"node --test test.mjs","build":"node build.mjs"}}
+--- v0.2.1/README.md
++++ v0.2.2/README.md
+@@ -1,12 +1,19 @@
+-# 玄與九爺｜辦公室入口 v0.2.1
++# 玄與九爺｜辦公室入口 v0.2.2
+ 
+ 私下檢視用原型，在既有三故事×兩分支的唯一基準目錄內更新；沒有另開競爭網站，沒有改動其他候選稿或公開部署。
++
++## 本輪兩項回歸修正（v0.2.2）
++
++- 離開迎接對白即消耗當次入場狀態；返回對白不重播推近／門片，關閉後重新入場仍可播一次。
++- 年月日不再由 maxlength 靜默截字；完整輸入交既有校驗，超過 4／2／2 位會用原有錯誤及焦點提示，合法 0001 年仍可用。沒有改寫故事、迎接或產品文案。
++- 本輪實走證據與限制：`evidence/r1-r2-v022/regression-qa.md`、`runtime-results.json`。`design-qa.md`、`evidence/office-v2/` 保留為 v0.2.1 歷史，不能當成本版已通過。
++- 本輪只做本機修復／測試及交付，沒有更新公開網站、發布或外發；本版仍待獨立新 hash 複驗。
+ 
+ ## 直接睇
+ 
+ - `玄與九爺-網頁初稿.html`：圖片、樣式及互動已內嵌，不用安裝套件。
+ - 本機預覽：http://127.0.0.1:4186/ 。這不是外部可用的公開網址。
+-- 本輪畫面及瀏覽器結果：`evidence/office-v2/`。舊的 `evidence/desktop-home.png` 等屬 v0.1 基準，不當成本版證據。
++- 本輪瀏覽器結果：`evidence/r1-r2-v022/`；其餘舊證據保留版本標記，不當成本版實走結果。
+ - `release-manifest.json`：版本與每個交付檔案的 SHA-256。雜湊只識別內容，不證明公開發布或產品品質。
+ 
+ ## 可操作流程
+@@ -45,6 +52,6 @@
+ 
+ ## 驗收與未做
+ 
+-本輪結果以 `design-qa.md`、`test-results.txt` 及 `evidence/office-v2/` 為準。虛構測試日期只用於本機驗收，不是用戶資料；交付畫面不含日期。
++本輪結果以 `evidence/r1-r2-v022/regression-qa.md`、`runtime-results.json` 及 `test-results.txt` 為準。虛構測試日期只用於本機驗收，不是用戶資料；交付畫面不含日期。
+ 
+ 真手機、真機軟鍵盤、Safari／Firefox、讀屏器、正式網域、慢網絡效能、命理準確度及真人轉化不因本機模擬而通過。未做公開發布、WhatsApp 發送、分享權限變更或付款；這些須沿原任務另行確認。
+--- v0.2.1/build.mjs
++++ v0.2.2/build.mjs
+@@ -26,7 +26,8 @@
+ const sources = ['index.html', 'styles.css', 'app.js', 'content.js', 'package.json', 'test.mjs', 'build.mjs', 'README.md', 'DESIGN_NOTES.md', 'image-prompt.txt', 'design-qa.md', 'test-results.txt', portable];
+ const assets = readdirSync(new URL('assets/', import.meta.url)).map(name => `assets/${name}`);
+ const evidence = readdirSync(new URL('evidence/office-v2/', import.meta.url)).map(name => `evidence/office-v2/${name}`);
+-const files = [...sources, ...assets, ...evidence];
++const regressionEvidence = ['identity-before.json', 'baseline-runtime.json', 'red-tests.txt', 'product.patch', 'runtime-results.json', 'regression-qa.md', 'tested-source.sha256', 'tested-delivery.sha256', 'http-source-sha256.json'].map(name => `evidence/r1-r2-v022/${name}`);
++const files = [...sources, ...assets, ...evidence, ...regressionEvidence];
+ const sha256 = Object.fromEntries(files.map(path => [path, createHash('sha256').update(read(path)).digest('hex')]));
+ writeFileSync(new URL('release-manifest.json', import.meta.url), JSON.stringify({ version, scope: 'private prototype; not publicly deployed', sha256 }, null, 2) + '\n');
+ const staged = `${archive}.${process.pid}.zip`;

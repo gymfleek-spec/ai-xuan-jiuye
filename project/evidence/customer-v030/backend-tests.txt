@@ -1,0 +1,44 @@
+Creating test database for alias 'default' ('/Users/simsonpersonal/Library/Application Support/XuanJiuye-local/disposable-tests.sqlite3')...
+Destroying old test database for alias 'default' ('/Users/simsonpersonal/Library/Application Support/XuanJiuye-local/disposable-tests.sqlite3')...
+Found 15 test(s).
+Operations to perform:
+  Apply all migrations: auth, contenttypes, customer, sessions
+Running migrations:
+  Applying contenttypes.0001_initial... OK
+  Applying contenttypes.0002_remove_content_type_name... OK
+  Applying auth.0001_initial... OK
+  Applying auth.0002_alter_permission_name_max_length... OK
+  Applying auth.0003_alter_user_email_max_length... OK
+  Applying auth.0004_alter_user_username_opts... OK
+  Applying auth.0005_alter_user_last_login_null... OK
+  Applying auth.0006_require_contenttypes_0002... OK
+  Applying auth.0007_alter_validators_add_error_messages... OK
+  Applying auth.0008_alter_user_username_max_length... OK
+  Applying auth.0009_alter_user_last_name_max_length... OK
+  Applying auth.0010_alter_group_name_max_length... OK
+  Applying auth.0011_update_proxy_permissions... OK
+  Applying auth.0012_alter_user_first_name_max_length... OK
+  Applying customer.0001_initial... OK
+  Applying sessions.0001_initial...test_ancient_year_and_real_leap_day_accepted (customer.tests.CustomerTests.test_ancient_year_and_real_leap_day_accepted) ... ok
+test_anonymous_profile_and_method_guards (customer.tests.CustomerTests.test_anonymous_profile_and_method_guards) ... ok
+test_auth_attempts_are_bounded_in_local_process (customer.tests.CustomerTests.test_auth_attempts_are_bounded_in_local_process) ... ok
+test_dates_and_untrusted_values_do_not_overwrite_saved_data (customer.tests.CustomerTests.test_dates_and_untrusted_values_do_not_overwrite_saved_data) ... ok
+test_delete_requires_confirmation_and_matching_revision (customer.tests.CustomerTests.test_delete_requires_confirmation_and_matching_revision) ... ok
+test_explicit_current_policy_consent_required (customer.tests.CustomerTests.test_explicit_current_policy_consent_required) ... ok
+test_independent_login_sessions_read_same_saved_record (customer.tests.CustomerTests.test_independent_login_sessions_read_same_saved_record) ... ok
+test_optimistic_revision_rejects_stale_write_without_data_loss (customer.tests.CustomerTests.test_optimistic_revision_rejects_stale_write_without_data_loss) ... ok
+test_private_database_source_and_evidence_are_never_static_files (customer.tests.CustomerTests.test_private_database_source_and_evidence_are_never_static_files) ... ok
+test_question_is_roundtripped_as_text_not_rendered_html (customer.tests.CustomerTests.test_question_is_roundtripped_as_text_not_rendered_html) ... ok
+test_real_login_signup_csrf_and_private_cookie (customer.tests.CustomerTests.test_real_login_signup_csrf_and_private_cookie) ... ok
+test_second_account_cannot_read_modify_or_delete_first (customer.tests.CustomerTests.test_second_account_cannot_read_modify_or_delete_first) ... ok
+test_unknown_fields_and_oversize_payload_rejected (customer.tests.CustomerTests.test_unknown_fields_and_oversize_payload_rejected) ... ok
+test_unknown_time_not_fabricated_and_places_remain_distinct (customer.tests.CustomerTests.test_unknown_time_not_fabricated_and_places_remain_distinct) ... ok
+test_weak_password_and_invalid_login_do_not_create_session (customer.tests.CustomerTests.test_weak_password_and_invalid_login_do_not_create_session) ... ok
+
+----------------------------------------------------------------------
+Ran 15 tests in 8.275s
+
+OK
+Destroying test database for alias 'default' ('/Users/simsonpersonal/Library/Application Support/XuanJiuye-local/disposable-tests.sqlite3')...
+ OK
+System check identified no issues (0 silenced).
