@@ -10,9 +10,9 @@ const engine = context.self.iztro;
 const input = { year: '2000', month: '8', day: '16', time: '03:30', precision: 'exact', gender: 'female', place: '' };
 const plain = value => JSON.parse(JSON.stringify(value));
 
-test('three focus readings use the selected real palace and only its major stars', () => {
+test('five focus readings use the selected real palace and only its major stars', () => {
   const chart = calculateZiwei(input, engine);
-  for (const [name, branch, stars] of [['命宮', '午', ['紫微']], ['官祿', '戌', ['廉貞', '天府']], ['夫妻', '辰', ['七殺']]]) {
+  for (const [name, branch, stars] of [['命宮', '午', ['紫微']], ['官祿', '戌', ['廉貞', '天府']], ['夫妻', '辰', ['七殺']], ['田宅', '酉', []], ['財帛', '寅', ['武曲', '天相']]]) {
     const reading = getPalaceReading(chart, name);
     assert.equal(reading.palace, name); assert.equal(reading.branch, branch);
     assert.deepEqual(plain(reading.stars.map(star => star.name)), stars);
@@ -20,10 +20,10 @@ test('three focus readings use the selected real palace and only its major stars
   }
 });
 
-test('13 real clock periods × 3 topics retain exact engine evidence without mutating a chart', () => {
+test('13 real clock periods × 5 topics retain exact engine evidence without mutating a chart', () => {
   for (const time of ['00:30', '01:30', '03:30', '05:30', '07:30', '09:30', '11:30', '13:30', '15:30', '17:30', '19:30', '21:30', '23:30']) {
     const chart = calculateZiwei({ ...input, time }, engine), before = JSON.stringify(chart);
-    for (const name of ['命宮', '官祿', '夫妻']) {
+    for (const name of ['官祿', '夫妻', '田宅', '財帛', '命宮']) {
       const reading = getPalaceReading(chart, name), palace = chart.palaces.find(p => p.name === name);
       assert.equal(reading.branch, palace.earthlyBranch);
       assert.deepEqual(plain(reading.stars.map(star => star.name)), plain(palace.majorStars.filter(star => star.type === 'major').map(star => star.name)));
@@ -66,7 +66,7 @@ test('all 14 named main stars have a bounded prompt and fixed public source link
 test('missing chart, unsupported topic and malformed evidence fail closed', () => {
   const chart = calculateZiwei(input, engine);
   for (const value of [null, {}, { status: 'needs-input', palaces: chart.palaces }, { status: 'ready', palaces: [] }]) assert.equal(getPalaceReading(value, '命宮'), null);
-  for (const topic of ['health', '財帛', '__proto__', 'constructor', undefined]) assert.equal(getPalaceReading(chart, topic), null);
+  for (const topic of ['health', '疾厄', '__proto__', 'constructor', undefined]) assert.equal(getPalaceReading(chart, topic), null);
   for (const patch of [{ earthlyBranch: '' }, { earthlyBranch: '<img>' }, { majorStars: null }, { majorStars: [null] }, { majorStars: [{ name: '<script>', type: 'major' }] }, { majorStars: [{ name: '紫微', type: 'major' }, { name: '紫微', type: 'major' }] }]) {
     const malformed = { ...chart, palaces: chart.palaces.map(p => p.name === '命宮' ? { ...p, ...patch } : p) };
     assert.equal(getPalaceReading(malformed, '命宮'), null);

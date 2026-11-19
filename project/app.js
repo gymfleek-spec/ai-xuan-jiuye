@@ -1,7 +1,7 @@
-import { attachZiwei } from './ziwei.js?v=0.6.2';
-import { attachSceneSequence } from './motion/motion.mjs?v=0.6.2';
-import { STORIES, WELCOME, GOALS, DETAIL_STEPS, emptyDetails, getDetailsError, getBirthDateError, getStory, getChoice } from './content.js?v=0.6.2';
-import { api } from './customer.js?v=0.6.2';
+import { attachZiwei } from './ziwei.js?v=0.6.12';
+import { attachSceneSequence } from './motion/motion.mjs?v=0.6.12';
+import { STORIES, WELCOME, GOALS, DETAIL_STEPS, emptyDetails, getDetailsError, getBirthDateError, getStory, getChoice } from './content.js?v=0.6.12';
+import { api } from './customer.js?v=0.6.12';
 
 const dialog = document.getElementById('story-dialog');
 const content = document.getElementById('story-content');
@@ -9,25 +9,19 @@ const accountControl = document.getElementById('account-control');
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
 const sceneVideo = document.getElementById('scene-video');
 const sceneFigure = document.getElementById('scene-motion');
-const sceneControls = document.getElementById('scene-motion-controls');
-const sceneButton = document.getElementById('scene-skip');
 const sceneStatus = document.getElementById('scene-status');
 const scenePoster = document.getElementById('scene-poster');
 const homeScene = document.getElementById('home-scene');
 const dialogScene = document.getElementById('dialog-scene');
-const homeControls = document.getElementById('home-controls');
-const dialogControls = document.getElementById('dialog-controls');
-let scenePlayer = null, sceneKey = null, sceneConfig = null, directVisit = false, mediaSkipped = false;
+let scenePlayer = null, sceneKey = null, sceneConfig = null, directVisit = false;
 const sceneSound = createSceneSound();
-const room = 'assets/journey-room.webp';
-const idle = 'assets/journey-idle.mp4';
+const room = 'assets/office-desk-chair-v12.jpg';
 const scenes = {
-  arrival: { poster: 'assets/journey-door.webp' },
-  entrance: { src: 'assets/journey-door.mp4', poster: 'assets/journey-altar.webp' },
-  altar: { poster: 'assets/journey-altar.webp' },
-  welcome: { src: idle, poster: room, loop: true },
-  interaction: { src: idle, poster: room, loop: true },
-  response: { src: 'assets/journey-response.mp4', poster: 'assets/journey-response.webp' },
+  arrival: { src: 'assets/arrival-loop-1080.mp4', poster: 'assets/arrival-loop-1080.webp', loop: true },
+  entrance: { src: 'assets/office-entry-chair-v12.mp4', poster: 'assets/office-door-a4.jpg', still: room },
+  welcome: { poster: room },
+  interaction: { poster: room },
+  response: { poster: room },
   quiet: { poster: room },
   reveal: { src: 'assets/journey-reveal.mp4', poster: 'assets/journey-reveal.webp' },
   still: { poster: room }
@@ -45,28 +39,45 @@ function button(label, action, kind = 'primary') {
 }
 
 function paint(html, phase = 'story') {
-    dialog.dataset.phase = phase;
+  dialog.dataset.phase = phase;
   content.innerHTML = `<div class="flow-copy">${html}</div>`;
   dialog.scrollTop = 0;
   content.parentElement?.scrollTo(0, 0);
-  content.focus({ preventScroll: true });
   syncSceneMotion(phase);
+  setTravelState(sceneVideo.dataset.state);
+  (content.inert ? dialog : content).focus({ preventScroll: true });
 }
 
 function showSceneState({ id, state }) {
   sceneVideo.dataset.state = state;
   sceneVideo.dataset.scene = id;
-  sceneButton.hidden = mediaSkipped || !sceneConfig?.src || state === 'reduced';
   const failed = ['error', 'blocked'].includes(state);
   sceneStatus.textContent = failed ? '影片暫時播唔到，可以繼續。' : '';
   sceneStatus.className = failed ? 'media-error' : 'sr-only';
+  if (sceneConfig?.still && ['ended', 'reduced', 'error', 'blocked'].includes(state)) {
+    const line = document.getElementById('desk-question');
+    if (line) line.textContent = state === 'ended' ? '坐低先，慢慢講。' : '係咪有問題想問我？';
+    scenePoster.src = sceneConfig.still;
+    scenePoster.alt = '玄收好把扇，同九爺坐喺枱前等你開口';
+  }
+  setTravelState(state);
   if (state === 'playing') sceneSound.play(id);
   else sceneSound.stop();
 }
 
+function setTravelState(state) {
+  const interrupted = state === 'paused' && !!sceneVideo.getAttribute('src') && !sceneVideo.ended;
+  const moving = dialog.open && dialog.dataset.phase === 'entrance' &&
+    (['loading', 'playing'].includes(state) || interrupted) && !reduceMotion.matches;
+  const wasMoving = dialog.dataset.travel === 'moving';
+  dialog.dataset.travel = moving ? 'moving' : 'ready';
+  content.inert = moving;
+  if (!moving && wasMoving && dialog.open) content.focus({ preventScroll: true });
+}
+
 function playSceneMotion() {
-  if (!scenePlayer || !sceneConfig?.src || reduceMotion.matches || mediaSkipped) return;
-  if (['ended', 'skipped'].includes(sceneVideo.dataset.state)) void scenePlayer.replay();
+  if (!scenePlayer || !sceneConfig?.src || reduceMotion.matches) return;
+  if (sceneVideo.dataset.state === 'ended') void scenePlayer.replay();
   else void scenePlayer.play();
 }
 
@@ -76,13 +87,11 @@ function stopSceneMotion() {
   scenePlayer = sceneKey = sceneConfig = null;
 }
 
-function syncSceneMotion(phase, autoplay = true) {
+function syncSceneMotion(phase) {
   const atHome = phase === 'arrival';
   if (!atHome && !dialog.open) { stopSceneMotion(); return; }
   const slot = atHome ? homeScene : dialogScene;
-  const controls = atHome ? homeControls : dialogControls;
   if (sceneFigure.parentNode !== slot) slot.append(sceneFigure);
-  if (sceneControls.parentNode !== controls) controls.append(sceneControls);
   const key = ['ziwei-date', 'ziwei-options', 'ziwei-review'].includes(phase)
     ? directVisit ? 'still' : 'quiet'
     : scenes[phase] ? phase : 'still';
@@ -91,17 +100,16 @@ function syncSceneMotion(phase, autoplay = true) {
   sceneKey = key;
   sceneConfig = scenes[key];
   sceneFigure.dataset.scene = key;
-  scenePoster.alt = ({arrival:'會客室門口',entrance:'開門後左側的現代神主枱',altar:'會客室左側的現代神主枱',welcome:'玄與九爺在會客室等你',interaction:'玄與九爺在會客室等你',response:'九爺側頭回應',reveal:'手轉桌上發光圓盤，這是演出道具'})[key] || '玄與九爺的會客室';
+  scenePoster.alt = ({arrival:'玄與九爺輕扇收扇，迎接你入座',entrance:'開門見佛龕，再向右望見玄同九爺',welcome:'玄與九爺在會客室等你',interaction:'玄與九爺在會客室等你',response:'玄收好把扇，九爺坐喺佢身邊',reveal:'手轉桌上發光圓盤，這是演出道具'})[key] || '玄與九爺的會客室';
   sceneFigure.hidden = false;
-  sceneControls.hidden = !sceneConfig.src;
   sceneFigure.dataset.complete = '';
   if (!scenePlayer) scenePlayer = attachSceneSequence(sceneVideo, scenePoster, {
     onState: showSceneState,
     onComplete({ reason }) { sceneFigure.dataset.complete = reason; }
   });
-  scenePlayer.setScene({ id: key, ...sceneConfig });
-  if (autoplay) playSceneMotion();
-  if (mediaSkipped) sceneButton.hidden = true;
+  const poster = reduceMotion.matches && sceneConfig.still || sceneConfig.poster;
+  scenePlayer.setScene({ id: key, ...sceneConfig, poster });
+  playSceneMotion();
 }
 
 function openOffice(skipIntro = false) {
@@ -110,7 +118,7 @@ function openOffice(skipIntro = false) {
   openZiwei(skipIntro);
 }
 
-function showArrival(autoplay = false) { syncSceneMotion('arrival', autoplay); }
+function showArrival() { syncSceneMotion('arrival'); }
 
 function formData() {
   return { birth: { ...birth }, calendar: 'gregorian', ...details, topic, goal };
@@ -160,7 +168,7 @@ async function syncSession() {
 
 function showWelcome() {
   const beat = WELCOME[welcomeIndex];
-  paint(`<p class="dialog-label">玄與九爺 / 入嚟坐</p><h2 id="dialog-title">${beat.speaker}</h2><p class="speech">${beat.text}</p><div class="dialog-actions">${button(welcomeIndex === WELCOME.length - 1 ? '填寫資料' : '繼續', 'welcome-next')}</div><button class="dialog-back" type="button" data-action="skip-welcome">略過開場，填寫資料</button>`, 'welcome');
+  paint(`<p class="dialog-label">玄與九爺 / 入嚟坐</p><h2 id="dialog-title">${beat.speaker}</h2><p class="speech">${beat.text}</p><div class="dialog-actions">${button(welcomeIndex === WELCOME.length - 1 ? '填寫資料' : '繼續', 'welcome-next')}</div>`, 'welcome');
 }
 
 function showBirth() {
@@ -404,7 +412,7 @@ document.addEventListener('click', async event => {
   if (!dialog.open) return;
   if (action === 'close') closeVisit();
   if (action === 'welcome-next') { if (welcomeIndex < WELCOME.length - 1) { welcomeIndex++; showWelcome(); } else showBirth(); }
-  if (['skip-welcome', 'back-birth', 'edit-visit'].includes(action)) showBirth();
+  if (['back-birth', 'edit-visit'].includes(action)) showBirth();
   if (action === 'back-welcome') { welcomeIndex = WELCOME.length - 1; showWelcome(); }
   if (action === 'detail-back') { if (detailIndex === 4) showTopic(); else if (detailIndex === 0) showBirth(); else showDetail(detailIndex - 1); }
   if (action === 'back-relationship') showDetail(3);
@@ -467,15 +475,6 @@ document.querySelectorAll('[data-filter]').forEach(filter => {
   });
 });
 
-sceneButton.addEventListener('click', () => {
-  mediaSkipped = true;
-  document.body.classList.add('motion-paused');
-  sceneSound.stop();
-  scenePlayer?.skip();
-  sceneButton.hidden = true;
-  if (dialog.open) content.focus({ preventScroll: true });
-});
-
 // Sound is optional: unavailable or blocked audio never stops the questionnaire.
 function createSceneSound() {
   let context = null, enabled = false, played = null, resuming = null, pending = null;
@@ -487,19 +486,19 @@ function createSceneSound() {
   }
   const sound = {
     unlock(event) {
-      if (!event.isTrusted || mediaSkipped || reduceMotion.matches || document.hidden) return;
+      if (!event.isTrusted || reduceMotion.matches || document.hidden) return;
       try {
         const Audio = window.AudioContext || window.webkitAudioContext;
         if (!Audio) return;
         context ||= new Audio();
         enabled = true;
         resuming = Promise.resolve(context.resume()).then(() => {
-          if (document.hidden || mediaSkipped || reduceMotion.matches) void context.suspend().catch(() => {});
+          if (document.hidden || reduceMotion.matches) void context.suspend().catch(() => {});
         }).catch(() => {});
       } catch { enabled = false; }
     },
     play(kind) {
-      if (!enabled || document.hidden || mediaSkipped || reduceMotion.matches || played === kind) return;
+      if (!enabled || document.hidden || reduceMotion.matches || played === kind) return;
       const cues = { entrance: [90, 65, .6], response: [390, 310, .12], reveal: [660, 990, 1.3] };
       if (!Object.hasOwn(cues, kind)) return;
       if (context?.state !== 'running') {
@@ -530,12 +529,16 @@ function createSceneSound() {
 }
 
 document.addEventListener('click', event => {
-  if (event.target.closest('button:not(#scene-skip)')) sceneSound.unlock(event);
+  if (event.target.closest('button')) sceneSound.unlock(event);
 }, true);
-document.addEventListener('visibilitychange', () => { if (document.hidden) sceneSound.stop(); });
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) sceneSound.stop();
+  else if (sceneVideo.dataset.state === 'paused' && sceneVideo.getAttribute('src') &&
+      ['entrance', 'arrival'].includes(sceneKey)) playSceneMotion();
+});
 reduceMotion.addEventListener('change', () => { if (reduceMotion.matches) sceneSound.stop(); });
 
-showArrival(true);
+showArrival();
 
 if ('IntersectionObserver' in window && !reduceMotion.matches) {
   document.documentElement.classList.add('js-motion');

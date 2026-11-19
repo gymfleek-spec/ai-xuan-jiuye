@@ -34,7 +34,7 @@ test('client resources stay local, with no browser storage, telemetry or payment
   const app = readFileSync(new URL('./app.js', import.meta.url), 'utf8');
   const css = readFileSync(new URL('./styles.css', import.meta.url), 'utf8');
   for (const [, path] of html.matchAll(/(?:src|href)="(assets\/[^"#]+|styles\.css[^"#]*|app\.js[^"#]*)"/g)) assert.ok(existsSync(new URL(path, import.meta.url)), path);
-  for (const [, id] of app.matchAll(/getElementById\('([^']+)'\)/g)) assert.ok((html + app).includes(`id="${id}"`) || DETAIL_STEPS.some(step => step.fields.some(field => `profile-${field.key}` === id)), id);
+  for (const [, id] of app.matchAll(/getElementById\('([^']+)'\)/g)) assert.ok((html + app).includes(`id="${id}"`) || readFileSync(new URL('./ziwei.js', import.meta.url), 'utf8').includes(`id="${id}"`) || DETAIL_STEPS.some(step => step.fields.some(field => `profile-${field.key}` === id)), id);
   assert.doesNotMatch(html + app + css, /https?:\/\/|\bfetch\s*\(|localStorage|sessionStorage|XMLHttpRequest|sendBeacon|WebSocket|indexedDB|document\.cookie|console\.|history\.|location\s*[.=]|Stripe|checkout/i);
   assert.match(app, /addEventListener\('submit', async event => \{\s*event\.preventDefault\(\)/);
   assert.match(html, /connect-src 'self'; form-action 'none'/);
@@ -87,7 +87,7 @@ test('required birth form is labelled, stays out of the URL and clears unsaved d
   const app = readFileSync(new URL('./app.js', import.meta.url), 'utf8');
   assert.doesNotMatch(html, /唔使生日|唔需要出生資料/);
   for (const field of ['year', 'month', 'day']) assert.ok(app.includes(`for="birth-${field}"`));
-  for (const action of ['direct', 'skip-welcome', 'edit-visit', 'back-question', 'back-goal', 'start-story']) assert.ok((html + app).includes(`data-action="${action}"`) || app.includes(`'${action}'`));
+  for (const action of ['direct', 'welcome-next', 'edit-visit', 'back-question', 'back-goal', 'start-story']) assert.ok((html + app).includes(`data-action="${action}"`) || app.includes(`'${action}'`));
   assert.match(app, /form id="birth-form" autocomplete="off" novalidate/);
   assert.match(app, /'close', \(\) => \{ if \(!dialog\.open\)/);
   assert.match(app, /content\.replaceChildren\(\)/);
@@ -104,7 +104,7 @@ test('versioned source and portable delivery have the same CSS, JS and embedded 
   assert.ok(portable.includes(`prototype-version" content="${version}"`));
   assert.ok(html.includes(`styles.css?v=${version}`) && html.includes(`app.js?v=${version}`));
   assert.ok(app.includes(`content.js?v=${version}`));
-  const embedMedia = source => source.replace(/assets\/[\w.-]+\.(mp4|webp)/g, (name, type) => `data:${type === 'mp4' ? 'video/mp4' : 'image/webp'};base64,${readFileSync(new URL(name, import.meta.url)).toString('base64')}`);
+  const embedMedia = source => source.replace(/assets\/[\w.-]+\.(mp4|webp|jpg)/g, (name, type) => `data:${type === 'mp4' ? 'video/mp4' : `image/${type === 'jpg' ? 'jpeg' : type}`};base64,${readFileSync(new URL(name, import.meta.url)).toString('base64')}`);
   assert.ok(portable.includes(`<style>${embedMedia(read('styles.css'))}</style>`));
   assert.ok(portable.includes(read('content.js').replace(/^export /gm, '')));
   assert.ok(portable.includes(read('customer.js').replace(/^export /gm, '')));
@@ -218,12 +218,12 @@ function controllerContext(apiStub = async () => { throw new Error('fixture unav
     return { add(name) { values.add(name); }, remove(name) { values.delete(name); }, contains: name => values.has(name), toggle(name, force = !values.has(name)) { if (force) values.add(name); else values.delete(name); return force; } };
   };
   const content = { innerHTML: '', focus() {}, replaceChildren() { this.innerHTML = ''; }, addEventListener(name, fn) { events[name] = fn; } };
-  const dialog = { open: true, dataset: {}, classList: classes(), addEventListener() {}, showModal() { this.open = true; }, close() { this.open = false; } };
-  const control = () => ({ addEventListener(name, fn) { this[name] = fn; }, setAttribute(name, value) { this[name] = value; }, hidden: true });
-  const video = { dataset: {}, src: null, error: null, ended: false, loads: 0, removeAttribute() { this.src = null; }, load() { ++this.loads; } };
+  const dialog = { open: true, focus() {}, dataset: {}, classList: classes(), addEventListener() {}, showModal() { this.open = true; }, close() { this.open = false; } };
+  const control = () => ({ focus() {}, addEventListener(name, fn) { this[name] = fn; }, setAttribute(name, value) { this[name] = value; }, hidden: true });
+  const video = { ...control(), dataset: {}, src: null, error: null, ended: false, loads: 0, getAttribute(name) { return name === 'src' ? this.src : null; }, removeAttribute() { this.src = null; }, load() { ++this.loads; } };
   const slot = () => ({ append(node) { node.parentNode = this; } });
-  Object.assign(fields, { 'story-dialog': dialog, 'story-content': content, 'account-control': control(), 'scene-video': video, 'scene-poster': {}, 'home-scene': slot(), 'dialog-scene': slot(), 'home-controls': slot(), 'dialog-controls': slot(), 'scene-motion': { hidden: false, dataset: {} }, 'scene-motion-controls': { hidden: false }, 'scene-skip': control(), 'scene-status': { textContent: '' }, 'save-consent': { checked: true }, 'save-error': { textContent: '' } });
-  const document = { body: { classList: classes() }, documentElement: { dataset: { mode } }, getElementById: id => fields[id], querySelectorAll: () => [], addEventListener(name, fn, capture) { if (!capture) events[name] = fn; }, contains: () => true };
+  Object.assign(fields, { 'story-dialog': dialog, 'story-content': content, 'account-control': control(), 'scene-video': video, 'desk-question': control(), 'scene-poster': {}, 'home-scene': slot(), 'dialog-scene': slot(), 'scene-motion': { hidden: false, dataset: {} }, 'scene-status': { textContent: '' }, 'save-consent': { checked: true }, 'save-error': { textContent: '' } });
+  const document = { body: { classList: classes() }, documentElement: { dataset: { mode } }, getElementById: id => fields[id], querySelectorAll: () => [], addEventListener(name, fn, capture) { if (!capture) {const last = events[name]; events[name] = last ? event => {last(event); fn(event);} : fn;} }, contains: () => true };
   const preferences = { matches: reducedMotion, addEventListener() {} }, players = [];
   const attachSceneSequence = (video, poster, callbacks) => {
     const player = { plays: 0, pauses: 0, replays: 0, destroys: 0, scenes: [],
@@ -235,19 +235,33 @@ function controllerContext(apiStub = async () => { throw new Error('fixture unav
       destroy() { ++this.destroys; video.src = null; }, callbacks };
     players.push(player); return player;
   };
-  const context = { document, window: { addEventListener() {} }, matchMedia: () => preferences, api: apiStub, STORIES, WELCOME, GOALS, DETAIL_STEPS, emptyDetails, getDetailsError, getBirthDateError, getStory, getChoice, attachZiwei: () => () => {}, attachSceneSequence, preferences, players, events, content, fields };
+  const context = { document, window: { addEventListener() {} }, matchMedia: () => preferences, api: apiStub, STORIES, WELCOME, GOALS, DETAIL_STEPS, emptyDetails, getDetailsError, getBirthDateError, getStory, getChoice, attachZiwei: (_dialog, _content, paint) => start => paint(start ? 'date fixture' : 'entrance choices fixture', start ? 'ziwei-date' : 'entrance'), attachSceneSequence, preferences, players, events, content, fields };
   runInNewContext(readFileSync(new URL('./app.js', import.meta.url), 'utf8').replace(/^import .*;\n/gm, ''), context);
   runInNewContext("birth = {year:'0001',month:'01',day:'01'}; topic='work'; goal='clarity'; sessionState={authenticated:true,username:'fixture'};", context);
   return context;
 }
 
-test('one shared stage starts still, then loads a single entrance movie on explicit entry', () => {
+test('the accepted looping arrival uses the shared player; entry replaces it only on click', () => {
   const c=controllerContext(undefined,'public-preview',false);
-  assert.equal(c.players.length,1);assert.equal(c.players[0].plays,0);
+  assert.equal(c.players.length,1);assert.equal(c.players[0].plays,1);
+  assert.equal(c.players[0].scene.src,'assets/arrival-loop-1080.mp4');
+  assert.equal(c.players[0].scene.poster,'assets/arrival-loop-1080.webp');
+  assert.equal(c.players[0].scene.loop,true);
+  runInNewContext('showArrival();',c);assert.equal(c.players[0].plays,1);
   runInNewContext("paint('door','entrance'); paint('door update','entrance');",c);
-  assert.equal(c.players[0].scenes.length,2);assert.equal(c.players[0].plays,1);
-  assert.equal(c.fields['scene-video'].src,'assets/journey-door.mp4');
+  assert.equal(c.players[0].scenes.length,2);assert.equal(c.players[0].plays,2);
+  assert.equal(c.fields['scene-video'].src,'assets/office-entry-chair-v12.mp4');
   assert.equal(c.fields['scene-motion'].parentNode,c.fields['dialog-scene']);
+});
+test('arrival end and failure never advance the visit; the original native entry is always available', () => {
+  const c=controllerContext(undefined,'public-preview',false),before=c.content.innerHTML;
+  c.players[0].finish();assert.equal(c.content.innerHTML,before);
+  assert.equal(c.fields['scene-motion'].dataset.complete,'ended');
+  runInNewContext("showSceneState({id:'arrival',state:'blocked'});",c);
+  assert.match(c.fields['scene-status'].textContent,/可以繼續/);
+  const html=readFileSync(new URL('index.html',import.meta.url),'utf8');
+  assert.match(html,/<button class="button primary entry-plaque" data-action="enter" type="button"><span>立即進入了解你的人生<\/span><\/button>/);
+  assert.doesNotMatch(html,/data-action="enter"[^>]*(?:disabled|hidden)/);
 });
 test('date/options/review stay still without restarting media during input', () => {
   const c=controllerContext(undefined,'public-preview',false);
@@ -255,28 +269,27 @@ test('date/options/review stay still without restarting media during input', () 
   assert.equal(c.players[0].scenes.length,2);assert.equal(c.players[0].scene.id,'quiet');assert.equal(c.players[0].scene.src,undefined);
   assert.equal(c.fields['scene-video'].src,null);
 });
-test('close stops and unloads, moves the stage home and never auto-restarts it', () => {
+test('close stops and unloads, moves the stage home and restarts only the home loop', () => {
   const c=controllerContext(undefined,'public-preview',false);
   runInNewContext("paint('response','response'); closeVisit();",c);
-  assert.equal(c.players[0].destroys,1);assert.equal(c.players[1].plays,0);assert.equal(c.fields['scene-video'].src,null);
+  assert.equal(c.players[0].destroys,1);assert.equal(c.players[1].plays,1);assert.equal(c.fields['scene-video'].src,'assets/arrival-loop-1080.mp4');
   assert.equal(c.fields['scene-motion'].parentNode,c.fields['home-scene']);
 });
 test('direct and legacy forms do not load decorative media', () => {
   const c=controllerContext(undefined,'public-preview',false);
   runInNewContext("directVisit=true; paint('date','ziwei-date'); paint('legacy','questions');",c);
-  assert.equal(c.fields['scene-video'].src,null);assert.equal(c.players[0].plays,0);
+  assert.equal(c.fields['scene-video'].src,null);assert.equal(c.players[0].plays,1);
 });
-test('one Skip stops media and persists across phases and close/reentry without changing answers', () => {
-  const c=controllerContext(undefined,'public-preview',false);
-  runInNewContext("paint('response','response');",c);
-  c.fields['scene-skip'].click();assert.equal(c.fields['scene-video'].src,null);assert.equal(c.fields['scene-skip'].hidden,true);
-  runInNewContext("paint('entrance','entrance'); closeVisit(); paint('again','entrance');",c);
-  assert.equal(c.fields['scene-video'].src,null);assert.equal(c.players[1].plays,0);
+test('Start interrupts the home loop immediately; returning loads the home only once',()=>{
+  const c=controllerContext(undefined,'public-preview',false);c.fields['story-dialog'].open=false;
+  runInNewContext('openOffice()',c);assert.equal(c.fields['story-dialog'].dataset.phase,'entrance');assert.equal(c.content.inert,true);
+  assert.notEqual(c.players.at(-1).scene.loop,true);runInNewContext('closeVisit()',c);
+  assert.equal(c.players.at(-1).plays,1);assert.equal(c.fields['scene-video'].src,'assets/arrival-loop-1080.mp4');
 });
 test('reduced motion keeps the source absent; clearing the preference alone cannot play', () => {
   const c=controllerContext(undefined,'public-preview',true);
   runInNewContext("paint('door','entrance');",c);
-  assert.equal(c.fields['scene-video'].src,null);assert.equal(c.fields['scene-skip'].hidden,true);
+  assert.equal(c.fields['scene-video'].src,null);
   c.preferences.matches=false;assert.equal(c.players[0].plays,0);
 });
 test('completion never advances, submits, selects or calculates', () => {
@@ -285,24 +298,60 @@ test('completion never advances, submits, selects or calculates', () => {
   assert.equal(c.content.innerHTML,'<div class="flow-copy">explicit choice</div>');
   assert.equal(c.fields['story-dialog'].dataset.phase,'entrance');assert.equal(c.fields['scene-video'].dataset.state,'ended');
 });
-test('failed scenes retain next controls and the same single Skip exit', () => {
-  const c=controllerContext(undefined,'public-preview',false);
-  runInNewContext("paint('continue or skip','response'); showSceneState({id:'response',state:'error'});",c);
-  assert.match(c.fields['scene-status'].textContent,/可以繼續/);c.fields['scene-skip'].click();
-  assert.equal(c.fields['scene-video'].src,null);assert.equal(c.content.innerHTML,'<div class="flow-copy">continue or skip</div>');
+test('the full A4 plays to its own end, with no midfilm hold or second click', () => {
+  const c=controllerContext(undefined,'public-preview',false),run=js=>runInNewContext(js,c);
+  run("paint('desk choices','entrance');");const clip=c.players[0].scene;
+  assert.equal(clip.src,'assets/office-entry-chair-v12.mp4');assert.equal(clip.holdAt,undefined);
+  assert.equal(c.content.inert,true);
+  c.players[0].finish();assert.equal(c.content.inert,false);assert.equal(c.fields['desk-question'].textContent,'坐低先，慢慢講。');
+  assert.equal(c.fields['scene-poster'].src,'assets/office-desk-chair-v12.jpg');assert.equal(c.fields['story-dialog'].dataset.phase,'entrance');
+  run("paint('topics','interaction');");assert.equal(c.players[0].scene.poster,clip.still);assert.equal(c.fields['scene-video'].src,null);
 });
-
-test('media packaging binds all four local videos exactly and has no default autoplay attribute', () => {
+test('returning from a background pause resumes the current entrance at the same position',()=>{
+  const c=controllerContext(undefined,'public-preview',false);
+  runInNewContext("paint('door','entrance');",c);
+  const player=c.players[0],v=c.fields['scene-video'],n=player.scenes.length,plays=player.plays;
+  v.currentTime=4.25;c.document.hidden=true;player.pause();c.events.visibilitychange();
+  assert.equal(player.plays,plays);assert.equal(c.content.inert,true);c.document.hidden=false;c.events.visibilitychange();
+  assert.equal(player.plays,plays+1);assert.equal(player.scenes.length,n);assert.equal(v.currentTime,4.25);
+  player.finish();assert.equal(c.content.inert,false);
+});
+test('travel failure and reduction expose a stable destination and usable text path', () => {
+  for (const state of ['error','blocked','reduced']) {
+    const c=controllerContext(undefined,'public-preview',false);
+    runInNewContext(`paint('entry choices','entrance'); showSceneState({id:'entrance',state:'${state}'});`,c);
+    assert.equal(c.content.inert,false,state);assert.equal(c.fields['story-dialog'].dataset.travel,'ready',state);
+    assert.equal(c.fields['scene-poster'].src,'assets/office-desk-chair-v12.jpg',state);
+    assert.equal(c.content.innerHTML,'<div class="flow-copy">entry choices</div>');
+  }
+  const reduced=controllerContext(undefined,'public-preview',true);
+  runInNewContext("paint('entry choices','entrance'); paint('hosts','interaction');",reduced);
+  assert.equal(reduced.fields['scene-video'].src,null);assert.equal(reduced.content.inert,false);
+  assert.equal(reduced.players[0].scene.poster,'assets/office-desk-chair-v12.jpg');
+});
+test('a reduced-motion visit is not stranded when the device preference changes',()=>{
+  const c=controllerContext(undefined,'public-preview',true);runInNewContext("paint('static','entrance');",c);
+  c.preferences.matches=false;runInNewContext("showSceneState({id:'entrance',state:'paused'});",c);
+  assert.equal(c.content.inert,false);assert.equal(c.players[0].plays,0);
+});
+test('failed optional scenes keep their next control and do not answer for the user',()=>{
+  const c=controllerContext(undefined,'public-preview',false);
+  runInNewContext("paint('continue manually','response');showSceneState({id:'response',state:'error'});",c);
+  assert.match(c.fields['scene-status'].textContent,/可以繼續/);
+  assert.equal(c.content.innerHTML,'<div class="flow-copy">continue manually</div>');assert.equal(c.content.inert,false);
+});
+test('media packaging binds the three runtime videos exactly and has no default autoplay attribute', () => {
   const read = name => readFileSync(new URL(name, import.meta.url), 'utf8');
   const html = read('index.html'), portable = read('玄與九爺-網頁初稿.html');
   assert.match(html, /media-src 'self' data:/);
   assert.equal([...html.matchAll(/<video /g)].length, 1);
-  assert.match(html.match(/<video[^>]+>/)[0], /muted playsinline preload="none"/);
+  assert.match(html.match(/<video[^>]+>/)[0], /muted playsinline[^>]* preload="none"/);
   assert.doesNotMatch(html.match(/<video[^>]+>/)[0], /\sautoplay|\sloop/);
   assert.match(read('motion/motion.css'), /object-fit:contain/);
   const encoded = [...portable.matchAll(/data:video\/mp4;base64,([A-Za-z0-9+/=]+)/g)].map(m => Buffer.from(m[1], 'base64'));
-  assert.equal(encoded.length, 4);
-  for (const name of ['door','idle','response','reveal']) assert.ok(encoded.some(data => data.equals(readFileSync(new URL(`assets/journey-${name}.mp4`, import.meta.url)))));
+  assert.equal(encoded.length, 3);
+  assert.ok(encoded.some(data => data.equals(readFileSync(new URL('assets/arrival-loop-1080.mp4', import.meta.url)))));
+  for (const name of ['office-entry-chair-v12','journey-reveal']) assert.ok(encoded.some(data => data.equals(readFileSync(new URL(`assets/${name}.mp4`, import.meta.url)))));
   assert.doesNotMatch(portable, /(?:src|href)="motion\//);
 });
 
@@ -398,4 +447,29 @@ test('save controller confirms returned data; failure preserves draft and never 
   assert.equal(context.fields['save-error'].textContent, 'synthetic save failure');
   assert.doesNotMatch(context.content.innerHTML, /資料已保存/);
   assert.equal(runInNewContext('details.question', context), 'unsaved synthetic question');
+});
+
+
+test('public media budget reserves capacity without allowing large code or extra files', () => {
+  const build = readFileSync(new URL('build.mjs', import.meta.url), 'utf8');
+  const checks = build.slice(build.indexOf('assert.ok(publicFiles.length'), build.indexOf('const actualPublicFiles'));
+  assert.ok(checks.includes("name.endsWith('.mp4')"));
+  const check = (publicFiles, publicSizes) => runInNewContext(checks, { assert, publicFiles, publicSizes });
+  assert.doesNotThrow(() => check(['assets/clip.mp4','app.js'], [5_000_000,1_000_000]));
+  assert.doesNotThrow(() => check(Array(20).fill('assets/clip.mp4'), Array(20).fill(2_500_000)));
+  assert.throws(() => check(['assets/clip.mp4'], [5_000_001]));
+  assert.throws(() => check(['app.js'], [1_000_001]));
+  assert.throws(() => check(Array(11).fill('assets/clip.mp4'), Array(11).fill(5_000_000)));
+  assert.doesNotThrow(() => check(Array(23).fill('app.js'), Array(23).fill(1)));
+  assert.throws(() => check(Array(24).fill('app.js'), Array(24).fill(1)));
+});
+
+test('public home keeps separate scene files and a high-priority native poster', () => {
+  const read = path => readFileSync(new URL(path, import.meta.url), 'utf8');
+  const html = read('public-preview/index.html'), app = read('public-preview/app.js');
+  assert.doesNotMatch(html + app, /data:video\/mp4|rel="preload"[^>]+\.mp4/);
+  assert.match(html, /arrival-loop-1080.webp"[^>]+width="1080" height="1920" fetchpriority="high"/);
+  assert.match(html, /<video[^>]+preload="none"[^>]+hidden/);
+  assert.match(app, /arrival: \{ src: 'assets\/arrival-loop-1080.mp4', poster: 'assets\/arrival-loop-1080.webp', loop: true \}/);
+  assert.doesNotMatch(html + app, /assets\/arrival-hosts\.(mp4|webp)/);
 });

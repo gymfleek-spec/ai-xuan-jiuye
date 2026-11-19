@@ -31,27 +31,47 @@ function fixture() {
   const submit = id => handlers.submit({ target: { id }, preventDefault() {}, stopImmediatePropagation() {} });
   const date = () => { type('year','2000'); type('month','8'); type('day','16'); submit('ziwei-date-form'); };
   const options = (precision = 'exact') => { type('precision',precision); if (precision === 'exact') type('time','03:30'); type('gender','female'); submit('ziwei-options-form'); };
-  return { nodes, phases, open, click, type, submit, date, options, get html() { return html; }, get phase() { return phase; }, restore() { globalThis.document = prior.document; globalThis.iztro = prior.engine; } };
+  return { nodes, phases, content, open, click, type, submit, date, options, get html() { return html; }, get phase() { return phase; }, restore() { globalThis.document = prior.document; globalThis.iztro = prior.engine; } };
 }
 
-test('journey uses explicit entrance and choice; returning from date never replays the door', () => {
-  const f = fixture(); try {
-    f.open(false); assert.equal(f.phase,'entrance');
-    f.click('greet'); assert.equal(f.phase,'welcome');
-    f.click('next-intro'); assert.equal(f.phase,'interaction');
-    f.click('focus',{palace:'官祿'}); assert.equal(f.phase,'response'); assert.match(f.html,/先由工作睇起/);
-    f.click('skip'); assert.equal(f.phase,'ziwei-date');
-    f.click('back-intro'); assert.equal(f.phase,'interaction');
-    assert.equal(f.phases.filter(p => p === 'entrance').length,1);
+test('the desk waits for the film; a blocked click cannot choose a topic', () => {
+  const f=fixture(); try {
+    f.open(false); f.content.inert=true; f.click('greet',{reply:'yes'});
+    assert.equal(f.phase,'entrance'); f.content.inert=false; f.click('greet',{reply:'invalid'});
+    assert.equal(f.phase,'entrance'); f.click('greet',{reply:'yes'});
+    assert.equal(f.phase,'interaction');
   } finally { f.restore(); }
+});
+test('both greetings open the same five topics in one click; there is no landmark button', () => {
+  const f=fixture(); try {
+    for (const [reply,copy] of [['curious','我係玄，呢位係九爺。'],['yes','好呀。']]) {
+      f.open(false);assert.match(f.html,/有呀，想傾吓/);assert.match(f.html,/你係邊位/);
+      assert.doesNotMatch(f.html,/look-altar|望吓周圍先|aria-pressed="true"|<form/);
+      f.click('greet',{reply}); assert.equal(f.phase,'interaction'); assert.ok(f.html.includes(copy));
+      assert.equal((f.html.match(/data-ziwei="focus"/g)||[]).length,5);
+      f.click('focus',{palace:'官祿'}); assert.equal(f.phase,'response');assert.match(f.html,/官祿宮/);
+      f.click('skip'); f.click('back-intro'); assert.equal(f.phase,'interaction');
+    }
+    assert.equal(f.phases.filter(v=>v==='entrance').length,2);
+  } finally { f.restore(); }
+});
+test('each topic opens its actual palace and twelve houses from a fictitious chart', () => {
+  for(const [palace, label] of [['官祿','事業'],['夫妻','愛情'],['田宅','家庭'],['財帛','財運'],['命宮','未來方向']]) {
+    const f=fixture();try{
+      f.open(false);f.click('greet',{reply:'yes'});f.click('focus',{palace});assert.ok(f.html.includes(label));assert.match(f.html,/免費試排紫微盤/);
+      f.click('skip');f.date();f.options();assert.match(f.html,/免費排盤/);f.click('calculate');f.click('view-result');
+      assert.equal(f.phase,'ziwei-result');assert.ok(f.html.includes('先由「'+label+'」睇起'));
+      assert.equal(f.nodes['ziwei-grid'].children.length,13);assert.ok(f.nodes['ziwei-palace-note'].textContent.includes('本盤'+palace));
+    }finally{f.restore();}
+  }
 });
 
 test('explicit reviewed calculation creates a real chart before reveal; movie completion cannot open it', () => {
   const f = fixture(); try {
-    f.open(false); f.click('greet'); f.click('next-intro'); f.click('focus',{palace:'官祿'}); f.click('skip');
+    f.open(false); f.click('greet',{reply:'curious'}); f.click('focus',{palace:'官祿'}); f.click('skip');
     f.date(); assert.equal(f.phase,'ziwei-options'); f.options(); assert.equal(f.phase,'ziwei-review');
     f.click('view-result'); assert.equal(f.phase,'ziwei-review');
-    f.click('calculate'); assert.equal(f.phase,'reveal'); assert.match(f.html,/命盤已排好/);
+    f.click('calculate'); assert.equal(f.phase,'reveal'); assert.match(f.html,/十二宮命盤排好喇/);
     assert.doesNotMatch(f.html,/id="ziwei-grid"/);
     f.click('view-result'); assert.equal(f.phase,'ziwei-result');
     assert.equal(f.nodes['ziwei-grid'].children.length,13);

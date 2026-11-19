@@ -40,7 +40,7 @@ const inline = publicHTML
   .replace(`<link rel="stylesheet" href="styles.css?v=${version}">`, () => `<style>${css}</style>`)
   .replace(`<link rel="stylesheet" href="motion/motion.css?v=${version}">`, () => `<style>${motionCSS}</style>`)
   .replace(`<script type="module" src="app.js?v=${version}"></script>`, () => `<script type="module">${script}</script>`)
-  .replace(/assets\/[\w.-]+\.(png|webp|mp4)/g, (path, type) => `data:${type === 'mp4' ? 'video/mp4' : `image/${type}`};base64,${read(path).toString('base64')}`);
+  .replace(/assets\/[\w.-]+\.(png|jpg|webp|mp4)/g, (path, type) => `data:${type === 'mp4' ? 'video/mp4' : `image/${type === 'jpg' ? 'jpeg' : type}`};base64,${read(path).toString('base64')}`);
 assert.doesNotMatch(inline, /(?:src|href)="(?:assets\/|styles\.css|app\.js|motion\/)|^import |^export /m);
 writeFileSync(new URL(portable, import.meta.url), inline);
 
@@ -48,7 +48,7 @@ writeFileSync(new URL(portable, import.meta.url), inline);
 const publicRoot = new URL('public-preview/', import.meta.url);
 mkdirSync(new URL('assets/', publicRoot), { recursive: true });
 
-const publicMedia = ['journey-door.mp4', 'journey-idle.mp4', 'journey-response.mp4', 'journey-reveal.mp4', 'journey-room.webp', 'journey-response.webp', 'journey-reveal.webp', 'journey-door.webp', 'journey-altar.webp'].map(name => `assets/${name}`);
+const publicMedia = ['office-entry-chair-v12.mp4', 'office-door-a4.jpg', 'office-desk-chair-v12.jpg', 'journey-reveal.mp4', 'journey-reveal.webp', 'arrival-loop-1080.mp4', 'arrival-loop-1080.webp'].map(name => `assets/${name}`);
 const vendorFiles = ['iztro-v2.6.5.min.js', 'THIRD_PARTY_NOTICES.txt'];
 const publicFiles = ['index.html', 'styles.css', 'app.js', 'content.js', 'customer.js', 'ziwei.js', 'motion/motion.mjs', 'motion/motion.css', ...publicMedia, ...vendorFiles.map(name => `vendor/${name}`)];
 // Remove only our previous generated public files, never unknown files or source assets.
@@ -62,7 +62,8 @@ for (const name of publicFiles.filter(name => name !== 'index.html')) {
   copyFileSync(new URL(name, import.meta.url), new URL(name, publicRoot));
 }
 const publicSizes = publicFiles.map(name => readFileSync(new URL(name, publicRoot)).length);
-assert.ok(publicFiles.length <= 20 && Math.max(...publicSizes) <= 1_000_000 && publicSizes.reduce((a, b) => a + b, 0) <= 2_000_000);
+assert.ok(publicFiles.length <= 23 && publicSizes.reduce((a, b) => a + b, 0) <= 50_000_000);
+assert.ok(publicFiles.every((name, i) => publicSizes[i] <= (name.endsWith('.mp4') ? 5_000_000 : 1_000_000)));
 const actualPublicFiles = readdirSync(publicRoot, { recursive: true }).filter(name => !['assets', 'motion', 'vendor'].includes(name));
 assert.deepEqual(actualPublicFiles.sort(), [...publicFiles].sort());
 
@@ -75,7 +76,7 @@ const customerEvidence = ['identity-before.json', 'implementation-scope.txt', 't
 const publicEvidence = ['identity-before.json', 'node-tests.txt', 'backend-tests.txt', 'local-browser-results.json', 'public-package.json', 'remote-hashes.json', 'published-results.json', '發布驗證.md', 'public-desktop-home.png', 'public-mobile-birth.png'].map(name => `evidence/public-v031/${name}`);
 const files = [...sources, ...assets, ...evidence, ...regressionEvidence, ...backendFiles, ...customerEvidence, ...publicEvidence];
 const sha256 = Object.fromEntries(files.map(path => [path, createHash('sha256').update(read(path)).digest('hex')]));
-writeFileSync(new URL('release-manifest.json', import.meta.url), JSON.stringify({ version, scope: `local-only v${version}: continuous 2D scene journey with door, choice response, forms, decorative reveal and actual Ziwei chart; bounded cultural reading only; no publication or persistence; legacy account storage not released; synthetic data only`, sha256 }, null, 2) + '\n');
+writeFileSync(new URL('release-manifest.json', import.meta.url), JSON.stringify({ version, scope: `v${version}: shared uncropped portrait stage, 1080p looping home and continuous A4 entrance with stabilized chair, no playback overlays, same-frame accessible desk responses and five topic-led free chart openings on the existing static preview; continuous scene journey and bounded cultural reading; no persistence, backend or real data; legacy account storage not released`, sha256 }, null, 2) + '\n');
 const staged = `${archive}.${process.pid}.zip`;
 try {
   execFileSync('python3', ['-c', `
