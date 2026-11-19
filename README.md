@@ -1,22 +1,22 @@
-# 玄與九爺 · v0.6.12 還原點
+# 玄與九爺 · v0.6.14 還原點
 
-這是 [玄與九爺公開站](https://xuan-jiuye-preview.pages.dev/) 的軟件及必要素材備份。可重建的是 [project/](project/)，可直接在本機預覽的是 [project/public-preview/](project/public-preview/)。此分支 `baseline-v0.6.12` 保留作還原點；下一階段另開分支，不覆寫基線。
+這是 [玄與九爺公開站](https://xuan-jiuye-preview.pages.dev/) 的軟件及必要素材備份。可重建的是 [project/](project/)，可直接在本機預覽的是 [project/public-preview/](project/public-preview/)。此分支 `baseline-v0.6.14` 保留作還原點；下一階段另開分支，不覆寫基線。
 
-這一版按「開始」後會一口氣播到玄收扇，片中沒有 ×、略過或暫停掣。到枱前可揀事業、愛情、家庭、財運、未來方向。只用虛構出生資料，不登入、不儲存。
+這一版按「開始」後會一口氣播到玄收扇，片中沒有 ×、略過或暫停掣。到枱前可揀事業、愛情、家庭、財運、未來方向。收扇後三個畫面可直接返回首頁；話題宮位有主星就讀本宮，無主星時標明參考邊個對宮。五題解說只留站內文字。只用虛構出生資料，不登入、不儲存。
 
 ## 由零還原
 
 需要 Git、Node.js（此版用 24 測試）、npm 及 Python 3；前端不用安裝 npm 套件。
 
 ```sh
-git clone --branch baseline-v0.6.12 --single-branch https://github.com/gymfleek-spec/ai-xuan-jiuye.git
+git clone --branch baseline-v0.6.14 --single-branch https://github.com/gymfleek-spec/ai-xuan-jiuye.git
 cd ai-xuan-jiuye/project
 npm run build
 npm test
 python3 -m http.server 4186 --bind 127.0.0.1 --directory public-preview
 ```
 
-瀏覽器開 `http://127.0.0.1:4186/`。這只在本機預覽，不會部署。要比對原件，用 [release-manifest.json](project/release-manifest.json) 的 SHA-256 逐檔核對；清單本身的 SHA-256 是 `bc676ed698a68918368ccf1a972d8b122660c6dbaa3b50e45c56ba47c2a8682b`。軟件目錄共有 141 個清單項目，加清單本身共 142 個檔案；當中 17 個是公開站實際使用的檔案。
+瀏覽器開 `http://127.0.0.1:4186/`。這只在本機預覽，不會部署。要比對原件，用 [release-manifest.json](project/release-manifest.json) 的 SHA-256 逐檔核對；清單本身的 SHA-256 是 `6d7ed2e964daf427ec5892a147c849108ad3892a64a6e8fec97ad49b5712ec32`。軟件目錄共有 141 個清單項目，加清單本身共 142 個檔案；當中 17 個是公開站實際使用的檔案。
 
 ## 哪些不會還原
 
