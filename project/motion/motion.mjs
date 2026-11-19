@@ -10,7 +10,7 @@ export function attachSceneSequence(video, poster, { onState, onComplete }) {
   const reduced = document.defaultView.matchMedia('(prefers-reduced-motion: reduce)');
   owners.get(video)?.destroy();
   let scene = null, disposed = false, wanted = false, loaded = false, hasFrame = false;
-  let epoch = 0, request = 0, state = '', listeners = null;
+  let epoch = 0, request = 0, state = '', listeners = null, loadingTimer;
 
   function asset(value, kind) {
     if (typeof value !== 'string' || !value.trim()) throw new TypeError('A media URL is required');
@@ -29,10 +29,20 @@ export function attachSceneSequence(video, poster, { onState, onComplete }) {
     if (next === 'playing' || next === 'ended') hasFrame = true;
     video.hidden = !loaded || !hasFrame || ['reduced', 'skipped', 'error', 'blocked'].includes(next);
     if (state === next) return;
+    clearTimeout(loadingTimer);
     state = next;
+    if (state === 'loading' && !scene.loop) {
+      const generation = epoch;
+      loadingTimer = setTimeout(() => {
+        if (disposed || generation !== epoch || !wanted || state !== 'loading') return;
+        unload();
+        emit('error');
+      }, 12000);
+    }
     onState({ id: scene.id, state: next });
   }
   function unload() {
+    clearTimeout(loadingTimer);
     ++epoch; ++request;
     wanted = loaded = hasFrame = false;
     if (listeners) {
@@ -85,7 +95,13 @@ export function attachSceneSequence(video, poster, { onState, onComplete }) {
       pause() {
         if (!currentResource() || !wanted || !video.paused) return;
         if (!current.loop && atEnd()) ended();
-        else stop();
+        else stop(!current.loop && current.holdAt === null && !document.hidden ? 'blocked' : 'paused');
+      },
+      timeupdate() {
+        if (!currentResource() || !wanted || current.held || current.holdAt === null || video.paused ||
+            video.currentTime < current.holdAt || document.hidden || reduced.matches) return;
+        current.held = true;
+        stop('held');
       },
       waiting() { if (currentResource() && wanted) emit('loading'); },
       ended,
@@ -93,10 +109,11 @@ export function attachSceneSequence(video, poster, { onState, onComplete }) {
     };
     for (const [name, listener] of Object.entries(listeners)) video.addEventListener(name, listener);
   }
-  function setScene({ id, src = null, poster: image, loop = false }) {
+  function setScene({ id, src = null, poster: image, loop = false, holdAt = null }) {
     if (disposed) return false;
     if (typeof id !== 'string' || !id.trim() || typeof loop !== 'boolean') throw new TypeError('Invalid scene');
-    const next = { id, src: src === null ? null : asset(src, 'video'), poster: asset(image, 'image'), loop, completion: null };
+    if (holdAt !== null && (!Number.isFinite(holdAt) || holdAt <= 0 || loop || !src)) throw new TypeError('Invalid scene hold');
+    const next = { id, holdAt, held: false, src: src === null ? null : asset(src, 'video'), poster: asset(image, 'image'), loop, completion: null };
     if (loaded && wanted && scene?.id !== id && scene?.loop && next.loop &&
         scene.src === next.src && scene.poster === next.poster && !video.error) {
       const current = scene;

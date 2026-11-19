@@ -144,7 +144,7 @@ test('fixture: switching invalidates old promises and captured ended/error callb
   assert.equal(states.length, count);
   assert.deepEqual(states.at(-1), { id: 'entrance', state: 'playing' });
   assert.deepEqual(completions, []);
-  assert.equal(video.count(), 5);
+  assert.equal(video.count(), 6);
   player.destroy();
 });
 
@@ -271,7 +271,7 @@ test('fixture: terminal pause before ended flag holds the tail; near-end manual 
   const { video, states, completions, player } = fixture();
   player.setScene(clip('entrance')); await player.play();
   video.currentTime = 3.9999; video.paused = true; video.fire('pause');
-  assert.equal(states.at(-1).state, 'paused'); assert.equal(completions.length, 0);
+  assert.equal(states.at(-1).state, 'blocked'); assert.equal(video.hidden,true); assert.equal(completions.length, 0);
   await player.play(); video.currentTime = 4; video.paused = true; video.fire('pause');
   assert.equal(states.at(-1).state, 'ended'); assert.equal(video.hidden, false);
   assert.equal(completions.length, 1);
@@ -357,7 +357,7 @@ test('fixture: remount destroys the old sequence but an old promise cannot pause
   const pauses = video.pauseCalls;
   pending.resolve(); assert.equal(await result, false);
   assert.equal(video.pauseCalls, pauses); assert.equal(states.at(-1).id, 'second');
-  assert.equal(document.count(), 1); assert.equal(reduced.count(), 1); assert.equal(video.count(), 5);
+  assert.equal(document.count(), 1); assert.equal(reduced.count(), 1); assert.equal(video.count(), 6);
   next.destroy();
 });
 
@@ -404,10 +404,11 @@ test('fixture: relative and typed inline media work without any URL request by t
   player.destroy();
 });
 
-test('source boundary: no form, chart, router, storage, timer or separate UI implementation', () => {
+test('source boundary: no form, chart, router, storage, polling or separate UI implementation', () => {
   const source = readFileSync(new URL('./motion.mjs', import.meta.url), 'utf8');
-  assert.doesNotMatch(source, /calculateZiwei|\.submit\s*\(|\.click\s*\(|innerHTML|setTimeout|setInterval|localStorage|sessionStorage|indexedDB|fetch\s*\(|XMLHttpRequest|sendBeacon|history\.|location\s*[.=]/);
+  assert.doesNotMatch(source, /calculateZiwei|\.submit\s*\(|\.click\s*\(|innerHTML|setInterval|localStorage|sessionStorage|indexedDB|fetch\s*\(|XMLHttpRequest|sendBeacon|history\.|location\s*[.=]/);
   assert.doesNotMatch(source, /createElement|appendChild/);
+  assert.equal((source.match(/setTimeout\(/g)||[]).length,1); // Single stalled-load escape; no navigation timer.
 });
 
 test('fixture: an already captured preference callback cannot unload a remounted owner', async () => {
@@ -472,4 +473,29 @@ test('TRANS062: idle preservation never applies to errors, explicit replay, diff
   video.error={code:3}; loads=video.loadCalls;
   player.setScene({...idle,id:'quiet',poster:'new-room.png'}); await player.play(); assert.ok(video.loadCalls>loads);
   player.destroy();
+});
+
+test('the deliberate entrance stop fires once; looking resumes the same resource without a seek', async () => {
+  const {video,player,states,completions} = fixture();
+  player.setScene({...clip('entry'),holdAt:1.15});
+  await player.play(); const loads=video.loadCalls;
+  video.currentTime=1.1;video.fire('timeupdate');
+  assert.equal(states.at(-1).state,'playing');
+  video.currentTime=1.2;video.fire('timeupdate');video.fire('pause');
+  assert.equal(states.at(-1).state,'held');assert.equal(video.paused,true);
+  assert.deepEqual(completions,[]);
+  await player.play();assert.equal(video.loadCalls,loads);assert.equal(video.currentTime,1.2);
+  video.currentTime=2.2;video.fire('timeupdate');assert.equal(states.at(-1).state,'playing');
+  video.pause();video.fire('pause');assert.equal(states.at(-1).state,'paused');
+  await player.play();finish(video);assert.deepEqual(completions,[{id:'entry',reason:'ended'}]);
+  player.destroy();
+});
+
+test('stalled entry unlocks the destination poster; late play cannot re-lock controls',async t=>{
+  t.mock.timers.enable({apis:['setTimeout']});
+  const {player,video,states,completions}=fixture(), slow=deferred();video.nextPlay=slow.promise;
+  player.setScene(clip('door'));const playing=player.play();
+  t.mock.timers.tick(11999);assert.equal(states.at(-1).state,'loading');
+  t.mock.timers.tick(1);assert.equal(states.at(-1).state,'error');assert.equal(video.src,'');
+  slow.resolve();assert.equal(await playing,false);assert.deepEqual(completions,[]);player.destroy();
 });
