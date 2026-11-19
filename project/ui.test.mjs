@@ -28,6 +28,12 @@ test('the film has no transport or dismiss overlay; navigation remains accessibl
   assert.match(html,/跳到主要內容/);assert.match(html,/class="visit-home"[^>]*data-action="close">返回首頁/);
   assert.match(app,/addEventListener\('cancel'/);assert.match(html,/id="scene-status" class="sr-only"/);
 });
+test('a single existing text exit stays on desk pages, never during motion',()=>{
+  const css=read('styles.css');
+  assert.equal((html.match(/class="visit-home"/g)||[]).length,1);
+  assert.match(css,/dialog\[data-travel=moving\] \.dialog-panel\{display:none\}/);
+  for(const rule of css.split('}').filter(r=>r.includes('.visit-home'))) assert.doesNotMatch(rule,/display:\s*none/);
+});
 test('starting motion gates replies, finishing exposes them without navigating',()=>{
   const f=soundFixture();f.context.dialog.dataset.phase='entrance';
   f.state('entrance','playing');assert.equal(f.context.content.inert,true);

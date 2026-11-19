@@ -8,7 +8,7 @@ const loaded = { self: {} };
 runInNewContext(readFileSync(new URL('./vendor/iztro-v2.6.5.min.js', import.meta.url), 'utf8'), loaded);
 function fixture() {
   const prior = { document: globalThis.document, engine: globalThis.iztro };
-  const nodes = {}, handlers = {}, phases = [];
+  const nodes = {}, handlers = {}, phases = [], links = [];
   class Node {
     constructor() { this.children = []; this.style = {}; this.value = ''; this.parentElement = { addEventListener() {} }; }
     append(...nodes) { this.children.push(...nodes); }
@@ -17,7 +17,7 @@ function fixture() {
     get textContent() { return this.text || this.children.map(n => n.textContent).join(''); }
     set textContent(value) { this.text = value; }
   }
-  globalThis.document = { createElement: () => new Node(), getElementById: id => nodes[id] ||= new Node() };
+  globalThis.document = { createElement: tag => { const node = new Node(); if (tag === 'a') links.push(node); return node; }, getElementById: id => nodes[id] ||= new Node() };
   globalThis.iztro = loaded.self.iztro;
   const dialog = { open: true, addEventListener: (name, fn) => handlers[name] = fn };
   const content = { querySelectorAll: () => [], addEventListener: (name, fn) => handlers[name] = fn };
@@ -31,7 +31,7 @@ function fixture() {
   const submit = id => handlers.submit({ target: { id }, preventDefault() {}, stopImmediatePropagation() {} });
   const date = () => { type('year','2000'); type('month','8'); type('day','16'); submit('ziwei-date-form'); };
   const options = (precision = 'exact') => { type('precision',precision); if (precision === 'exact') type('time','03:30'); type('gender','female'); submit('ziwei-options-form'); };
-  return { nodes, phases, content, open, click, type, submit, date, options, get html() { return html; }, get phase() { return phase; }, restore() { globalThis.document = prior.document; globalThis.iztro = prior.engine; } };
+  return { nodes, phases, links, content, open, click, type, submit, date, options, get html() { return html; }, get phase() { return phase; }, restore() { globalThis.document = prior.document; globalThis.iztro = prior.engine; } };
 }
 
 test('the desk waits for the film; a blocked click cannot choose a topic', () => {
@@ -61,11 +61,28 @@ test('each topic opens its actual palace and twelve houses from a fictitious cha
       f.open(false);f.click('greet',{reply:'yes'});f.click('focus',{palace});assert.ok(f.html.includes(label));assert.match(f.html,/免費試排紫微盤/);
       f.click('skip');f.date();f.options();assert.match(f.html,/免費排盤/);f.click('calculate');f.click('view-result');
       assert.equal(f.phase,'ziwei-result');assert.ok(f.html.includes('先由「'+label+'」睇起'));
-      assert.equal(f.nodes['ziwei-grid'].children.length,13);assert.ok(f.nodes['ziwei-palace-note'].textContent.includes('本盤'+palace));
+      assert.equal(f.nodes['ziwei-grid'].children.length,13);assert.ok(f.nodes['ziwei-palace-note'].textContent.includes(palace));
+      assert.match(f.nodes['ziwei-palace-note'].textContent, /解讀依據/);
+      assert.deepEqual(f.links.filter(a => a.href && new URL(a.href, 'https://site.test').origin !== 'https://site.test'), [], label + ': no reference links');
     }finally{f.restore();}
   }
 });
 
+test('the live renderer distinguishes borrowed and native stars after switching topics and retains a clean original grid',()=>{
+  const f=fixture();try{
+    f.open(false); f.click('greet',{reply:'yes'}); f.click('focus',{palace:'官祿'}); f.click('skip');
+    for(const [key,val] of Object.entries({year:'1995',month:'08',day:'15'}))f.type(key,val);
+    f.submit('ziwei-date-form'); for(const [key,val] of Object.entries({precision:'exact',time:'09:30',gender:'male'}))f.type(key,val);
+    f.submit('ziwei-options-form'); f.click('calculate'); f.click('view-result');
+    const n=()=>f.nodes['ziwei-palace-note'].textContent;
+    assert.match(n(),/官祿宮.*本宮無十四主星.*借對宮夫妻宮.*武曲、貪狼/);
+    assert.doesNotMatch(n(),/心理學|未做借星|先唔替|模型|內部/);
+    f.click('palace',{palace:'田宅'}); assert.match(n(),/田宅宮.*本宮無十四主星.*借對宮子女宮.*天同、太陰/); assert.doesNotMatch(n(),/貪狼/);
+    f.click('palace',{palace:'命宮'}); assert.match(n(),/命宮.*天相/); assert.doesNotMatch(n(),/借對宮子女|太陰/);
+    const career=f.nodes['ziwei-grid'].children.find(cell=>cell.children[0]?.textContent==='官祿');
+    assert.match(career.textContent,/本宮無十四主星/);assert.doesNotMatch(career.textContent,/武曲|貪狼/);
+  }finally{f.restore();}
+});
 test('explicit reviewed calculation creates a real chart before reveal; movie completion cannot open it', () => {
   const f = fixture(); try {
     f.open(false); f.click('greet',{reply:'curious'}); f.click('focus',{palace:'官祿'}); f.click('skip');
@@ -75,7 +92,7 @@ test('explicit reviewed calculation creates a real chart before reveal; movie co
     assert.doesNotMatch(f.html,/id="ziwei-grid"/);
     f.click('view-result'); assert.equal(f.phase,'ziwei-result');
     assert.equal(f.nodes['ziwei-grid'].children.length,13);
-    assert.match(f.nodes['ziwei-palace-note'].textContent,/官祿喺戌位，廉貞、天府/);
+    assert.match(f.nodes['ziwei-palace-note'].textContent,/官祿宮.*戌.*廉貞、天府/);
   } finally { f.restore(); }
 });
 
