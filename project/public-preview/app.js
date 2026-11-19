@@ -1,7 +1,7 @@
-import { attachZiwei } from './ziwei.js?v=0.6.12';
-import { attachSceneSequence } from './motion/motion.mjs?v=0.6.12';
-import { STORIES, WELCOME, GOALS, DETAIL_STEPS, emptyDetails, getDetailsError, getBirthDateError, getStory, getChoice } from './content.js?v=0.6.12';
-import { api } from './customer.js?v=0.6.12';
+import { attachZiwei } from './ziwei.js?v=0.6.14';
+import { attachSceneSequence } from './motion/motion.mjs?v=0.6.14';
+import { STORIES, WELCOME, GOALS, DETAIL_STEPS, emptyDetails, getDetailsError, getBirthDateError, getStory, getChoice } from './content.js?v=0.6.14';
+import { api } from './customer.js?v=0.6.14';
 
 const dialog = document.getElementById('story-dialog');
 const content = document.getElementById('story-content');
@@ -253,7 +253,7 @@ function showAccount(message = '') {
 }
 
 function showPreviewInfo() {
-  paint(`<p class="dialog-label">公開預覽</p><h2 id="dialog-title">先試問卷同故事。</h2><p class="dialog-lead">只用虛構資料。填寫只留本頁，關閉或重新整理會清除；目前不設登入及保存，紫微排盤只用本頁核對資料，固定故事唔係個人分析。</p><div class="dialog-actions">${button('重新試紫微排盤', 'direct')}</div>`, 'questions');
+  paint(`<p class="dialog-label">玄與九爺</p><h2 id="dialog-title">點樣免費睇命盤？</h2><p class="dialog-lead">只用虛構資料。填寫只留本頁，關閉或重新整理會清除；目前不設登入及保存，紫微排盤只用本頁核對資料，固定故事唔係個人分析。</p><div class="dialog-actions">${button('重新試紫微排盤', 'direct')}</div>`, 'questions');
 }
 
 function selectOption(trigger, action) {

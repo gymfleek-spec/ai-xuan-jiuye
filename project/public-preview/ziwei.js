@@ -1,45 +1,132 @@
-import { getBirthDateError } from './content.js?v=0.6.12';
+import { getBirthDateError } from './content.js?v=0.6.14';
 
 const READING_TOPICS = {
-  官祿: { label: '事業', hint: '我點做事', invite: '同一份工，有人鍾意帶頭，有人鍾意執好細節。你最享受邊一樣？我哋由官祿宮睇起。', lead: '官祿宮講做事取向，唔係升遷預測。' },
-  夫妻: { label: '愛情', hint: '我點同人相處', invite: '有句說話未諗好點開口？唔使講對方係邊個，我哋由夫妻宮睇親密關係入面嘅相處方式。', lead: '夫妻宮講親密相處，唔判斷婚期或對方性格。' },
-  田宅: { label: '家庭', hint: '我想點樣安頓', invite: '返到屋企，邊件小事最令你覺得自在？由田宅宮講起，睇吓你重視點樣嘅生活空間。', lead: '田宅宮借居住同歸屬感做起點，唔判斷家人好壞。' },
-  財帛: { label: '財運', hint: '我點用手上資源', invite: '有筆錢可以自己安排，你會留起，定用喺最在意嗰件事？由財帛宮睇你點分配資源。', lead: '財帛宮用嚟反思點樣用資源；唔預測賺蝕，亦唔係投資建議。' },
-  命宮: { label: '未來方向', hint: '我下一步想點行', invite: '眼前有幾條路，邊條值得先試一小步？我哋由命宮睇你慣常點揀，唔替你定去向。', lead: '命宮講行事取向，幫你整理下一步，唔係預言將來。' }
+  官祿: { label: '事業', hint: '我點做事', invite: '同一份工，有人鍾意帶頭，有人鍾意執好細節。你最享受邊一樣？我哋由官祿宮睇起。', lead: '諗返最近一次有人臨時搵你幫手，你最先答咗邊句？', question: '下次有人話「好趕」，你想即刻接手，定先問邊樣可以遲啲交？' },
+  夫妻: { label: '愛情', hint: '我點同人相處', invite: '有句說話未諗好點開口？唔使講對方係邊個，我哋由夫妻宮睇親密關係入面嘅相處方式。', lead: '揀最近一次你想同對方講、最後又冇講出口嘅事，睇下邊段似當時嘅你。', question: '如果可以補返一句，邊句最接近你嗰刻真正想講嘅嘢？' },
+  田宅: { label: '家庭', hint: '我想點樣安頓', invite: '返到屋企，邊件小事最令你覺得自在？由田宅宮講起，睇吓你重視點樣嘅生活空間。', lead: '由返到屋企嗰一刻諗起：邊件小事最令你放鬆，邊件你成日就住其他人？', question: '今晚返到屋企，有邊件小事你想照自己意思做一次？' },
+  財帛: { label: '財運', hint: '我點用手上資源', invite: '有筆錢可以自己安排，你會留起，定用喺最在意嗰件事？由財帛宮睇你點分配資源。', lead: '試拎最近一筆你有猶豫過嘅開支做例，諗返落決定前你最在意乜。', question: '下次遇到同樣一筆數，你想保留咩預算，又想留幾多畀自己自由用？' },
+  命宮: { label: '未來方向', hint: '我下一步想點行', invite: '眼前有幾條路，邊條值得先試一小步？我哋由命宮睇你慣常點揀，唔替你定去向。', lead: '諗一件你最近未揀定嘅事，對照下自己通常點樣踏出第一步。', question: '如果只試一個星期，邊一小步可以幫你睇清楚仲想唔想繼續？' }
 };
 
-// Cultural keywords only; questions are our prompts, not claims made by the source.
-const STAR_PROMPTS = {
-  紫微: ['統籌與方向', '呢件事要由邊個定方向？你想負責到邊一部分？'],
-  天機: ['想法與變通', '有幾多個做法可揀？你仲差邊項資料先肯開始？'],
-  太陽: ['對外付出', '你想貢獻啲乜？對方有冇需要你而家呢種幫法？'],
-  武曲: ['動手落實', '如果先做一件可完成嘅事，你會揀乜？'],
-  天同: ['相處的舒服感', '你想維持舒服，定願意為一件重要嘅事講清楚？'],
-  廉貞: ['原則與界線', '邊條界線對你重要？有冇已經講清楚？'],
-  天府: ['維持與管理', '有邊啲安排值得保留？邊啲只係慣咗？'],
-  太陰: ['細膩的感受', '你真正嘅感受係乜？你想點樣表達？'],
-  貪狼: ['探索與興趣', '你最想探索乜？有冇一樣值得先集中？'],
-  巨門: ['表達與疑問', '你心入面嘅疑問係乜？邊句說話未講清楚？'],
-  天相: ['協調與分工', '各人應該負責邊部分？你想點樣協調？'],
-  天梁: ['照顧與承擔', '你想照顧邊個？有邊啲責任唔需要一個人扛？'],
-  七殺: ['堅持與決斷', '你想堅持嘅係目標，定只係目前呢個做法？'],
-  破軍: ['改變既有做法', '你想改變邊一部分？有乜值得先保留？']
+// A scene is an invitation to compare with lived experience, not a finding about the visitor.
+const STAR_READINGS = {
+  紫微: { theme:'定方向',
+    官祿:'開完會冇人拍板，你可能會先定一個方向，等大家有路行。留意散會之後，係咪連本來可以分出去嘅事都返到你手。',
+    夫妻:'兩個人揀去邊，你可能習慣提早訂好位。係對方鍾意你安排，定係你哋一直冇問過大家想點？',
+    田宅:'家人聚餐要夾時間，你可能好快就整好一張名單。試留一件事畀另一個人話事，睇下晚餐仲係咪一樣順。',
+    財帛:'遇到一筆要一齊用嘅錢，你可能想先定好用途。留意最後個安排，有冇連提出唔同意見嘅人都照顧到。',
+    命宮:'面前幾條路都行得，你可能最想揀嗰條可以自己話事嘅。諗清楚你想決定嘅係方向，定係連每個細節都要自己管。' },
+  天機: { theme:'搵做法',
+    官祿:'份工一轉要求，你可能好快諗到第二、第三個做法。如果草稿改咗幾次仲未交，可能差嘅唔係主意，而係一句「咁就夠」。',
+    夫妻:'收到一個好短嘅回覆，腦入面可能即刻浮起幾種解釋。與其估邊個啱，不如問返對方嗰句想講乜。',
+    田宅:'屋企有樣嘢唔順手，你可能即刻諗到點調位。不妨先問成日用嗰件嘢嘅人，最麻煩係邊一步。',
+    財帛:'想買一樣嘢，你可能開幾頁慢慢比。若果越睇越難揀，返去睇最初想用佢解決邊個問題，未必需要再搵多十款。',
+    命宮:'新線索一出現，你可能又想改計劃。留意今次係真係多咗重要資料，定純粹想等到再穩陣啲先開始。' },
+  太陽: { theme:'主動幫一把',
+    官祿:'有人卡住，你可能第一個行埋去幫。若果次次都幫到收工，不如先問佢係想你示範一次，定替佢做晒。',
+    夫妻:'對方講今日好攰，你可能好快幫佢諗辦法。有時最啱用嘅幫忙，反而係問一句：「想我聽，定一齊諗？」',
+    田宅:'屋企多嘢做，你可能唔出聲就執多兩手。留意呢個係今次自願幫手，定係大家已經當咗你會做。',
+    財帛:'夾份送禮，你可能想出多啲等大家方便。落實之前對一對自己個數，慷慨同勉強唔一定要一齊出現。',
+    命宮:'見到有人等你出手，件事可能突然變得好值得做。試想像冇人等你幫忙嗰日，你自己又最想做乜。' },
+  武曲: { theme:'動手落實',
+    官祿:'有人臨收工話「好急」，你可能已經覆咗「我嚟」，先發現原本嗰份都係今日交。你想幫手，同你手上仲有幾多時間，係兩件事。',
+    夫妻:'屋企有嘢壞咗，你可能當晚就整好，當係一句關心。如果對方仲想傾耐啲，佢要嘅可能唔係另一個解決方法。',
+    田宅:'屋企要執，你可能捲起衫袖就做，做到一半先發現得自己一個。不妨開頭就問清楚，邊個洗碗、邊個收枱。',
+    財帛:'見到銀碼未對清，你可能寧願逐項計過先安心。睇返最近一筆，邊部分真係要計準，邊部分只要預個上限就夠？',
+    命宮:'同坐低諗相比，你可能更鍾意落手試一次。若果揀唔落去，試分清楚：你係唔想行嗰條路，定只係唔知第一步做乜。' },
+  天同: { theme:'留住舒服',
+    官祿:'同事問你接唔接多件事，你可能怕大家尷尬，於是話「冇問題」。如果之後連午飯都要趕，嗰句答應仲合唔合你心意？',
+    夫妻:'大家唔同意嗰陣，你可能會先講笑，等氣氛鬆一鬆。如果笑完仍然介意，遲啲搵個舒服嘅時候講返都得。',
+    田宅:'屋企人問食乜，你可能順口講「是但」。一次半次係隨和；如果成個禮拜都冇食過自己想食嗰樣，今晚可以講一個菜名。',
+    財帛:'忙完一日，買杯鍾意嘅飲品可能係你畀自己嘅休息。留意邊次真係享受，邊次其實只係想早十分鐘收工。',
+    命宮:'有個做慣嘅選擇擺喺面前，舒服未必等於停滯。可以問吓自己：休息完，我仲想留喺度，定有件事想試？' },
+  廉貞: { theme:'把界線講清楚',
+    官祿:'兩個同事接同一類差事，規矩卻唔一樣，你可能會特別在意。講出邊一步唔一致，通常比估邊個偏幫邊個容易傾。',
+    夫妻:'有句玩笑聽落唔舒服，你可能要過一陣先知自己介意乜。講返嗰句說話，比替對方定性更容易畀人聽得明。',
+    田宅:'屋企人未問就入房，介意嘅可能唔係道門，而係可唔可以先敲一敲。講一條做得到嘅約定，大家先知道點尊重你。',
+    財帛:'同朋友夾錢，份額明明唔大，你可能都想講清楚。你在意嘅未必係嗰幾蚊，而係大家用唔用同一個規矩。',
+    命宮:'有條捷徑好快，但做法同你重視嘅嘢唔夾，你可能寧願慢啲。分清楚邊條線唔想過，其他條件就有得傾。' },
+  天府: { theme:'留有餘地',
+    官祿:'接新差事之前，你可能先望一望人手同日程。嗰下停頓唔一定係唔肯做，可能係想知邊個頂得住原有嗰攤。',
+    夫妻:'關係入面，你可能鍾意有啲約定唔使次次再問，例如星期日一齊食飯。不妨間中問吓：大家仲係享受，定只係照做？',
+    田宅:'櫃桶入面留定一份後備，可能令你住得踏實。今次執屋可以分開：邊樣真係會用，邊樣留低只因未諗好點處理。',
+    財帛:'有筆新開支，你可能先留起日常要用嗰份，先諗剩低點用。睇返你留嘅餘額，有冇顧到一樣真心想做嘅事。',
+    命宮:'揀一條新路之前，你可能想保留一個退路。若果退路已經喺度，下一個等緊嘅條件係必要，定係錦上添花？' },
+  太陰: { theme:'留意細微變化',
+    官祿:'開會時你可能留意到，有人本來想講嘢，最後冇出聲。散會私下問一句，會比替佢估原因實在。',
+    夫妻:'對方今日覆少咗一句，你可能比平日更留神。先問「今日過成點？」可以畀對方講，亦唔使你自己估晒。',
+    田宅:'返到屋企想靜一陣，你可能見大家忙，又起身幫手。如果係咁，試吓早少少講：「我想坐十分鐘，一陣再一齊執。」',
+    財帛:'有啲開支細到唔覺眼，但加埋可能佔咗你原本想留低嗰份。試揀一個星期睇，唔使為每一蚊責怪自己。',
+    命宮:'一個決定喺人多時聽落好合理，安靜落嚟，你可能有第二種感覺。不如記低令你遲疑嘅嗰個細節，再返去問清楚。' },
+  貪狼: { theme:'試新嘢',
+    官祿:'同事拋出新點子，你可能即刻想試，手上舊嗰件又唔想放低。如果兩件都開咗頭，邊件試完半個鐘，你仲想做落去？',
+    夫妻:'一齊試新地方可能特別有話題；但冇節目嗰晚，又唔代表冇嘢可講。留意你掛住嘅係嗰次新鮮感，定係同邊個一齊。',
+    田宅:'見到一個新佈置，你可能想即刻搬吓張枱。試擺一日，睇吓屋企人同自己用落順唔順手，先決定留唔留。',
+    財帛:'打開購物籃，可能一眼中意咗幾樣。留到聽朝再望，邊樣你仲講得出會喺邊度用？',
+    命宮:'同一晚報幾堂興趣班可能好過癮，但時間未必夠晒。不如先試一堂，留意完咗之後你仲想唔想返去。' },
+  巨門: { theme:'問到明白',
+    官祿:'收到一句「執靚啲」，你可能想追問到有個實例先開工。與其一路估，不如請對方揀一版，指畀你睇邊度未啱。',
+    夫妻:'同一個字，兩個人可能聽出唔同意思。若果你哋兜咗幾個圈都傾唔埋，可以先問：「你講嘅係頭先嗰件事？」',
+    田宅:'屋企傾分工，大家口中嘅「幫手」未必係同一樣嘢。不妨逐件講明係買餸、煮飯定洗碗，睇吓仲有冇爭拗。',
+    財帛:'睇一張收據，如果銀碼同預期唔同，你可能會問個明白。逐項對返約定，唔使一開始就假設邊個計錯。',
+    命宮:'聽到一個好肯定嘅建議，你可能反而多咗疑問。試揀出一條真係會改變你決定嘅問題，先搵嗰個答案。' },
+  天相: { theme:'照顧分工',
+    官祿:'兩邊要嘅嘢唔一樣，你可能自然做咗中間人。下次傳話前先問：呢個決定係咪應該由佢哋直接傾？',
+    夫妻:'揀地方時，你可能好快就講得出對方鍾意乜。試喺嗰句之後加半句「我今日就想……」，兩個人先真係有得揀。',
+    田宅:'想家人分工公平，你可能會睇邊個做多咗，卻冇計自己安排時間嗰份工。傾分工嗰陣，記得將呢件事都擺上枱。',
+    財帛:'夾一餐飯，平均分最易計，未必人人都覺得公平。你可能想顧晒大家；最好落單前先問大家點分。',
+    命宮:'大家有唔同意見時，你可能好快搵到一個人人接受嘅方法。留意嗰個方法入面，有冇計埋你自己想要嘅嘢。' },
+  天梁: { theme:'照顧與承擔',
+    官祿:'新人問多兩句，你可能索性代佢做埋。若果想佢下次自己識做，今次有邊一步可以留返畀佢試？',
+    夫妻:'見到對方為難，你可能第一時間想替佢擋開。問清楚佢想你陪住定幫手決定，可以少一份好心做多咗。',
+    田宅:'家人一遇到麻煩就搵你，你可能慣咗先接電話再諗自己得唔得閒。今次可以先講你做到邊一步，唔使一口應承到底。',
+    財帛:'有人開口想你幫補，你可能先諗對方點算。答之前留一晚，睇清你願意幫幾多，同自己實際負擔到幾多。',
+    命宮:'諗下一步時，你可能由「邊個需要我」開始。試將「我想點過呢一日」都寫低，兩樣可以有唔同答案。' },
+  七殺: { theme:'當機立斷',
+    官祿:'限期逼近，你可能寧願先落一個決定，好過成班人繼續等。開工前確認邊步可以改、邊步改唔返，快得嚟會踏實啲。',
+    夫妻:'一有分歧，你可能想即晚講出個決定；對方可能仲未諗好。不如約實幾時再傾，停一停唔等於避開。',
+    田宅:'屋企一亂，你可能即刻清走一批嘢。揀走自己嗰份可以好爽快；到共用嘅物件，問多一聲先落手。',
+    財帛:'見到限時優惠，你可能想即刻拍板。試問自己：如果冇個倒數，我仲會唔會覺得呢樣嘢值得？',
+    命宮:'一條路行唔通，你可能寧願轉彎，都唔想原地等。諗一個最細、改得返嘅決定先試，唔使今日押晒落去。' },
+  破軍: { theme:'試另一套做法',
+    官祿:'舊表格越填越慢，你可能想索性重做。先揀最阻時間嗰一欄改，試完先知要唔要成份換晒。',
+    夫妻:'同一件事又拗撬，你可能想徹底換個相處方式。不如先改一個開場白，睇下今次係咪傾到平時傾唔到嘅嘢。',
+    田宅:'如果一返屋企就喺門口搵鎖匙，你可能想成個玄關重新執過。今個星期先換個放鎖匙嘅位，用得順先再郁其他。',
+    財帛:'一個月超咗預算，你可能想將成套計法推倒重來。先搵出最唔合用嗰一項，其他幫到手嘅做法唔使一齊掉。',
+    命宮:'想重新開始嗰陣，成套換晒可能最有感覺。試講得出邊一樣真係唔再啱用，亦講一樣你想帶埋行落去嘅嘢。' }
 };
+
+const BRANCHES = [...'子丑寅卯辰巳午未申酉戌亥'];
+const OPPOSITE = { 官祿:'夫妻', 夫妻:'官祿', 田宅:'子女', 財帛:'福德', 命宮:'遷移' };
+const palaceTitle = name => name.endsWith('宮') ? name : name + '宮';
+
+function readStars(palace, topic) {
+  const list = palace?.majorStars;
+  if (!Array.isArray(list) || list.some(s => !s || typeof s.name !== 'string' || typeof s.type !== 'string')) return null;
+  const stars = list.filter(s => s.type === 'major');
+  if (stars.length > 2 || new Set(stars.map(s => s.name)).size !== stars.length || stars.some(s => !Object.hasOwn(STAR_READINGS, s.name))) return null;
+  return stars.map(({ name }) => ({ name, theme: STAR_READINGS[name].theme, behaviour: STAR_READINGS[name][topic] }));
+}
 
 export function getPalaceReading(chart, name) {
-  if (chart?.status !== 'ready' || !Object.hasOwn(READING_TOPICS, name) || !Array.isArray(chart.palaces)) return null;
-  const palace = chart.palaces.find(p => p?.name === name);
-  if (!palace || ![...'子丑寅卯辰巳午未申酉戌亥'].includes(palace.earthlyBranch) || !Array.isArray(palace.majorStars) || palace.majorStars.some(star => !star || typeof star !== 'object')) return null;
-  const stars = palace.majorStars.filter(star => star.type === 'major');
-  if (stars.length > 2 || new Set(stars.map(star => star.name)).size !== stars.length || stars.some(star => !Object.hasOwn(STAR_PROMPTS, star.name))) return null;
+  if (chart?.status !== 'ready' || !Object.hasOwn(READING_TOPICS, name) || !Array.isArray(chart.palaces) || chart.palaces.length !== 12) return null;
+  const matches = chart.palaces.filter(p => p?.name === name);
+  if (matches.length !== 1) return null;
+  const palace = matches[0], i = BRANCHES.indexOf(palace.earthlyBranch);
+  const stars = readStars(palace, name);
+  if (i < 0 || !stars) return null;
+  let opposite = null;
+  if (!stars.length) {
+    const branch = BRANCHES[(i + 6) % 12], oppositeName = OPPOSITE[name];
+    const donors = chart.palaces.filter(p => p?.earthlyBranch === branch || p?.name === oppositeName);
+    if (donors.length !== 1 || donors[0].name !== oppositeName || donors[0].earthlyBranch !== branch) return null;
+    const borrowed = readStars(donors[0], name);
+    if (!borrowed?.length) return null;
+    opposite = { palace: oppositeName, branch, stars: borrowed };
+  }
   return {
-    label: READING_TOPICS[name].label, lead: READING_TOPICS[name].lead,
-    palace: name, branch: palace.earthlyBranch,
-    stars: stars.map(star => ({ name: star.name, theme: STAR_PROMPTS[star.name][0], question: STAR_PROMPTS[star.name][1] })),
-    sources: [
-      { title: '紫微研習社：宮位', url: 'https://docs.iztro.com/learn/palace' },
-      { title: '紫微研習社：十四主星', url: 'https://docs.iztro.com/learn/major-star' }
-    ]
+    label: READING_TOPICS[name].label, lead: READING_TOPICS[name].lead, question: READING_TOPICS[name].question,
+    palace: name, branch: palace.earthlyBranch, stars, opposite
   };
 }
 
@@ -50,7 +137,7 @@ export function getZiweiError(input, today = new Date()) {
   if (!input || typeof input !== 'object') return { field: 'year', message: '請填寫出生資料。' };
   const dateError = getBirthDateError(input, today);
   if (dateError) return dateError;
-  if (Number(input.year) < 1900 || Number(input.year) > 2099) return { field: 'year', message: '呢個版本只支援1900至2099年的西曆出生日期。' };
+  if (Number(input.year) < 1900 || Number(input.year) > 2099) return { field: 'year', message: '請填1900至2099年之間嘅西曆出生日期。' };
   if (!['exact', 'unknown'].includes(input.precision)) return { field: 'precision', message: '請選擇已知時間或不知道。' };
   if (input.precision === 'exact' && !/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(input.time)) return { field: 'time', message: '請填有效出生時間，或選不知道。' };
   if (input.precision === 'unknown' && input.time !== '') return { field: 'time', message: '未知時辰不能同時填入時間。' };
@@ -81,7 +168,7 @@ export function attachZiwei(dialog, content, paint) {
   const action = (label, name, kind = 'primary') => `<button class="button ${kind}" type="button" data-ziwei="${name}">${label}</button>`;
   const label = '';
   const privacy = '<p class="privacy-note">只用虛構資料；資料只留本頁，不保存。</p>';
-  const rules = '<details class="ziwei-rules"><summary>排盤方式</summary><p>採用西曆及出生地當地鐘錶時間，不校正夏令時間或真太陽時。23:00起按翌日排盤；閏月初一至十五按前月，十六日起按後月。本版只展示本命盤，不作大限、流年或吉凶預言。</p></details>';
+  const rules = '<details class="ziwei-rules"><summary>排盤方式</summary><p>採用西曆及出生地當地鐘錶時間，不校正夏令時間或真太陽時。23:00起按翌日排盤；閏月初一至十五按前月，十六日起按後月。呢張係本命盤，不作大限、流年或吉凶預言。</p></details>';
 
   function text(tag, value, className) {
     const node = document.createElement(tag);
@@ -134,23 +221,26 @@ export function attachZiwei(dialog, content, paint) {
     const reading = getPalaceReading(chart, name);
     const note = document.getElementById('ziwei-palace-note');
     note.replaceChildren();
-    if (!reading) { note.append(text('p', '未能核對呢個宮嘅說明，請先查看原始命盤。')); return; }
-    note.append(text('h3', `玄 · ${reading.label}`));
-    note.append(text('p', `本盤${reading.palace}喺${reading.branch}位，${reading.stars.map(star => star.name).join('、') || '本宮無十四主星'}。`, 'reading-fact'));
-    if (!reading.stars.length) {
-      note.append(text('p', '無主星唔代表好或壞。本版未做借星同合盤，先唔替呢個宮寫星性說明。'));
-    } else {
-      for (const star of reading.stars) {
-        const section = document.createElement('section'); section.className = 'reading-star';
-        section.append(text('h4', `${star.name} · ${star.theme}`), text('p', `九爺：${star.question}`)); note.append(section);
-      }
-    }
-    const evidence = document.createElement('details'); evidence.className = 'reading-evidence';
-    evidence.append(text('summary', '解讀依據'), text('p', reading.lead), text('p', '呢啲係單星文化象徵引出嘅反思題，唔係你必然嘅性格；同宮有兩粒主星，亦唔等於簡單相加。'), text('p', `本盤依據：${reading.palace}・${reading.branch}；十四主星：${reading.stars.map(star => star.name).join('、') || '無'}。`));
-    evidence.append(text('p', '只用本宮主星作文化閱讀入口；未合看輔星、四化、三方四正、借星或流年，唔作吉凶預言。反思題為本頁提問，詞義參考：'));
-    for (const source of reading.sources) { const link = text('a', source.title); link.href = source.url; link.target = '_blank'; link.rel = 'noopener noreferrer'; evidence.append(link); }
-    note.append(evidence);
     content.querySelectorAll('[data-ziwei="palace"]').forEach(node => node.setAttribute('aria-pressed', String(node.dataset.palace === name)));
+    if (!reading) { note.append(text('p', '呢格嘅星曜資料唔齊，可以打開下面嘅十二宮，或者返去核對出生資料。')); return; }
+    const { stars, opposite } = reading;
+    const visibleStars = opposite ? opposite.stars : stars;
+    const names = visibleStars.map(s => s.name).join('、');
+    const fact = palaceTitle(reading.palace) + '喺' + reading.branch + '位，' + (opposite
+      ? '本宮無十四主星。借對宮' + palaceTitle(opposite.palace) + '（' + opposite.branch + '位）嘅' + names + '嚟參看。'
+      : '本宮主星係' + names + '。');
+    note.append(text('h3', '玄 · ' + reading.label), text('p', fact, 'reading-fact'), text('p', reading.lead));
+    for (const star of visibleStars) {
+      const section = document.createElement('section'); section.className = 'reading-star';
+      section.append(text('h4', star.name + ' · ' + star.theme), text('p', star.behaviour)); note.append(section);
+    }
+    note.append(text('p', '九爺：' + reading.question));
+    const evidence = document.createElement('details'); evidence.className = 'reading-evidence';
+    evidence.append(text('summary', '解讀依據'), text('p', opposite
+      ? '本宮冇主星，傳統紫微斗數會參考正對面嗰一宮。借嚟睇嘅星仍然喺對宮，唔會搬入本宮。'
+      : '呢度讀嘅係本宮主星。兩粒星可以有唔同取向，唔代表你每次都會兩樣一齊做。'),
+      text('p', '星曜係傳統象徵。近況啱唔啱，由你用生活經驗對照；一粒星唔足以判定發生過咩事。'));
+    note.append(evidence);
   }
   function showResult() {
     if (chart.status === 'needs-input') {
@@ -199,7 +289,7 @@ export function attachZiwei(dialog, content, paint) {
     if (!active || !['ziwei-date-form', 'ziwei-options-form'].includes(event.target.id)) return;
     event.preventDefault(); event.stopImmediatePropagation();
     if (event.target.id === 'ziwei-date-form') {
-      const error = getBirthDateError(input) || (Number(input.year) < 1900 || Number(input.year) > 2099 ? { field: 'year', message: '呢個版本只支援1900至2099年的西曆出生日期。' } : null);
+      const error = getBirthDateError(input) || (Number(input.year) < 1900 || Number(input.year) > 2099 ? { field: 'year', message: '請填1900至2099年之間嘅西曆出生日期。' } : null);
       if (error) errorMessage(error); else showOptions();
     } else {
       const error = getZiweiError(input);
