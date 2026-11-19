@@ -1,9 +1,11 @@
-import { WELCOME, getBirthDateError } from './content.js?v=0.6.2';
+import { getBirthDateError } from './content.js?v=0.6.12';
 
 const READING_TOPICS = {
-  命宮: { label: '自己', lead: '先借命宮，整理你習慣點樣行事。' },
-  官祿: { label: '工作', lead: '官祿宮係傳統觀察處事取向嘅入口，唔係職業或升遷預測。' },
-  夫妻: { label: '關係', lead: '夫妻宮係傳統觀察親密相處觀念嘅入口，唔判斷婚期或對方性格。' }
+  官祿: { label: '事業', hint: '我點做事', invite: '同一份工，有人鍾意帶頭，有人鍾意執好細節。你最享受邊一樣？我哋由官祿宮睇起。', lead: '官祿宮講做事取向，唔係升遷預測。' },
+  夫妻: { label: '愛情', hint: '我點同人相處', invite: '有句說話未諗好點開口？唔使講對方係邊個，我哋由夫妻宮睇親密關係入面嘅相處方式。', lead: '夫妻宮講親密相處，唔判斷婚期或對方性格。' },
+  田宅: { label: '家庭', hint: '我想點樣安頓', invite: '返到屋企，邊件小事最令你覺得自在？由田宅宮講起，睇吓你重視點樣嘅生活空間。', lead: '田宅宮借居住同歸屬感做起點，唔判斷家人好壞。' },
+  財帛: { label: '財運', hint: '我點用手上資源', invite: '有筆錢可以自己安排，你會留起，定用喺最在意嗰件事？由財帛宮睇你點分配資源。', lead: '財帛宮用嚟反思點樣用資源；唔預測賺蝕，亦唔係投資建議。' },
+  命宮: { label: '未來方向', hint: '我下一步想點行', invite: '眼前有幾條路，邊條值得先試一小步？我哋由命宮睇你慣常點揀，唔替你定去向。', lead: '命宮講行事取向，幫你整理下一步，唔係預言將來。' }
 };
 
 // Cultural keywords only; questions are our prompts, not claims made by the source.
@@ -93,26 +95,22 @@ export function attachZiwei(dialog, content, paint) {
     if (field) { field.setAttribute('aria-invalid', 'true'); field.focus(); }
   }
   function showEntrance() {
-    paint(`<h2 id="dialog-title">入嚟先。</h2><div class="story-options">${action('先睇吓左邊', 'look-altar')}${action('去見玄同九爺', 'greet')}</div>`, 'entrance');
+    paint(`<h2 id="dialog-title">玄</h2><p class="speech" id="desk-question">係咪有問題想問我？</p><div class="desk-replies"><button class="button primary" type="button" data-ziwei="greet" data-reply="yes">有呀，想傾吓。</button><button class="button secondary" type="button" data-ziwei="greet" data-reply="curious">你係邊位？</button></div>`, 'entrance');
   }
-  function showAltar() {
-    paint(`<h2 id="dialog-title">左邊係神主枱。</h2><p class="speech">玄同九爺喺入面等你。</p><div class="dialog-actions">${action('去見玄同九爺', 'greet')}</div>`, 'altar');
-  }
-  function showIntro() {
-    paint(`<h2 id="dialog-title">玄</h2><p class="speech">坐低先。今晚想睇啲乜？</p><div class="dialog-actions">${action('同九爺講', 'next-intro')}</div>`, 'welcome');
-  }
-  function showChoice() {
-    paint(`<h2 id="dialog-title">想睇邊方面？</h2><div class="story-options">${[['命宮','自己'],['官祿','工作'],['夫妻','關係']].map(([palace,title]) => `<button class="option" type="button" data-ziwei="focus" data-palace="${palace}">${title}</button>`).join('')}</div>`, 'interaction');
+  function showChoice(reply) {
+    const hello = reply === 'curious' ? '我係玄，呢位係九爺。' : reply === 'yes' ? '好呀。' : '';
+    paint(`<p class="desk-speaker">玄</p><h2 id="dialog-title">${hello}想由邊方面睇起？</h2><div class="desk-topics">${Object.entries(READING_TOPICS).map(([palace, topic]) => `<button class="option" type="button" data-ziwei="focus" data-palace="${palace}"><strong>${topic.label}</strong><span>${topic.hint}</span></button>`).join('')}</div>`, 'interaction');
   }
   function showResponse() {
-    paint(`<h2 id="dialog-title">九爺</h2><p class="speech">好，先由${READING_TOPICS[focusPalace].label}睇起。你幾時出世？</p><div class="dialog-actions">${action('填出生日期', 'skip')}</div><button class="dialog-back" type="button" data-ziwei="choose-focus">返去揀</button>`, 'response');
+    const topic = READING_TOPICS[focusPalace];
+    paint(`<h2 id="dialog-title">九爺 · ${topic.label}</h2><p class="speech">${topic.invite}</p><p class="desk-note">用虛構出生資料，免費睇十二宮。</p><div class="dialog-actions">${action('免費試排紫微盤', 'skip')}${action('返去揀話題', 'choose-focus', 'secondary')}</div>`, 'response');
   }
   function showReveal() {
-    paint(`<h2 id="dialog-title">命盤已排好。</h2><div class="dialog-actions">${action('睇命盤', 'view-result')}</div><button class="dialog-back" type="button" data-ziwei="edit-options">修改資料</button>`, 'reveal');
+    paint(`<h2 id="dialog-title">十二宮命盤排好喇。</h2><div class="dialog-actions">${action('睇命盤', 'view-result')}</div><button class="dialog-back" type="button" data-ziwei="edit-options">修改資料</button>`, 'reveal');
   }
   function showDate() {
     chart = reviewed = null;
-    paint(`${label}<h2 id="dialog-title">你邊日出世？</h2><p class="dialog-lead">出生日期（西曆）</p><form id="ziwei-date-form" autocomplete="off" novalidate><div class="birth-fields"><label for="ziwei-year">年<input id="ziwei-year" data-ziwei-field="year" type="text" inputmode="numeric" placeholder="YYYY" required></label><label for="ziwei-month">月<input id="ziwei-month" data-ziwei-field="month" type="text" inputmode="numeric" placeholder="MM" required></label><label for="ziwei-day">日<input id="ziwei-day" data-ziwei-field="day" type="text" inputmode="numeric" placeholder="DD" required></label></div>${privacy}<p id="ziwei-error" class="form-error" role="alert"></p><div class="dialog-actions"><button class="button primary" type="submit">填出生時間</button></div></form><button class="dialog-back" type="button" data-ziwei="back-intro">返去揀主題</button>`, 'ziwei-date');
+    paint(`${label}<h2 id="dialog-title">例子入面嘅人，邊日出世？</h2><p class="dialog-lead">填一個虛構嘅西曆出生日期。</p><form id="ziwei-date-form" autocomplete="off" novalidate><div class="birth-fields"><label for="ziwei-year">年<input id="ziwei-year" data-ziwei-field="year" type="text" inputmode="numeric" placeholder="YYYY" required></label><label for="ziwei-month">月<input id="ziwei-month" data-ziwei-field="month" type="text" inputmode="numeric" placeholder="MM" required></label><label for="ziwei-day">日<input id="ziwei-day" data-ziwei-field="day" type="text" inputmode="numeric" placeholder="DD" required></label></div>${privacy}<p id="ziwei-error" class="form-error" role="alert"></p><div class="dialog-actions"><button class="button primary" type="submit">填出生時間</button></div></form><button class="dialog-back" type="button" data-ziwei="back-intro">返去揀主題</button>`, 'ziwei-date');
     for (const key of ['year', 'month', 'day']) document.getElementById(`ziwei-${key}`).value = input[key];
   }
   function showOptions() {
@@ -124,7 +122,7 @@ export function attachZiwei(dialog, content, paint) {
   function showReview() {
     chart = null;
     reviewed = JSON.stringify(input);
-    paint(`${label}<h2 id="dialog-title">資料啱嗎？</h2><dl class="visit-review" id="ziwei-review"></dl><p id="ziwei-error" class="form-error" role="alert"></p><div class="dialog-actions">${action('啱，排盤', 'calculate')}${action('修改資料', 'edit-options', 'secondary')}</div>`, 'ziwei-review');
+    paint(`${label}<h2 id="dialog-title">資料啱嗎？</h2><dl class="visit-review" id="ziwei-review"></dl><p id="ziwei-error" class="form-error" role="alert"></p><div class="dialog-actions">${action('啱，免費排盤', 'calculate')}${action('修改資料', 'edit-options', 'secondary')}</div>`, 'ziwei-review');
     const rows = [['西曆出生日期', `${input.year}年${input.month}月${input.day}日`], ['當地出生時間', input.precision === 'exact' ? input.time : '唔確定'], ['出生地（不作校時）', input.place || '未提供'], ['排盤參數', { male: '男', female: '女', withheld: '暫不提供' }[input.gender]]];
     const list = document.getElementById('ziwei-review');
     for (const [key, value] of rows) { const row = document.createElement('div'); row.append(text('dt', key), text('dd', value)); list.append(row); }
@@ -159,7 +157,7 @@ export function attachZiwei(dialog, content, paint) {
       paint(`${label}<h2 id="dialog-title">資料未足，先唔落盤。</h2><p class="dialog-lead">出生時間同排盤參數齊咗，再返嚟排盤。</p><div class="dialog-actions">${action('返回資料', 'edit-options')}</div>${privacy}`, 'ziwei');
       return;
     }
-    paint(`${label}<h2 id="dialog-title">你嘅本命盤</h2><p id="ziwei-result-context" class="reading-fact"></p><div class="ziwei-reading" id="ziwei-reading"></div><div class="dialog-actions">${[['命宮', '自己'], ['官祿', '工作'], ['夫妻', '關係']].map(([name, title]) => `<button class="button secondary" type="button" data-ziwei="palace" data-palace="${name}" aria-pressed="false">${title}</button>`).join('')}</div><section id="ziwei-palace-note" aria-live="polite" aria-atomic="true"></section><details class="ziwei-chart-details"><summary>打開十二宮命盤</summary><div class="ziwei-scroll" tabindex="0" role="region" aria-label="十二宮命盤，窄螢幕可左右捲動"><div class="ziwei-grid" id="ziwei-grid"></div></div></details>${rules}<p class="privacy-note">只作傳統文化參考，不作健康、投資或人生決定依據。未提供流年、大限或完整論命。</p><div class="dialog-actions">${action('修改資料', 'edit-options')}</div>${privacy}`, 'ziwei-result');
+    paint(`${label}<h2 id="dialog-title">十二宮命盤</h2><p class="dialog-lead">先由「${READING_TOPICS[focusPalace].label}」睇起。想睇全盤，可以打開下面嘅十二宮。</p><p id="ziwei-result-context" class="reading-fact"></p><div class="ziwei-reading" id="ziwei-reading"></div><div class="dialog-actions palace-switches">${Object.entries(READING_TOPICS).map(([name, topic]) => `<button class="button secondary" type="button" data-ziwei="palace" data-palace="${name}" aria-pressed="false">${topic.label}</button>`).join('')}</div><section id="ziwei-palace-note" aria-live="polite" aria-atomic="true"></section><details class="ziwei-chart-details"><summary>打開十二宮命盤</summary><div class="ziwei-scroll" tabindex="0" role="region" aria-label="十二宮命盤，窄螢幕可左右捲動"><div class="ziwei-grid" id="ziwei-grid"></div></div></details>${rules}<p class="privacy-note">只作傳統文化參考，不作健康、投資或人生決定依據。未提供流年、大限或完整論命。</p><div class="dialog-actions">${action('修改資料', 'edit-options')}</div>${privacy}`, 'ziwei-result');
     document.getElementById('ziwei-result-context').textContent = `${input.year}年${input.month}月${input.day}日 ${input.time} · ${chart.fiveElementsClass}`;
     const grid = document.getElementById('ziwei-grid');
     const scroll = grid.parentElement;
@@ -210,11 +208,10 @@ export function attachZiwei(dialog, content, paint) {
   }, true);
   content.addEventListener('click', event => {
     const trigger = event.target.closest('button[data-ziwei]');
-    if (!active || !trigger) return;
+    if (!active || !trigger || content.inert) return;
     const name = trigger.dataset.ziwei;
-    if (name === 'look-altar') showAltar();
-    if (name === 'greet') showIntro();
-    if (name === 'next-intro' || name === 'choose-focus') showChoice();
+    if (name === 'greet' && ['curious', 'yes'].includes(trigger.dataset.reply)) showChoice(trigger.dataset.reply);
+    if (name === 'choose-focus') showChoice();
     if (name === 'focus' && Object.hasOwn(READING_TOPICS, trigger.dataset.palace)) { focusPalace = trigger.dataset.palace; showResponse(); }
     if (name === 'skip' || name === 'edit-date') showDate();
     if (name === 'back-intro') showChoice();
