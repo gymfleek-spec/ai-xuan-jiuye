@@ -1,7 +1,7 @@
-import { attachZiwei } from './ziwei.js?v=0.9.0';
-import { attachSceneSequence } from './motion/motion.mjs?v=0.9.0';
-import { STORIES, WELCOME, GOALS, DETAIL_STEPS, emptyDetails, getDetailsError, getBirthDateError, getStory, getChoice } from './content.js?v=0.9.0';
-import { api } from './customer.js?v=0.9.0';
+import { attachZiwei } from './ziwei.js?v=0.11.0';
+import { attachSceneSequence } from './motion/motion.mjs?v=0.11.0';
+import { STORIES, WELCOME, GOALS, DETAIL_STEPS, emptyDetails, getDetailsError, getBirthDateError, getStory, getChoice } from './content.js?v=0.11.0';
+import { api } from './customer.js?v=0.11.0';
 
 const dialog = document.getElementById('story-dialog');
 const content = document.getElementById('story-content');
