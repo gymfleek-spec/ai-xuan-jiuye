@@ -2,7 +2,7 @@
 export const WELCOME = [
   { speaker: '玄', text: '入嚟坐。今日，想同我哋傾啲乜？' },
   { speaker: '九爺', text: '唔使諗住講得好聽。講你真正在意嗰樣就得。' },
-  { speaker: '玄', text: '開始之前，先核對出生日期、時間同排盤參數。我哋按盤面逐樣睇，唔會替你決定。' }
+  { speaker: '玄', text: '開始之前，先核對出生日期、時間同性別。我哋按盤面逐樣睇，唔會替你決定。' }
 ];
 
 export const GOALS = { clarity: '釐清選擇', understand: '理解自己', action: '一個小行動' };

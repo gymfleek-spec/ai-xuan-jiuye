@@ -91,10 +91,7 @@ dialog[data-phase=ziwei] .flow-copy{max-width:660px;margin:auto}.ziwei-rules{mar
 .journey-site .preview-banner{position:static;background:transparent;border:0;color:var(--muted);font-size:11px;padding:18px 0;line-height:1.8}
 .before-enter{display:grid;grid-template-columns:1fr 1fr;gap:90px;border-top:1px solid var(--line);padding-top:65px;padding-bottom:55px}
 .before-enter h2{font:30px/1.8 var(--serif);margin:16px 0}
-.before-enter p,.story-shelf>p{color:var(--muted);font-size:14px;line-height:2}
-.story-shelf{padding-top:20px;padding-bottom:20px;border-block:1px solid var(--line)}
-.story-shelf>summary{font:20px/1.8 var(--serif);color:var(--gold);cursor:pointer;min-height:44px}
-.story-links{display:flex;flex-direction:column;align-items:flex-start;gap:8px;margin-top:15px}
+.before-enter p{color:var(--muted);font-size:14px;line-height:2}
 .journey-site dialog{width:min(1152px,calc(100% - 32px));max-height:calc(100dvh - 32px);border:1px solid #8e795244;border-radius:2px;background:#141912}
 .journey-site .dialog-grid,.journey-site dialog[data-phase] .dialog-grid{display:grid;grid-template-columns:minmax(260px,440px) minmax(0,1fr);min-height:0;position:relative}
 .journey-site .dialog-art,.journey-site dialog[data-phase] .dialog-art{position:sticky;top:0;inset:auto;align-self:start;height:min(660px,calc(100dvh - 32px));min-height:0;opacity:1;pointer-events:auto;background:#1b2019}
@@ -214,3 +211,69 @@ dialog[data-phase=ziwei] .flow-copy{max-width:660px;margin:auto}.ziwei-rules{mar
 .journey-site dialog[data-phase=response] .dialog-actions{margin-top:8px}
 @media(prefers-reduced-motion:no-preference){.journey-site dialog[data-phase=entrance][data-travel=ready] .dialog-panel{animation:desk-in .18s ease-out}@keyframes desk-in{from{opacity:0}to{opacity:1}}}
 @media(max-height:500px){.journey-site dialog:is([data-phase=entrance],[data-phase=interaction],[data-phase=response]) .dialog-panel{margin-top:var(--portrait-h)}}
+
+/* Printed story strip. The original desk and chart stills supply all six shots. */
+.journey-site dialog[data-phase=career-setup] .dialog-panel{background:#282119f5;color:#faf0da;border-color:#aa8c61}
+.journey-site .comic-end>.primary{background:#e7cb96;color:#241c13;border-color:#f3d994}
+.journey-site dialog:is([data-phase=career-comic],[data-phase=career-ritual]){width:100%;background:#171811}
+.journey-site dialog:is([data-phase=career-comic],[data-phase=career-ritual]) .dialog-grid{display:block;min-height:100dvh}
+.journey-site dialog:is([data-phase=career-comic],[data-phase=career-ritual]) .dialog-art{display:none}
+.journey-site dialog:is([data-phase=career-comic],[data-phase=career-ritual]) .dialog-panel{width:min(100%,38rem);max-width:none;max-height:none;margin:auto;padding:clamp(22px,6vw,46px) clamp(14px,4vw,34px) 32px;overflow:visible;background:#202119;border:0;border-inline:1px solid #a48d612e;border-radius:0;backdrop-filter:none;-webkit-backdrop-filter:none}
+.comic-head{border-block:1px solid #b6a076;padding:14px 0 18px;text-align:left;color:#f9ecd3}
+.comic-head p{font:600 .83rem/1.5 var(--sans);letter-spacing:.08em;color:#ddc99c}.comic-head span{color:#dba879}
+.journey-site .comic-head h2{font:600 clamp(1.65rem,6vw,2.45rem)/1.45 var(--serif);letter-spacing:.025em;color:#fff0d2;margin:.27em 0}
+.comic-caption span{float:right}
+.career-strip{list-style:none;margin:15px 0 24px;padding:0;display:grid;gap:24px}
+.comic-frame{position:relative;border:1px solid #ad946966;background:#302d22}
+.comic-art{height:clamp(132px,44vw,244px);position:relative;background:#211d17 url('assets/office-desk-chair-v12.jpg') 50% 29%/100% auto no-repeat}
+.comic-number{position:absolute;left:9px;top:9px;background:#231e19f5;color:#f3d49b;padding:3px 9px;border-left:2px solid #e8c68e;font:600 14px/1.4 Georgia,serif;letter-spacing:.08em}
+.comic-frame:nth-child(2) .comic-art{height:clamp(105px,32vw,182px);background-image:url('assets/journey-reveal.webp');background-position:50% 46%}
+.comic-frame:nth-child(3) .comic-art{background-position:9% 23%;background-size:174% auto}
+.comic-frame:nth-child(4) .comic-art{background-position:97% 32%;background-size:168% auto}
+.comic-frame:nth-child(5) .comic-art{height:clamp(104px,31vw,174px);background-image:url('assets/arrival-loop-1080.webp');background-position:28% 55%;background-size:132% auto}
+.comic-frame:nth-child(6) .comic-art{background-image:url('assets/arrival-loop-1080.webp');background-position:50% 26%}
+.comic-bubble{position:relative;margin:-14px 11px 12px 24px;padding:12px clamp(11px,3vw,20px) 16px;background:#f3e7cb;color:#2c271f;border-radius:3px 13px 13px 13px;box-shadow:0 2px 0 #15150c}
+.comic-frame:nth-child(3n+1) .comic-bubble,.comic-frame:last-child .comic-bubble{margin: -14px 24px 12px 11px;border-radius:13px 3px 13px 13px;background:#e1e6d5;color:#20271f}
+.comic-bubble::before{content:"";position:absolute;top:-10px;left:16px;border:0 solid transparent;border-width:0 12px 12px 0;border-bottom-color:#f3e7cb}
+.comic-frame:nth-child(3n+1) .comic-bubble::before,.comic-frame:last-child .comic-bubble::before{left:auto;right:16px;transform:scaleX(-1);border-bottom-color:#e1e6d5}
+.comic-bubble strong{display:block;font:700 13px/1.4 var(--sans);letter-spacing:.14em;color:#65512f}
+.comic-bubble p{margin:4px 0 0;font:500 clamp(17px,3.8vw,20px)/1.65 var(--serif);overflow-wrap:anywhere}
+.career-strip>.comic-frame:first-child .comic-art{height:clamp(86px,25vw,146px)}
+.comic-frame:first-child .comic-bubble p{font-weight:650}
+.comic-focus{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.journey-site .comic-focus .button{color:#233024;background:#f4f1de;border:1px solid #68785e;min-height:44px;padding:8px 13px;font:600 15px/1.4 var(--sans)}
+.journey-site .comic-focus .button:hover,.journey-site .comic-focus .button:focus-visible{background:#fff9df;outline:2px solid #28442f;outline-offset:2px}
+.comic-end{display:grid;gap:10px}.comic-end>.primary{justify-content:center;width:100%}
+.comic-alternates{display:flex;flex-wrap:wrap;gap:7px}.comic-alternates .button{flex:1 1 12em;justify-content:center;font-size:14px;gap:0}
+.journey-site #ziwei-palace-note:focus-visible{outline:2px solid #dcc69a;outline-offset:4px}
+
+/* The seal, stars and visitor's folio are rendered from the current chart, not a movie. */
+.journey-site dialog[data-phase=career-setup] .profile-fields{gap:10px;margin:12px 0}
+.journey-site dialog[data-phase=career-setup] .profile-fields label{color:#f9ebd2}
+.journey-site dialog[data-phase=career-setup] .profile-fields textarea{min-height:90px}
+#career-question-form .primary{background:#e4c487;border-color:#ead09c;color:#2b2114}
+#career-question-form .question-skip{background:rgba(233,210,163,.12);border-color:rgba(233,210,163,.6);color:#f4e7cc}
+#career-question-form .question-skip:hover,#career-question-form .question-skip:focus-visible{background:rgba(233,210,163,.22);border-color:#ead09c}
+#career-question-form .question-skip:focus-visible{outline:2px solid #f4dba0;outline-offset:3px}
+@media(prefers-reduced-transparency:reduce){#career-question-form .question-skip{background:#373329}}
+.journey-site dialog[data-phase=career-setup] .privacy-note,.career-summary{color:#e4cea7}
+.career-summary,.ritual-name,.ritual-birth,.comic-head h2{overflow-wrap:anywhere;unicode-bidi:plaintext}
+.career-summary{margin:.4em 0;font-size:14px;font-variant-numeric:tabular-nums}
+.journey-site dialog[data-phase=career-ritual] .dialog-panel{background:#17241e;color:#f4e7cd}
+.ritual-box{position:relative;text-align:center;padding:15px clamp(10px,4vw,30px);margin:12px 0;background:radial-gradient(ellipse at 50% 47%,#2d4234,#17271f 70%);border:1px solid #8d8364;box-shadow:inset 0 0 0 3px #192720,inset 0 0 0 4px #736b524d}
+.ritual-name{margin:0;font:600 clamp(20px,4vw,29px)/1.4 var(--serif);color:#f6e6bf}
+.ritual-birth{margin:.3em 0;color:#e6cc99;font:500 .87rem/1.5 var(--sans);font-variant-numeric:tabular-nums}
+.ritual-box svg{width:100%;height:auto;max-height:43dvh;display:block;margin:auto}
+.ritual-box[data-ink-set] :is(.dial-sweep,.dial-house,.dial-thread,.ritual-seal){animation:none}
+.ritual-fact{margin:.65em auto 0;max-width:28em;color:#f3e6cf;font:500 1rem/1.55 var(--serif)}
+.ritual-seal{display:inline-block;padding:3px 9px;border:3px double #df977f;color:#f4be9c;font:700 .85rem/1.4 var(--serif);letter-spacing:.12em;transform:rotate(-3deg)}
+@media(prefers-reduced-motion:no-preference){
+  .dial-sweep{transform-origin:160px 160px;animation:career-turn 1.7s cubic-bezier(.2,.8,.3,1) both}
+  .dial-house{animation:career-ink .5s ease-out backwards}
+  .dial-thread{stroke-dasharray:1;animation:career-trace 1.45s .75s ease-out both}
+  .ritual-seal{animation:career-imprint .38s 2.45s both}
+  @keyframes career-turn{from{transform:rotate(-42deg);opacity:.35}to{transform:rotate(0);opacity:1}}
+  @keyframes career-ink{from{opacity:.14}to{opacity:1}}
+  @keyframes career-trace{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
+  @keyframes career-imprint{from{opacity:0;transform:translateY(-6px) scale(1.25) rotate(-8deg)}to{opacity:1;transform:rotate(-3deg)}}
+}
