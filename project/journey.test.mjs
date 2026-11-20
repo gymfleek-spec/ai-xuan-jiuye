@@ -74,8 +74,9 @@ test('each topic opens its actual palace and twelve houses from a fictitious cha
   for(const [palace, label] of [['官祿','事業'],['夫妻','愛情'],['田宅','家庭'],['財帛','財運'],['命宮','未來方向']]) {
     const f=fixture();try{
       f.open(false);f.click('greet',{reply:'yes'});f.click('focus',{palace});assert.ok(f.html.includes(label));
-      if(['官祿','夫妻'].includes(palace)){f.alias();f.born();f.ask('');assert.equal(f.phase,'career-ritual');f.endRitual();assert.equal(f.phase,'career-comic');}
-      else{assert.match(f.html,/免費試排紫微盤/);f.click('skip');f.date();f.options();assert.match(f.html,/免費排盤/);f.click('calculate');}
+      assert.match(f.html,/點稱呼你好/); f.alias();f.born();f.ask('');
+      assert.equal(f.phase,'career-ritual');f.endRitual();assert.equal(f.phase,'career-comic');
+      assert.ok(f.html.includes('免費'+label+'手記'));
       f.click('view-result');
       assert.equal(f.phase,'ziwei-result');assert.ok(f.html.includes('先由「'+label+'」睇起'));
       assert.equal(f.nodes['ziwei-grid'].children.length,13);assert.ok(f.nodes['ziwei-palace-note'].textContent.includes(palace));
@@ -99,14 +100,14 @@ test('the live renderer distinguishes borrowed and native stars after switching 
 });
 test('explicit reviewed calculation creates a real chart before reveal; movie completion cannot open it', () => {
   const f = fixture(); try {
-    f.open(false); f.click('greet',{reply:'curious'}); f.click('focus',{palace:'田宅'}); f.click('skip');
+    f.open(true);
     f.date(); assert.equal(f.phase,'ziwei-options'); f.options(); assert.equal(f.phase,'ziwei-review');
     f.click('view-result'); assert.equal(f.phase,'ziwei-review');
     f.click('calculate'); assert.equal(f.phase,'reveal'); assert.match(f.html,/十二宮命盤排好喇/);
     assert.doesNotMatch(f.html,/id="ziwei-grid"/);
     f.click('view-result'); assert.equal(f.phase,'ziwei-result');
     assert.equal(f.nodes['ziwei-grid'].children.length,13);
-    assert.match(f.nodes['ziwei-palace-note'].textContent,/田宅宮/);
+    assert.match(f.nodes['ziwei-palace-note'].textContent,/命宮/);
   } finally { f.restore(); }
 });
 
@@ -390,4 +391,189 @@ test('love question only sets the conversation: clear priorities, no-contact, tw
   f.click('ask-again');f.field('question').value='草稿：想復合';f.submit('career-question-form',{value:'skip-question'});f.endRitual();assert.deepEqual(f.lines(),blank);
   f.close();f.start('官祿');assert.equal(f.field('alias').value,'');f.alias();assert.equal(f.field('date').value,'');f.born();f.ask('點問升職？');f.endRitual();assert.match(f.lines()[0],/下一級/);assert.match(f.html,/對返官祿宮/);
  }finally{f.restore();}
+});
+
+test('family keeps the same practical answer while the dial, six panels and grid follow the actual home palace',()=>{
+ const f=fixture();try {
+  const q='屋企啲家務點分，先唔使次次都係我提？';
+  f.start('田宅');assert.match(f.html,/家庭手記/);f.alias('阿桐');f.click('example');f.submit('career-birth-form');
+  assert.match(f.html,/屋企|家中/);assert.match(f.html,/略過提問/);
+  let prior;
+  for(const [time,branch,fact] of [['09:30','午',/田宅宮喺午位，本宮無十四主星。借對宮子女宮（子位）嘅天同、太陰/],['11:30','巳',/田宅宮喺巳位，本宮主星係紫微、七殺/]]){
+   if(prior){f.click('career-birth');f.born('1995-08-15',time);assert.equal(f.field('question').value,q);}
+   f.ask(q);assert.match(f.nodes['ritual-name'].textContent,/阿桐嘅家庭盤/);assert.match(f.nodes['ritual-fact'].textContent,fact);
+   const dial=f.nodes['career-dial'].children;
+   assert.equal(dial.find(n=>n.attrs.fill==='#ffbe92').textContent,'田宅');assert.equal(dial.at(-1).textContent,branch+' 位');
+   f.endRitual();const lines=f.lines();assert.equal(lines.length,6);assert.match(lines[0],/洗碗|收碗/);assert.match(lines[1],fact);assert.match(lines[5],/試吓.*「/);assert.match(f.html,/對返田宅宮/);
+   if(prior){assert.equal(lines[0],prior[0]);assert.equal(lines[5],prior[5]);assert.notEqual(lines[2],prior[2]);}
+   f.click('view-result');assert.match(f.nodes['ziwei-palace-note'].textContent,fact);
+   const cell=name=>f.nodes['ziwei-grid'].children.find(n=>n.children[0]?.textContent.split(' · ')[0]===name).textContent;
+   if(!prior){assert.match(cell('田宅'),/本宮無十四主星/);assert.doesNotMatch(cell('田宅'),/天同|太陰/);assert.match(cell('子女'),/天同.*太陰/);}
+   else assert.match(cell('田宅'),/紫微.*七殺/);
+   f.click('read-comic');assert.deepEqual(f.lines(),lines);prior=lines;
+  }
+ }finally{f.restore();}
+});
+
+test('family answers the stated concern; changing a focus never changes the chart',()=>{
+ const f=fixture(true);try {
+  f.start('田宅');f.alias();f.born();
+  const read=q=>{f.ask(q);f.endRitual();return f.lines();};
+  const both=read('想分家務，又想屋企人入房前敲門。');
+  assert.match(both[0],/想先傾邊一件/);
+  const buttons=f.nodes['career-strip'].children[0].children[1].children.at(-1).children;
+  assert.deepEqual(buttons.map(b=>b.attrs['data-topic']).sort(),['家務分擔','私人空間'].sort());
+  for(const [topic,wanted] of [['私人空間',/敲門/],['家務分擔',/洗碗|收碗/]]){
+   f.click('choose-career-topic',{topic});assert.match(f.lines()[0],wanted);assert.equal(f.lines()[1],both[1]);assert.equal(f.timers.size,0);
+   f.click('reset-career-topic');
+  }
+  for(const [q,wanted] of [
+   ['唔係想分家務，只係想屋企人入房前敲門。',/敲門/],['想講家務同私人空間，想先傾家務。',/洗碗|收碗/],
+   ['我唔想再一個人做晒家務。',/洗碗|收碗/],['唔想再提佢洗碗。',/洗碗|收碗/],
+   ['屋企人成日鬧交，點開口？',/等大家|傾一件/],['我自己住，想收拾好屋企。',/落鎖匙|放鎖匙|一個位/],
+   ['唔想講家務。',/唔想替你估/],['明年會唔會買到樓？',/唔想替你估/],['今朝條圍巾係藍色。',/換個講法/]
+  ]){f.click('ask-again');const l=read(q);assert.match(l[0],wanted,q);assert.equal(l[1],both[1]);}
+  f.click('ask-again');const solo=read('我一個人住，啲碗成日堆住，點安排洗碗好？');assert.match(solo[0],/自己|食完/);assert.doesNotMatch(solo[0]+solo[5],/揀一件|你提咗幾件事|約好邊個|我煮飯，你/);
+  f.click('ask-again');const talking=read('我唔想再鬧交，只係想知點開口傾家務。');assert.match(talking[0],/洗碗|收碗/);
+  f.click('ask-again');const risk=read('屋企人恐嚇我，唔畀我走，我仲應唔應該同佢傾家務？');
+  assert.match(risk[0],/安全/);assert.doesNotMatch(risk.join(''),/試問|敲門先|傾清楚分工|約好邊個|今晚可以講一個菜名/);
+  f.click('ask-again');const blank=read('');assert.match(blank[0],/田宅宮/);
+  f.click('ask-again');f.field('question').value='冇提交嘅家庭草稿';f.submit('career-question-form',{value:'skip-question'});f.endRitual();
+  assert.deepEqual(f.lines(),blank);assert.doesNotMatch(blank.join(''),/冇提交|你屋企一定|你嘅子女|你嘅小朋友|你同父母住/);
+  f.close();f.start('夫妻');assert.equal(f.field('alias').value,'');f.alias();assert.equal(f.field('date').value,'');f.born();assert.equal(f.field('question').value,'');
+ }finally{f.restore();}
+});
+
+test('housework does not invent a housemate when the Cantonese subject is omitted',()=>{
+ const f=fixture(true);try{
+  f.start('田宅');f.alias();f.born();
+  const advice=q=>{f.ask(q);f.endRitual();return f.lines();};
+  const noHousemate=/邊個負責|我煮飯，你|屋企人問食乜|畀另一個人話事|一齊執|大家忙/;
+  let same, firstFact;
+  for(const q of [
+   '自己住，啲家務點安排？例如洗碗。','我自己住，啲家務點安排？例如洗碗。',
+   '我同屋企人分開住，屋企啲家務點分配？例如洗碗。','我冇同家人住埋一齊，洗碗點安排？',
+   '一個人住，屋企啲家務同洗碗點安排？','自己一個住，屋企啲家務點分？',
+   '我自己一個人住，啲家務點分？','獨居，食完飯成日唔想洗碗，點算？',
+   '自己住，食完飯成日唔想洗碗，點算？','以前同室友住，而家自己住，家務點分？',
+   '洗碗點安排？'
+  ]){
+   const lines=advice(q);assert.equal(lines.length,6);assert.match(lines[0],/自己.*碗|碗.*自己/,q);assert.doesNotMatch(lines.join(''),noHousemate,q);
+   if(same)assert.deepEqual(lines,same,q);else same=lines;
+   firstFact=lines[1];f.click('view-result');const note=f.nodes['ziwei-palace-note'].textContent;
+   assert.match(note,/天同、太陰/);assert.doesNotMatch(note,noHousemate,q);f.click('read-comic');f.click('ask-again');
+  }
+  for(const q of ['同室友住，洗碗點分工？','唔係自己住，而家同阿妹一齊住，想分家務。','唔係一個人住，洗碗點分工？',
+   '我自己一個做晒家務，想同家人輪流洗碗。','以前自己住，而家同室友住，想分家務。','我媽自己住，我同室友想分家務。']){
+   const lines=advice(q);assert.match(lines[0],/邊個負責/,q);assert.match(lines[5],/我煮飯，你/,q);assert.equal(lines[1],firstFact);f.click('ask-again');
+  }
+  assert.match(advice('自己住，唔想傾洗碗，只係想執屋。')[0],/一個位/);
+  f.click('ask-again');assert.match(advice('自己住，唔想講洗碗。')[0],/唔想替你估/);
+  f.click('career-birth');f.born('1995-08-15','11:30');const native=advice('自己一個住，洗碗點安排？');
+  assert.equal(native[0],same[0]);assert.equal(native[5],same[5]);assert.match(native[1],/紫微、七殺/);assert.notEqual(native[2],same[2]);assert.doesNotMatch(native.join(''),noHousemate);
+  f.click('view-result');assert.doesNotMatch(f.nodes['ziwei-palace-note'].textContent,noHousemate);
+ }finally{f.restore();}
+});
+
+test('words for allocating chores are not evidence of a second person',()=>{
+ const f=fixture(true);try{
+  f.start('田宅');f.alias();f.born();
+  const noRoommate=/邊個負責|我煮飯，你|屋企人問食乜|一齊執|畀另一個人話事|就住其他人/;
+  let previous;
+  for(const [time,stars] of [['09:30',/天同、太陰/],['11:30',/紫微、七殺/]]){
+   if(previous){f.click('career-birth');f.born('1995-08-15',time);}
+   let reference;
+   for(const home of ['屋企得我一個人住，','依家間屋淨係得我，','以前同室友住，而家自己搬咗出嚟，','得我同隻貓住，','我唔同室友住，','']) {
+    for(const verb of ['分配','安排','分工','分擔']){
+     const q=home+'啲家務點'+verb+'？例如洗碗。';
+     f.ask(q);f.endRitual();const lines=f.lines();
+     assert.match(lines[0],/自己.*碗|碗.*自己/,q);assert.equal(lines.length,6);
+     assert.doesNotMatch(lines.join(''),noRoommate,q);assert.match(lines[1],stars,q);
+     if(reference)assert.deepEqual(lines,reference,q);else reference=lines;
+     f.click('view-result');const note=f.nodes['ziwei-palace-note'].textContent;
+     assert.match(note,stars);assert.doesNotMatch(note,noRoommate,q);f.click('read-comic');f.click('ask-again');
+    }
+   }
+   for(const q of ['同室友住，啲家務點分配？例如洗碗。','屋企唔係得我一個人住，啲家務點安排？',
+    '我同太太想分擔家務，啲碗可以點安排？','室友同我一齊住，家務點安排？例如洗碗。','屋企啲家務點分，先唔使次次都係我提？',
+    '以前自己住，而家要同細佬輪流洗碗，家務點分配？','同家人住，但啲家務一個人做晒，洗碗點分？']){
+    f.ask(q);f.endRitual();const shared=f.lines();assert.match(shared[0],/邊個負責/,q);assert.match(shared[5],/我煮飯，你/,q);assert.equal(shared[1],reference[1],q);f.click('ask-again');
+   }
+   if(previous){assert.equal(reference[0],previous[0]);assert.equal(reference[5],previous[5]);assert.notEqual(reference[2],previous[2]);}
+   previous=reference;
+  }
+ }finally{f.restore();}
+});
+
+
+test('three notebooks: each pair of charts keeps the practical answer, reads its own palace and leaves borrowed stars in the donor house',()=>{
+ const cases=[
+  ['田宅','家庭','我同屋企人分開住，想約時間探屋企人，點開口？',/幾時方便|邊日方便/,
+   [['09:30','午','子女','子',['天同','太陰']],['19:30','丑',null,null,['武曲','貪狼']]]],
+  ['財帛','財運','我想儲錢去旅行，點開始？',/旅行|想儲嚟做乜/,
+   [['09:30','亥',null,null,['天府']],['19:30','午','福德','子',['天同','太陰']]]],
+  ['命宮','未來方向','轉工定進修，兩條路點揀？',/兩條路|兩個選擇/,
+   [['09:30','卯',null,null,['天相']],['19:30','戌','遷移','辰',['天機','天梁']]]]
+ ];
+ for(const [palace,label,q,answer,charts] of cases){const f=fixture(true);try{
+   f.start(palace); f.alias('阿禾'); let previous;
+   for(const [time,branch,other,ob,stars] of charts){
+     if(previous)f.click('career-birth'); f.born('1995-08-15',time); if(previous)assert.equal(f.field('question').value,q);
+     f.ask(q); const fact=f.nodes['ritual-fact'].textContent;
+     const title=palace==='命宮'?palace:palace+'宮';
+     assert.equal(fact,title+'喺'+branch+'位，'+(other?'本宮無十四主星。借對宮'+other+'宮（'+ob+'位）嘅'+stars.join('、')+'嚟參看。':'本宮主星係'+stars.join('、')+'。'));
+     assert.equal(f.nodes['career-dial'].children.at(-2).textContent,palace); f.endRitual();
+     const lines=f.lines();assert.equal(lines.length,6);assert.match(lines[0],answer,q);
+     assert.equal(f.nodes['dialog-title'].textContent,'阿禾嘅'+label+'手記');assert.ok(lines[1].includes(fact));
+     assert.ok(lines[2].includes(stars[0]));assert.ok(f.html.includes('對返'+title));assert.doesNotMatch(f.html,/命宮宮/);
+     if(previous){assert.equal(lines[0],previous[0]);assert.equal(lines[5],previous[5]);assert.notEqual(lines[2],previous[2]);}previous=lines;
+     f.click('view-result');const note=f.nodes['ziwei-palace-note'].textContent;
+     assert.ok(note.includes(fact));const cell=name=>f.nodes['ziwei-grid'].children.find(n=>n.children[0]?.textContent.split(' · ')[0]===name);
+     const native=n=>cell(n).children.filter(x=>x.className==='ziwei-major').map(x=>x.textContent.split(' · ')[0]);assert.deepEqual(native(palace),other?[]:stars);
+     if(other)assert.deepEqual(native(other),stars);f.click('read-comic');assert.deepEqual(f.lines(),lines);
+   }
+ }finally{ f.restore(); }}
+});
+
+test('family, money and direction: priorities, optional questions and changing focus are local to the current notebook',()=>{
+ const scenarios=[
+  ['田宅','想約阿媽見面，亦想屋企人入房前敲門。',[['約家人見面',/邊日方便/],['私人空間',/敲門/]],'唔係想約阿爸食飯，淨係想屋企人入房前敲門。','田宅宮'],
+  ['田宅','幾時探屋企人好？又想屋企人入房前敲門。',[['約家人見面',/幾時方便|邊日方便/],['私人空間',/敲門/]],'唔係想約食飯，只係想請人入我房前敲門。','田宅宮'],
+  ['財帛','我想儲錢，又想學點記帳。',[['儲錢目標',/想儲嚟做乜/],['睇清開支',/三筆|一筆開支/]],'唔係想儲錢，只係想知點記帳。','財帛宮'],
+  ['命宮','我一方面想比較兩條路，又想知點踏出第一步。',[['比較兩條路',/兩條路/],['試行第一步',/十分鐘|半個鐘/]],'唔係想揀方向，只係想知點踏出第一步。','命宮']
+ ];
+ for(const [palace,multi,options,priority,name] of scenarios){const f=fixture(true);try{
+  f.start(palace);f.alias();f.born();
+  const read=q=>{f.ask(q);f.endRitual();return f.lines();}, initial=read(multi);
+  assert.match(initial[0],/想先傾邊一件/,multi);
+  const choices=()=>f.nodes['career-strip'].children[0].children[1].children.at(-1).children.map(x=>x.attrs['data-topic']);
+  assert.deepEqual(new Set(choices()),new Set(options.map(x=>x[0])));
+  for(const [key,expected] of options){f.click('choose-career-topic',{topic:key});assert.match(f.lines()[0],expected);assert.equal(f.lines()[1],initial[1]);assert.equal(f.timers.size,0);f.click('reset-career-topic');}
+  f.click('ask-again');assert.match(read(priority)[0],options[1][1]);f.click('ask-again');assert.match(read('虛構句：條圍巾係藍色。')[0],/換個講法/);
+  f.click('ask-again');const blank=read('');assert.ok(blank[0].includes(name));
+  f.click('ask-again');f.field('question').value=multi;f.submit('career-question-form',{value:'skip-question'});f.endRitual();assert.deepEqual(f.lines(),blank);
+  f.close();f.start(palace);assert.equal(f.field('alias').value,'');f.alias();assert.equal(f.field('date').value,'');f.born();assert.equal(f.field('question').value,'');
+ }finally{f.restore();}}
+});
+
+test('money and direction give reflection, not betting, investment tips or a promised outcome',()=>{
+ const examples=[
+  ['財帛','想問今年會唔會發達？',/唔會話到|唔能夠|睇唔到/],
+  ['財帛','我應唔應該買股票？',/唔會.*買賣|唔.*揀股票/],
+  ['財帛','今日邊隻股票會升，買邊隻好？',/唔會.*買賣|唔.*揀股票/],
+  ['財帛','今期畀幾個六合彩號碼我。',/唔會.*號碼|唔.*估.*號碼/],
+  ['財帛','我唔想再超支，點記帳好？',/三筆|一筆開支/],
+  ['財帛','唔想問股票，只想儲錢。',/想儲嚟做乜/],
+  ['財帛','我想揀下買邊隻茶杯，但唔知抵唔抵。',/換個講法|購物籃|聽朝/],
+  ['財帛','見到減價就忍唔住買，點算？',/購物籃|聽朝/],
+  ['財帛','同朋友食飯，點夾錢好？',/夾錢|落單/],
+  ['命宮','我將來一定會成功嗎？',/唔會話到|睇唔到/],
+  ['命宮','我好迷惘，唔知自己想做乜。',/上星期|過去一星期/],
+  ['命宮','我唔想再拖延，但唔知第一步點行。',/十分鐘|半個鐘/],
+  ['命宮','讀書定做嘢，應該點揀？',/兩條路/]
+ ];
+ const f=fixture(true);try{for(const [palace,q,expected] of examples){
+  f.start(palace);f.alias();f.born();f.ask(q);f.endRitual();assert.match(f.lines()[0],expected,q);
+  assert.doesNotMatch(f.lines().join(''),/你一定會|包賺|買入[：:]|保證你|你注定/);f.close();
+ }}finally{f.restore();}
 });

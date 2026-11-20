@@ -1,11 +1,11 @@
-import { getBirthDateError } from './content.js?v=0.9.0';
+import { getBirthDateError } from './content.js?v=0.11.0';
 
 const READING_TOPICS = {
-  官祿: { label: '事業', hint: '我點做事', invite: '同一份工，有人鍾意帶頭，有人鍾意執好細節。你最享受邊一樣？我哋由官祿宮睇起。', lead: '諗返最近一次有人臨時搵你幫手，你最先答咗邊句？', question: '下次有人話「好趕」，你想即刻接手，定先問邊樣可以遲啲交？' },
-  夫妻: { label: '愛情', hint: '我點同人相處', invite: '有句說話未諗好點開口？唔使講對方係邊個，我哋由夫妻宮睇親密關係入面嘅相處方式。', lead: '試諗一幕：如果你想有人聽你講完，會點開口？有冇伴侶都可以睇。', question: '如果可以補返一句，邊句最接近你嗰刻真正想講嘅嘢？' },
-  田宅: { label: '家庭', hint: '我想點樣安頓', invite: '返到屋企，邊件小事最令你覺得自在？由田宅宮講起，睇吓你重視點樣嘅生活空間。', lead: '由返到屋企嗰一刻諗起：邊件小事最令你放鬆，邊件你成日就住其他人？', question: '今晚返到屋企，有邊件小事你想照自己意思做一次？' },
-  財帛: { label: '財運', hint: '我點用手上資源', invite: '有筆錢可以自己安排，你會留起，定用喺最在意嗰件事？由財帛宮睇你點分配資源。', lead: '試拎最近一筆你有猶豫過嘅開支做例，諗返落決定前你最在意乜。', question: '下次遇到同樣一筆數，你想保留咩預算，又想留幾多畀自己自由用？' },
-  命宮: { label: '未來方向', hint: '我下一步想點行', invite: '眼前有幾條路，邊條值得先試一小步？我哋由命宮睇你慣常點揀，唔替你定去向。', lead: '諗一件你最近未揀定嘅事，對照下自己通常點樣踏出第一步。', question: '如果只試一個星期，邊一小步可以幫你睇清楚仲想唔想繼續？' }
+  官祿: { label: '事業', hint: '我點做事', lead: '諗返最近一次有人臨時搵你幫手，你最先答咗邊句？', question: '下次有人話「好趕」，你想即刻接手，定先問邊樣可以遲啲交？' },
+  夫妻: { label: '愛情', hint: '我點同人相處', lead: '試諗一幕：如果你想有人聽你講完，會點開口？有冇伴侶都可以睇。', question: '如果可以補返一句，邊句最接近你嗰刻真正想講嘅嘢？' },
+  田宅: { label: '家庭', hint: '我想點樣安頓', lead: '由返到屋企嗰一刻諗起：有邊件小事，照自己意思做會自在啲？', question: '今晚返到屋企，有邊件小事你想照自己意思做一次？' },
+  財帛: { label: '財運', hint: '我點用手上資源', lead: '試拎最近一筆你有猶豫過嘅開支做例，諗返落決定前你最在意乜。', question: '下次遇到同樣一筆數，你想保留咩預算，又想留幾多畀自己自由用？' },
+  命宮: { label: '未來方向', hint: '我下一步想點行', lead: '諗一件你最近未揀定嘅事，對照下自己通常點樣踏出第一步。', question: '如果只試一個星期，邊一小步可以幫你睇清楚仲想唔想繼續？' }
 };
 
 // A scene is an invitation to compare with lived experience, not a finding about the visitor.
@@ -208,19 +208,176 @@ const lovePrompts = {
     '如果有一段未發嘅訊息，可以放入自己嘅便條，唔撳傳送。',
     '停低聯絡係尊重對方講過嘅界線。張盤唔能夠將一句「唔想」變成答應。']
 };
+const familyPrompts = {
+  '約家人見面': [/探(?:吓|下)?(?:望|親|屋企人|家人|爸媽|父母|媽咪|爹哋|阿[爸媽嫲爺公婆哥姐]|老[豆母爸媽])|返(?:去|屋企)食飯|(?:約(?:埋)?|同)(?:我嘅?)?(?:屋企人|家人|父母|爸媽|媽咪|爹哋|家[姐兄]|細[佬妹]|阿[爸媽嫲爺公婆哥姐]|老[豆母爸媽]).{0,6}(?:見|聚|食(?:餐)?飯|飲茶)|約食飯/,
+    '想見屋企人，可以先問邊日方便，唔使一次傾埋以後要幾耐見一次。',
+    '今次你最想要嘅係坐低食餐飯，定只係見一見、傾十分鐘？',
+    '如果你想約，可以試一句：「星期日下晝我得閒，想過嚟坐一陣。你嗰日方唔方便？」對方唔方便就另約。',
+    '見一次唔等於應承咗以後每星期都返去。你同對方都可以揀時間。'],
+  '尊重對方意願': lovePrompts['尊重對方意願'],
+  '家務分擔': [/家務|洗碗|洗衫|晾衫|倒垃圾|收枱|分擔家事|輪流(?:煮飯|買餸)|邊個(?:煮飯|買餸)/,
+    '先揀一樣，例如洗碗。今晚邊個負責，就由收碗跟到洗好，唔使另一個人次次開聲提。',
+    '如果洗碗有人做，但碗碟成日留喺枱面，要傾嘅可能只係邊一步先算做完。',
+    '下餐飯可以試問：「我煮飯，你由收碗跟到洗好，咁分啱唔啱？」聽埋對方點答先定。',
+    '公平唔一定係一人一半。試一餐，先知呢個分法啱唔啱大家。'],
+  '私人空間': [/私人空間|個人空間|自己.{0,3}空間|私隱|界線|界限|敲門|入我房|入房|翻我啲嘢|攞我啲嘢|獨處|想靜|靜一陣/,
+    '將「畀啲空間我」講成一個做法。譬如想有人入房前問一聲，可以講：「麻煩敲門，等我應咗先入。」',
+    '你想留低嘅，係一個唔畀人郁嘅櫃桶，定係返到屋企可以靜十分鐘？',
+    '揀一件你最想保留嘅小事，補完一句：「下次＿＿之前，可唔可以先問我？」',
+    '想有私人空間，唔等於要疏遠人。講清楚要留邊樣，比叫大家自己估容易。'],
+  '傾返一件事': [/鬧交|嗌交|嘈交|吵架|爭執|意見唔同|分歧|拗撬|冷戰|道歉|溝通|點同(?:屋企人|家人)講/,
+    '等大家都願意傾，先講返一件事：「頭先食飯嗰陣，我有半句未講完。」唔使一開口就分邊個啱。',
+    '嗰次你最想人聽明嘅係邊半句？可以先喺心入面講一次。',
+    '試寫低你自己把聲會講嘅一句：「頭先講到＿＿，我其實係想＿＿。」講唔講出口，由你決定。',
+    '如果而家唔係傾嘅時候，可以遲啲再講。唔需要一餐飯解決晒。'],
+  '安頓日常': [/收納|佈置|擺位|執屋|收拾|收執|新居|搬入/,
+    '由一個位開始就夠。返到屋企第一樣要放低嘅係鎖匙、袋，定係外套？搵個最順手嘅位畀佢。',
+    '如果每日都要周圍搵同一樣嘢，邊個位置你唔使刻意記都會行過？',
+    '揀一件自己嘅物件，試放喺新位置一晚。聽日順手就留，唔順就搬返。',
+    '屋企好唔好用，唔使同人哋間屋比。對你方便嘅擺法就值得留。'],
+  '先顧安全': [/恐嚇|威脅|跟蹤|家暴|打(?:咗|過|傷)?我|郁手打|動手打|唔[畀俾]我走|唔准我走|鎖住我/,
+    '如果你覺得唔安全，唔需要同對方對質。可以先去安全嘅地方；有即時危險，就聯絡當地緊急服務。',
+    '有冇一個你信得過、而家又方便聯絡嘅人？唔使喺呢度留下對方資料。',
+    '如果安全方便，可以同信得過嘅人講：「我而家需要有人陪，可唔可以幫我？」',
+    '呢種情況唔靠命盤判斷，亦唔係靠你一個人講得好啲就要解決。']
+};
+const soloChores = [null,
+  '食完飯，洗碗可以由自己用嗰隻開始。洗好就去抖，唔使一口氣執晒成個廚房。',
+  '最容易卡住嘅係未開始，定係開始咗就覺得要一次做晒？',
+  '今日揀一樣做得完嘅家務。做完就可以停，唔使順便掃埋地。',
+  '今日做到幾多，睇你有幾多時間同氣力；做少一樣都得。'];
+const ownChoreScenes = {
+  紫微:'想聽朝一起身就沖到茶，可以先洗定隻杯。抹櫃門遲一日都唔礙事。',
+  天機:'如果洗隻碗都要周圍搵海綿，試一晚將海綿放喺鋅盆邊，睇吓順唔順手。',
+  太陽:'今晚洗定聽朝食早餐嗰隻碗，當係幫聽朝啱啱瞓醒嘅自己一把。',
+  武曲:'水喉一開，先洗手上嗰隻碗。其餘有幾多，放低隻碗先再望。',
+  天同:'如果飯後最想坐低飲杯茶，不如先洗隻茶杯。杯茶沖好，就留返嗰幾分鐘畀自己。',
+  廉貞:'今日條線可以好簡單：洗完碗就算收工，雪櫃留返第二日抹。',
+  天府:'如果聽朝要帶飯，今晚先洗好飯盒。其他手尾可以按氣力慢慢執。',
+  太陰:'收好一隻碗之後，留意吓：係見到枱面空返一格，定係鋅盆冇積水，令你舒服啲？',
+  貪狼:'如果洗碗覺得悶，可以試住播首鍾意嘅歌。歌完嗰刻，睇吓想繼續定收工。',
+  巨門:'成盆碗最難落手嘅係邊度？如果係黐實嘅飯粒，下一餐食完先浸嗰隻碗就夠。',
+  天相:'可以將手尾分成兩份：聽朝要用嘅今晚洗，唔趕用嘅另外安排。點分由你定。',
+  天梁:'今日攰嘅話，照顧自己都算一件正經事。洗好要用嗰隻杯，就可以坐低飲啖水。',
+  七殺:'成個廚房咁多嘢，今晚只揀「洗碗」一樣。抹枱做唔做，唔使一齊決定。',
+  破軍:'如果次次收碗都要搬兩次，試將碗架移近鋅盆。用一餐就知順唔順手。'
+};
+
+function selfManagedChores(question) {
+  // 分配 can mean splitting one's own time. Switch to shared advice only on evidence of another participant.
+  let shared = false;
+  const clauses = question.normalize('NFKC').replace(/[ \t]/g, '').split(/[,。；;:！？!?、\n]|但[係是]?|不過|(?=而家|依家|家陣|目前|現時|現在)/);
+  for (const clause of clauses) {
+    // Living apart from one relative says nothing about who shares today's chores.
+    const now = clause.replace(/(?:同|跟|與)(?:屋企人|家人|父母|爸媽|阿[爸媽]|兄弟姊妹)(?:係|一直)?(?:分開住|分居|唔(?:係)?住埋一齊)/g, '')
+      .replace(/^(?:喺屋企|屋企|家中|而家|依家|家陣|目前|現時|現在|其實|一直|本身|我)+/, '');
+    if (!now || /^(?:以前|以往|從前|之前|曾經|當年|舊時)/.test(now)) continue;
+    const alone = /^(唔係|不是|唔再|不再|唔止|唔只|不只)?(?:淨係|只係|只有|只得|得返|剩返|得|我)*(?:獨居|(?:獨自|單獨|自己(?:一個(?:人)?)?|一個(?:人)?)住)/.exec(now);
+    if (alone) { shared = Boolean(alone[1]); continue; }
+    if (/^(?:冇|無|沒有)(?:室友|同住者)|(?:冇|無|唔|不|唔再|不再|唔想|不想|沒有)同.{0,8}(?:住|分工)/.test(now)) { shared = false; continue; }
+    if (/(?:同|跟|與)(?:我嘅|我個|我)?(?:人|佢|對方|室友|舍友|同屋|家人|屋企人|伴侶|另一半|[男女]?朋友|父母|爸媽|仔女|兄弟|姊妹|老[公婆豆母]|太太|先生|細[佬妹]|家[姐兄]|阿[\u3400-\u9fff])/.test(now) ||
+        /(?:室友|同屋|屋企人|家人|伴侶|另一半|對方|佢)(?:同我|跟我|都|又|成日|肯|唔肯|負責|幫手|輪流|一齊|分工)|我哋|我們|兩個人(?:住|一齊)|一人一半|一人一樣|邊個(?:負責|洗碗|煮飯|買餸)|(?:提|催)(?:佢|對方)|(?:次次|成日)(?:都)?(?:係|要|由)?我(?:提|催)/.test(clause)) shared = true;
+  }
+  return !shared;
+}
+
+const visitScenes = {
+  紫微:'有幾個日子可揀，可以先提自己最方便嗰日，再聽對方點講。', 天機:'如果兩邊個時間成日撞唔啱，可以問見一陣定通個電話邊樣方便啲。',
+  太陽:'想順便帶啲嘢過去，可以先問對方想唔想要，唔使估。', 武曲:'想將「下次見」講實，可以提一日同一個時段，唔使即刻訂位。',
+  天同:'如果一餐飯太趕，可以問對方想唔想改飲杯茶，坐一陣就得。', 廉貞:'如果今次要早走，約嗰陣講明幾點走，大家容易安排。',
+  天府:'約日子時留少少空檔，試吓邊個時段見完唔使趕住走。', 太陰:'問句「朝早定下晝舒服啲？」可能比一口氣列晒全星期易答。',
+  貪狼:'想試新地方，可以先問對方想出去行吓，定喺熟悉嘅地方傾。', 巨門:'「過嚟一陣」可以係十分鐘，亦可以係一餐飯。不妨講明自己有幾多時間。',
+  天相:'夾時間記得計埋自己來回嗰程，唔只係望大家幾時得閒。', 天梁:'去探人唔一定要接晒所有安排。今次有冇一件事你其實想坐低聽？',
+  七殺:'有一日得閒可以直接提出；對方未肯定，就留返畀對方覆。', 破軍:'飯敘成日夾唔到，可以試一次短啲嘅見面，唔一定照舊做。'
+};
+
+const moneyPrompts = {
+  '儲錢目標': [/儲(?:錢|蓄|到|唔到|起|返|旅費|首期|一筆)|存(?:錢|款)|留(?:筆|一筆)錢|儲.{0,5}(?:旅行|應急|目標)/,
+    '先寫低想儲嚟做乜，同大概幾時要用。譬如想去旅行，可以先查一程車費，唔使今日就定每月儲幾多。',
+    '假如有個月要用多啲錢，你情願將日子推遲，定改細個目標？',
+    '用紙寫一句：「我想為＿＿留起一筆錢。」再圈低一項你想先查清楚嘅使費，唔使喺呢度填銀碼。',
+    '有個想法同即刻有錢剩係兩回事。今次只搞清楚想留畀邊件事，都算行咗一步。'],
+  '睇清開支': [/記[帳賬數]|使費|開支|支出|收支|使咗去邊|錢去咗邊|用咗去邊|超支|超出預算|唔夠使|唔夠用|預算|月光|月尾(?:冇|無)錢/,
+    '唔使由月頭補起。試記低最近三筆使費，望吓邊筆係原本預咗、邊筆係臨時先要用。',
+    '有冇一筆當時好趕，過後先想起其實可以遲啲決定？冇都唔出奇。',
+    '下次用完錢，先喺自己張紙記一筆：「用喺＿＿；原本有冇預到？」唔使交單據。',
+    '記低係想睇清楚，唔係要將每一筆都分成啱同錯。'],
+  '買之前停一停': [/衝動(?:消費|購物|買)|忍唔住買|亂買|手痕買|見到減價|限時優惠|購物籃|抵唔抵|買唔買|應唔應該買/,
+    '如果唔係急用，可以先擺喺購物籃，聽朝再問自己：「冇咗個優惠，我仲想要佢嚟做乜？」',
+    '你想買嘅係嗰樣嘢本身，定係見到個倒數先突然想要？',
+    '今日留低貨品名就得，唔使結帳。聽朝講得出會幾時用，再決定。',
+    '停一晚唔等於唔准買，係畀自己有得揀。'],
+  '夾錢點分': [/夾(?:錢|份)|攤分|分[帳賬]|平分(?:飯錢|餐費)|AA制/i,
+    '夾錢最好買之前就問：「今次想各自畀返自己嗰份，定一齊平分？」未講掂，唔急住代人落單。',
+    '有冇一項係有人想要、有人未必會用？可以將嗰項分開傾。',
+    '下次落單前試問一句：「我打算叫呢樣，各自畀返自己嗰份，好唔好？」',
+    '講返點分先，唔需要估其他人負擔到幾多。'],
+  '投資同買賣': [/股票|邊隻股|買咩股|買股|炒股|基金|虛擬貨幣|加密貨幣|比特幣|買入|沽出|投資|入市|放盤價/,
+    '我唔會用張盤幫你揀股票，亦唔會話你應該幾時買賣。星位唔能夠話你知價格會點行。',
+    '你最想搞清楚嘅係自己有咩疑問，定係有人催你即刻決定？',
+    '先寫低一條未有答案嘅問題。要了解真實產品，就查正式產品資料；唔使跟住呢張盤做交易。',
+    '財帛宮呢度講點樣作取捨，唔係投資建議。'],
+  '財運預測': [/發達|發財|橫財|偏財|暴富|會唔會有錢|幾時有錢|幾時有財|今年(?:嘅)?財運|財運(?:點|好|如何)|賺(?:大錢|幾多)/,
+    '張盤睇唔到你幾時發達，亦唔會話到將來有幾多錢。如果想講一件實在嘅事，可以由你想留起筆錢做乜講起。',
+    '對你嚟講，「鬆動啲」係想少擔心邊一樣日常使費？',
+    '揀一樣想預早安排嘅使費，喺自己張紙記低；唔使估幾時行好運。',
+    '日子點過，唔係一粒星定好。'],
+  '下注同號碼': [/六合彩|彩票|幸運(?:號碼|數字)|賭(?:波|馬|錢|博)|下注|投注|冧巴/,
+    '我唔會用命盤估中獎號碼，亦唔會畀你下注貼士。幾粒星排喺邊，同開咩號碼係兩回事。',
+    '如果只係好奇盤面，可以淨係睇下面財帛宮嗰格。',
+    '想睇張盤，撳「對返財帛宮」就得，唔使買飛或者落注。',
+    '呢份手記唔預測賽果或攪珠結果。']
+};
+
+const directionPrompts = {
+  '比較兩條路': [/兩(?:條路|個(?:選擇|方向|方案))|[二兩]揀一|二選一|揀[AB]|比較(?:選擇|方向)|(?:轉工|轉行|工作|返工|做嘢|讀書|進修|升學|創業|留低|繼續讀).{0,10}(?:定係?|還是|抑或|或者|vs).{1,15}/i,
+    '將兩條路各寫一行，再用同一條問題去比：「如果揀呢條，普通一個星期二，我會用時間做啲乜？」唔使今日揀定。',
+    '嗰兩個星期二，邊一日有件事係你真係想試，而唔只係個名聽落好？',
+    '每條路各寫一件平日會做嘅事。揀一件可以先試十分鐘嘅，試完先記低想唔想再做。',
+    '比較係想知差別，唔係要張盤替你淘汰其中一條路。'],
+  '試行第一步': [/第一步|下一步|踏出|拖延|遲遲未|唔知(?:由邊|點開[始頭]|從何)|由邊(?:度|樣)開始|點起步|點開始|想開始|點樣開始|未敢開始/,
+    '留十分鐘做一個細到可以試完就停嘅動作。例如想寫嘢，就開張紙寫第一句，唔使先決定要寫成一本書。',
+    '十分鐘之後，你想知道自己鍾唔鍾意做，定係想知卡喺邊一步？',
+    '補完「我用十分鐘試＿＿」，揀個得閒嘅時段。做完只記一樣：仲想試，定想換個做法？',
+    '試一次唔係答應以後都做。做到幾多，由你話事。'],
+  '搵個方向': [/迷[惘茫]|冇方向|無方向|冇目標|搵(?:個|到)?方向|未有方向|搵唔到方向|唔知(?:自己)?(?:想做|適合|想要|鍾意)|唔知(?:將來|未來|前路)|揀方向|未來方向/,
+    '未有方向，可以由上星期搵一幕：有冇一件小事，做完你仲想多留一陣？唔使即刻講出一個職業名。',
+    '你想留低嘅，係嗰個題目、嗰種做法，定係當時可以自己掌握時間？',
+    '記低嗰一幕，再寫一樣你想再試嘅細節。暫時諗唔到，就由聽日留意一次開始。',
+    '一個片段未必係答案，但你可以親自再試，睇吓仲似唔似。'],
+  '預測結果': [/注定|命中註定|一定(?:會|能|成功)|(?:幾時|會唔會|可唔可以|會不會).{0,5}(?:成功|有出息|夢想成真)|將來會(?:點|點樣|做咩|發生)|未來會(?:點|點樣|發生)/,
+    '張盤睇唔到你將來一定會點。與其由我估結果，不如揀一樣你可以試完、再自己決定嘅事。',
+    '你講嘅「成功」，係想做到一件咩事？用自己嘅講法就得。',
+    '試將「會唔會成功」改成「我可以先試＿＿，睇吓＿＿」。答案可以等試完先填。',
+    '命宮係一個對照選擇嘅角度，唔會替你寫結局。']
+};
+
 const notebooks = {
   官祿: {prompts:careerPrompts, general:generalCareerPrompt, intro:'官祿宮就係睇工作嗰格。', question:'最近工作上，想問啲乜？', example:'例如：幾樣嘢同時要交，點排先後？', privacy:'用虛構處境試，唔好寫真名、公司名或聯絡資料。'},
   夫妻: {prompts:lovePrompts, intro:'夫妻宮睇嘅係兩個人點相處，單身都可以參考。', question:'感情上，有咩想問？', example:'例如：想見多啲，但一開口就拗，點講好？', privacy:'用虛構處境試，唔好寫自己或對方嘅真名、帳號或聯絡資料。', general:[null,
     '冇特別問題都得。我哋先睇夫妻宮，諗吓自己鍾意點樣同人相處。',
     '有人陪你時，你最珍惜嘅係一齊做一件事，定係可以自在咁靜一陣？',
     '揀一個令你覺得自在嘅相處片段，寫低：「我鍾意嗰刻，因為＿＿。」',
-    '而家有冇拍拖都用得着。唔似你嘅例子，唔使夾硬認。']}
+    '而家有冇拍拖都用得着。唔似你嘅例子，唔使夾硬認。']},
+  田宅: {prompts:familyPrompts, intro:'田宅宮係睇屋企同日常起居嗰格。', question:'屋企有件咩事，你想傾吓？', example:'例如：屋企啲家務點分，先唔使次次都係我提？', privacy:'用虛構例子就得，唔使寫家人真名、住址或聯絡資料。', general:[null,
+    '冇特別問題都得。我哋由田宅宮講起：一個地方，點樣先住得自在？',
+    '有冇一個位，坐低就可以抖一抖？一張凳都可以，唔一定要有自己間房。',
+    '今晚揀屋企一個自己用嘅位，放低一樣令你覺得舒服嘅嘢，試一晚就得。',
+    '自己住定同人住，都唔使套落某一種家庭。生活例子似你先攞嚟用。']},
+  財帛: {prompts:moneyPrompts, intro:'財帛宮係睇點用手上資源嗰格，唔係估身家。', question:'關於用錢，有咩想傾？', example:'例如：想儲錢去旅行，點開始？', privacy:'用虛構例子就得，唔使寫真實金額、戶口或單據資料。', general:[null,
+    '冇特別問題都得。我哋睇財帛宮，用「想買一樣嘢」做例，唔使交代身家。',
+    '如果同一樣嘢可以遲一日先買，有咩資料會幫你決定？',
+    '諗一樣你見過但未買嘅嘢，寫低佢用嚟做乜。唔買都可以完成呢一步。',
+    '星位可以當一個角度，唔會決定你有幾多錢。']},
+  命宮: {prompts:directionPrompts, intro:'命宮係呢度用嚟對照自己點揀路嗰格，唔係預告將來。', question:'諗緊下一步，有邊件事想問？', example:'例如：轉工定進修，兩條路點揀？', privacy:'用虛構選擇就得，唔使寫真名、公司名或聯絡資料。', general:[null,
+    '冇定好目標都可以睇。我哋由命宮開始，諗吓有新嘢想試嗰陣，咩會幫你行出第一步。',
+    '試想像有一個鐘自己安排：邊件小事你願意分十分鐘畀佢？',
+    '留低一句：「如果有十分鐘，我想試＿＿。」得閒先試，唔使而家揀一世。',
+    '生活例子啱用先留低，唔啱唔使夾硬跟。']}
 };
 
 function notebookTopics(question, prompts) {
-  if (prompts === lovePrompts) {
-    for (const boundary of ['先顧安全','尊重對方意願']) if (prompts[boundary][0].test(question)) return [boundary];
-  }
+  for (const boundary of ['先顧安全','尊重對方意願']) if (prompts[boundary]?.[0].test(question)) return [boundary];
   // shortcut: only explicit topics and priorities; if more than one fits, let the reader choose.
   const topics = new Set(), preferred = new Set();
   let hasPriority = false;
@@ -230,13 +387,19 @@ function notebookTopics(question, prompts) {
     // Refusing overtime is a request about hours, unlike refusing to discuss overtime.
     const reduceHours = /(?:唔想|不想)(?:再|成日|日日|晚晚|繼續|被迫|\s)*(?:加班(?!費)|OT\b|超時工作)/i.test(part);
     const declined = /(?:唔係|不是|並非)(?:想|要|問|傾)|唔想|不想|唔打算|冇打算|唔考慮|唔(?:再)?諗(?:住)?|不打算|無意|暫不考慮|(?:唔係|不是)(?:我)?(?:最)?想(?:問|傾|講)|\b(?:not asking|not interested|(?:don't|do not) want)\b/i.test(part);
-    if (declined && !reduceHours) continue;
+    // Wanting reminders or intrusions to stop is different from declining to discuss that topic.
+    const familyBurden = prompts === familyPrompts && /(?:唔想|不想)(?:再|成日|次次|日日|繼續)*(?:一個人做|自己做|做晒|做哂|做家務|洗碗|洗衫|晾衫|倒垃圾|收枱|(?:提|催).{0,9}(?:家務|洗碗|收枱|倒垃圾)|.{0,9}(?:未問|唔敲門)就入|[嘈嗌鬧]交)/.test(part);
+    const wantsChange = (prompts === moneyPrompts && /(?:唔想|不想)(?:再|次次|成日|繼續)*(?:超支|亂買|衝動(?:消費|購物))/.test(part)) ||
+      (prompts === directionPrompts && /(?:唔想|不想)(?:再|成日|繼續)*拖延/.test(part));
+    if (declined && !reduceHours && !familyBurden && !wantsChange) continue;
     const first = /只(?:係)?想|淨係想|主要想|反而想|想先|最想|先(?:問|傾|處理)|\bonly (?:ask|want)/i.test(part);
     if (first) {
       hasPriority = true;
       part = part.split(/之後|跟住|然後|再(?:傾|諗|問|談|睇|考慮)/,1)[0];
     }
+    const financialDecision = prompts === moneyPrompts && (moneyPrompts['投資同買賣'][0].test(part) || moneyPrompts['下注同號碼'][0].test(part));
     for (const [topic,[words]] of Object.entries(prompts)) {
+      if (financialDecision && topic === '買之前停一停') continue;
       if (words.test(part)) (first ? preferred : topics).add(topic);
     }
   }
@@ -247,6 +410,7 @@ function notebookTopics(question, prompts) {
     found.delete('講出需要');
     if (found.size > 1 && question.includes('單身') && !lovePrompts['認識新朋友'][0].test(question.replaceAll('單身',''))) found.delete('認識新朋友');
   }
+  if (prompts === familyPrompts && found.size > 1 && !/鬧交|嗌交|嘈交|吵架|爭執|意見唔同|分歧|拗撬|冷戰|道歉/.test(question)) found.delete('傾返一件事');
   return [...found];
 }
 
@@ -358,7 +522,9 @@ export function attachZiwei(dialog, content, paint) {
   let alias = '', question = '', chosenTopic = '', ritualTimer;
   const notebook = () => notebooks[focusPalace];
   const topicsForVisit = () => notebookTopics(question, notebook().prompts);
-  let input = emptyInput(), chart = null, reviewed = null, active = false, focusPalace = '命宮';
+  const selectedTopic = topics => topics.includes(chosenTopic) ? chosenTopic : topics.length === 1 ? topics[0] : '';
+  const familyScenes = topic => topic === '家務分擔' && selfManagedChores(question) ? ownChoreScenes : topic === '約家人見面' ? visitScenes : null;
+  let input = emptyInput(), chart = null, reviewed = null, active = false, focusPalace = '';
   const action = (label, name, kind = 'primary') => `<button class="button ${kind}" type="button" data-ziwei="${name}">${label}</button>`;
   const label = '';
   const privacy = '<p class="privacy-note">只用虛構資料；資料只留本頁，不保存。</p>';
@@ -381,11 +547,6 @@ export function attachZiwei(dialog, content, paint) {
   function showChoice(reply) {
     const hello = reply === 'curious' ? '我係玄，呢位係九爺。' : reply === 'yes' ? '好呀。' : '';
     paint(`<p class="desk-speaker">玄</p><h2 id="dialog-title">${hello}想由邊方面睇起？</h2><div class="desk-topics">${Object.entries(READING_TOPICS).map(([palace, topic]) => `<button class="option" type="button" data-ziwei="focus" data-palace="${palace}"><strong>${topic.label}</strong><span>${topic.hint}</span></button>`).join('')}</div>`, 'interaction');
-  }
-  function showResponse() {
-    if (notebook()) { showAlias(); return; }
-    const topic = READING_TOPICS[focusPalace];
-    paint(`<h2 id="dialog-title">九爺 · ${topic.label}</h2><p class="speech">${topic.invite}</p><p class="desk-note">用虛構出生資料，免費睇十二宮。</p><div class="dialog-actions">${action('免費試排紫微盤', 'skip')}${action('返去揀話題', 'choose-focus', 'secondary')}</div>`, 'response');
   }
   const get = id => document.getElementById(id);
   const formError = '<p id="ziwei-error" class="form-error" role="alert"></p>';
@@ -441,14 +602,15 @@ export function attachZiwei(dialog, content, paint) {
     if (!reading) { showResult(); return; }
     const [first, second] = reading.opposite?.stars || reading.stars;
     const topics = topicsForVisit();
-    const topic = topics.includes(chosenTopic) ? chosenTopic : topics.length === 1 ? topics[0] : '';
+    const topic = selectedTopic(topics);
     const choose = !topic && topics.length > 1;
-    const [,answer,ask,tryIt,close] = notebook().prompts[topic] || notebook().general;
+    const scenes = familyScenes(topic);
+    const [,answer,ask,tryIt,close] = scenes === ownChoreScenes ? soloChores : notebook().prompts[topic] || notebook().general;
     const lead = choose ? '你提咗幾件事，想先傾邊一件？揀一樣就得，唔使再填生辰。'
       : question && !topic ? '我唔想替你估。你可以補一句最想講嘅事，或者先由' + palaceTitle(focusPalace) + '睇起。' : answer;
     const lines = [
-      ['九爺', lead], ['玄 · 盤面所見', notebook().intro + readingFact(reading)],
-      ['玄 · 生活對照', first.name + '有「' + first.theme + '」呢個讀法。' + (['先顧安全','尊重對方意願'].includes(topic) ? '呢個係傳統比喻，唔係叫你接觸對方。' : first.behaviour)],
+      ['九爺', lead], ['玄 · 盤面所見', notebook().intro + readingFact(reading) + (focusPalace === '田宅' && reading.opposite ? '「子女」係對宮個名，唔係話你有小朋友。' : '')],
+      ['玄 · 生活對照', first.name + '有「' + first.theme + '」呢個讀法。' + (['先顧安全','尊重對方意願'].includes(topic) ? '呢個係傳統比喻，唔係叫你接觸對方。' : (focusPalace === '田宅' ? '試想一幕：' : '') + (scenes?.[first.name] || first.behaviour))],
       ['九爺', (second ? second.name + '可以從「' + second.theme + '」去睇。' : '') + ask],
       ['玄', close], ['九爺 · 可以試吓', tryIt]
     ];
@@ -509,12 +671,13 @@ export function attachZiwei(dialog, content, paint) {
     const { stars, opposite } = reading;
     const visibleStars = opposite ? opposite.stars : stars;
     const fact = readingFact(reading);
-    note.append(text('h3', '玄 · ' + reading.label), text('p', fact, 'reading-fact'), text('p', reading.lead));
+    const scenes = name === '田宅' && focusPalace === name ? familyScenes(selectedTopic(topicsForVisit())) : null;
+    note.append(text('h3', '玄 · ' + reading.label), text('p', fact, 'reading-fact'), text('p', scenes === ownChoreScenes ? '諗返一餐飯之後，你最想先執好邊樣，令自己用得舒服？' : scenes === visitScenes ? '如果想約家人見面，幾時、見幾耐先啱自己？' : reading.lead));
     for (const star of visibleStars) {
       const section = document.createElement('section'); section.className = 'reading-star';
-      section.append(text('h4', star.name + ' · ' + star.theme), text('p', star.behaviour)); note.append(section);
+      section.append(text('h4', star.name + ' · ' + star.theme), text('p', scenes?.[star.name] || star.behaviour)); note.append(section);
     }
-    note.append(text('p', '九爺：' + reading.question));
+    note.append(text('p', '九爺：' + (scenes === visitScenes ? '想見面嗰次，你願意預幾多時間？' : reading.question)));
     const evidence = document.createElement('details'); evidence.className = 'reading-evidence';
     evidence.append(text('summary', '解讀依據'), text('p', opposite
       ? '本宮冇主星，傳統紫微斗數會參考正對面嗰一宮。借嚟睇嘅星仍然喺對宮，唔會搬入本宮。'
@@ -527,7 +690,8 @@ export function attachZiwei(dialog, content, paint) {
       paint(`${label}<h2 id="dialog-title">資料未足，先唔落盤。</h2><p class="dialog-lead">出生時間同性別齊咗，再返嚟排盤。</p><div class="dialog-actions">${action('返回資料', 'edit-options')}</div>${privacy}`, 'ziwei');
       return;
     }
-    paint(`${label}<h2 id="dialog-title">十二宮命盤</h2><p class="dialog-lead">先由「${READING_TOPICS[focusPalace].label}」睇起。想睇全盤，可以打開下面嘅十二宮。</p><p id="ziwei-result-context" class="reading-fact"></p><div class="ziwei-reading" id="ziwei-reading"></div><div class="dialog-actions palace-switches">${Object.entries(READING_TOPICS).map(([name, topic]) => `<button class="button secondary" type="button" data-ziwei="palace" data-palace="${name}" aria-pressed="false">${topic.label}</button>`).join('')}</div><section id="ziwei-palace-note" tabindex="-1" aria-live="polite" aria-atomic="true"></section><details class="ziwei-chart-details"><summary>打開十二宮命盤</summary><div class="ziwei-scroll" tabindex="0" role="region" aria-label="十二宮命盤，窄螢幕可左右捲動"><div class="ziwei-grid" id="ziwei-grid"></div></div></details>${rules}<p class="privacy-note">只作傳統文化參考，不作健康、投資或人生決定依據。未提供流年、大限或完整論命。</p><div class="dialog-actions">${notebook() && getPalaceReading(chart,focusPalace) ? action('再睇六格對話','read-comic') : ''}${action('修改資料', notebook() ? 'career-birth' : 'edit-options', notebook() ? 'secondary' : 'primary')}</div>${privacy}`, 'ziwei-result');
+    const initialPalace = focusPalace || '命宮';
+    paint(`${label}<h2 id="dialog-title">十二宮命盤</h2><p class="dialog-lead">先由「${READING_TOPICS[initialPalace].label}」睇起。想睇全盤，可以打開下面嘅十二宮。</p><p id="ziwei-result-context" class="reading-fact"></p><div class="ziwei-reading" id="ziwei-reading"></div><div class="dialog-actions palace-switches">${Object.entries(READING_TOPICS).map(([name, topic]) => `<button class="button secondary" type="button" data-ziwei="palace" data-palace="${name}" aria-pressed="false">${topic.label}</button>`).join('')}</div><section id="ziwei-palace-note" tabindex="-1" aria-live="polite" aria-atomic="true"></section><details class="ziwei-chart-details"><summary>打開十二宮命盤</summary><div class="ziwei-scroll" tabindex="0" role="region" aria-label="十二宮命盤，窄螢幕可左右捲動"><div class="ziwei-grid" id="ziwei-grid"></div></div></details>${rules}<p class="privacy-note">只作傳統文化參考，不作健康、投資或人生決定依據。未提供流年、大限或完整論命。</p><div class="dialog-actions">${notebook() && getPalaceReading(chart,focusPalace) ? action('再睇六格對話','read-comic') : ''}${action('修改資料', notebook() ? 'career-birth' : 'edit-options', notebook() ? 'secondary' : 'primary')}</div>${privacy}`, 'ziwei-result');
     document.getElementById('ziwei-result-context').textContent = `${input.year}年${input.month}月${input.day}日 ${input.time} · ${chart.fiveElementsClass}`;
     const grid = document.getElementById('ziwei-grid');
     const scroll = grid.parentElement;
@@ -552,7 +716,7 @@ export function attachZiwei(dialog, content, paint) {
     const soul = chart.palaces.find(p => p.name === '命宮'), body = chart.palaces.find(p => p.isBodyPalace);
     const reading = document.getElementById('ziwei-reading');
     reading.append(text('p', `命宮：${soul.earthlyBranch}位・${starNames(soul)}。身宮：${body.name}・${body.earthlyBranch}位。`));
-    showPalace(focusPalace);
+    showPalace(initialPalace);
     if (focusNote) document.getElementById('ziwei-palace-note').focus();
   }
 
@@ -614,7 +778,7 @@ export function attachZiwei(dialog, content, paint) {
     const name = trigger.dataset.ziwei;
     if (name === 'greet' && ['curious', 'yes'].includes(trigger.dataset.reply)) showChoice(trigger.dataset.reply);
     if (name === 'choose-focus') { clearVisit(); showChoice(); }
-    if (name === 'focus' && Object.hasOwn(READING_TOPICS,trigger.dataset.palace)) { focusPalace=trigger.dataset.palace; showResponse(); }
+    if (name === 'focus' && Object.hasOwn(READING_TOPICS,trigger.dataset.palace)) { focusPalace=trigger.dataset.palace; showAlias(); }
     if (notebook()) {
       if (name === 'edit-alias') showAlias();
       if (name === 'career-birth') showNotebookBirth();
@@ -642,7 +806,7 @@ export function attachZiwei(dialog, content, paint) {
       catch { chart = null; document.getElementById('ziwei-error').textContent = '未能建立命盤。請核對資料或重新載入後再試；未有排盤結果。'; }
     }
   });
-  function clearVisit() { clearTimeout(ritualTimer); alias=question=chosenTopic=''; input=emptyInput(); focusPalace='命宮'; chart=reviewed=null; }
+  function clearVisit() { clearTimeout(ritualTimer); alias=question=chosenTopic=''; input=emptyInput(); focusPalace=''; chart=reviewed=null; }
   dialog.addEventListener('close', () => { if (!dialog.open) { clearVisit(); active=false; } });
   return skipIntro => { clearVisit(); active=true; if (skipIntro) showDate(); else showEntrance(); };
 }
