@@ -126,3 +126,35 @@ test('portable HTML is an offline public preview, not a private account client',
   assert.doesNotMatch(html, /<script[^>]+src=/);
   assert.doesNotMatch(html, /^import /m);
 });
+
+// Fortel 1.3.4 (independent of iztro): https://github.com/airicyu/fortel-ziweidoushu
+// Civil clock, 天盤, leap month switches after day 15. For our 23:00 policy compare next civil day at 00:00.
+// The two schools differ on 庚干化科; transformations are not an input to the career comic.
+test('five independent natal chart cases including the three civil times at New Year', () => {
+  const cases = [
+    ['1995-08-15','09:30','male','一九九五年七月二十','土五局',
+     '戊子/子女/天同太陰 己丑/夫妻身/武曲貪狼 戊寅/兄弟/太陽巨門 己卯/命宮/天相 庚辰/父母/天梁天機 辛巳/福德/七殺紫微 壬午/田宅/ 癸未/官祿/ 甲申/僕役/ 乙酉/遷移/廉貞破軍 丙戌/疾厄/ 丁亥/財帛/天府'],
+    ['2000-08-16','03:30','female','二〇〇〇年七月十七','木三局',
+     '戊子/遷移/貪狼 己丑/疾厄/天同巨門 戊寅/財帛/天相武曲 己卯/子女/天梁太陽 庚辰/夫妻/七殺 辛巳/兄弟/天機 壬午/命宮/紫微 癸未/父母/ 甲申/福德/破軍 乙酉/田宅/ 丙戌/官祿身/天府廉貞 丁亥/僕役/太陰'],
+    ['2023-04-05','12:00','male','二〇二三年閏二月十五','木三局',
+     '甲子/田宅/貪狼 乙丑/官祿/天同巨門 甲寅/僕役/天相武曲 乙卯/遷移/天梁太陽 丙辰/疾厄/七殺 丁巳/財帛/天機 戊午/子女/紫微 己未/夫妻/ 庚申/兄弟/破軍 辛酉/命宮身/ 壬戌/父母/天府廉貞 癸亥/福德/太陰'],
+    ['2023-04-06','12:00','male','二〇二三年閏二月十六','水二局',
+     '甲子/福德/天梁 乙丑/田宅/七殺廉貞 甲寅/官祿/ 乙卯/僕役/ 丙辰/遷移/天同 丁巳/疾厄/武曲破軍 戊午/財帛/太陽 己未/子女/天府 庚申/夫妻/天機太陰 辛酉/兄弟/紫微貪狼 壬戌/命宮身/巨門 癸亥/父母/天相'],
+    ['2024-02-09','22:59','female','二〇二三年十二月三十','水二局',
+     '甲子/夫妻身/天府武曲 乙丑/兄弟/太陰太陽 甲寅/命宮/貪狼 乙卯/父母/天機巨門 丙辰/福德/天相紫微 丁巳/田宅/天梁 戊午/官祿/七殺 己未/僕役/ 庚申/遷移/廉貞 辛酉/疾厄/ 壬戌/財帛/破軍 癸亥/子女/天同'],
+    ['2024-02-09','23:00','female','二〇二四年正月初一','火六局',
+     '丙子/夫妻/天梁 丁丑/兄弟/七殺廉貞 丙寅/命宮身/ 丁卯/父母/ 戊辰/福德/天同 己巳/田宅/武曲破軍 庚午/官祿/太陽 辛未/僕役/天府 壬申/遷移/天機太陰 癸酉/疾厄/紫微貪狼 甲戌/財帛/巨門 乙亥/子女/天相'],
+    ['2024-02-10','00:00','female','二〇二四年正月初一','火六局',
+     '丙子/夫妻/天梁 丁丑/兄弟/七殺廉貞 丙寅/命宮身/ 丁卯/父母/ 戊辰/福德/天同 己巳/田宅/武曲破軍 庚午/官祿/太陽 辛未/僕役/天府 壬申/遷移/天機太陰 癸酉/疾厄/紫微貪狼 甲戌/財帛/巨門 乙亥/子女/天相'],
+
+  ];
+  const branches='子丑寅卯辰巳午未申酉戌亥';
+  for(const [date,time,gender,lunar,element,layout] of cases) {
+    const [year,month,day]=date.split('-');
+    const chart=calculateZiwei({year,month,day,time,gender,place:'',precision:'exact'},engine);
+    assert.equal(chart.lunarDate.replace('闰','閏').replace(/[臘腊]月/,'十二月'),lunar);
+    assert.equal(chart.fiveElementsClass,element);
+    const cells=Array.from(chart.palaces).sort((a,b)=>branches.indexOf(a.earthlyBranch)-branches.indexOf(b.earthlyBranch));
+    assert.equal(cells.map(p=>[p.heavenlyStem+p.earthlyBranch,p.name.replace('仆役','僕役')+(p.isBodyPalace?'身':''),p.majorStars.filter(s=>s.type==='major').map(s=>s.name).sort().join('')].join('/')).join(' '),layout,date+' '+time);
+  }
+});

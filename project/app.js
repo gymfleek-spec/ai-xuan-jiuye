@@ -1,7 +1,7 @@
-import { attachZiwei } from './ziwei.js?v=0.6.14';
-import { attachSceneSequence } from './motion/motion.mjs?v=0.6.14';
-import { STORIES, WELCOME, GOALS, DETAIL_STEPS, emptyDetails, getDetailsError, getBirthDateError, getStory, getChoice } from './content.js?v=0.6.14';
-import { api } from './customer.js?v=0.6.14';
+import { attachZiwei } from './ziwei.js?v=0.9.0';
+import { attachSceneSequence } from './motion/motion.mjs?v=0.9.0';
+import { STORIES, WELCOME, GOALS, DETAIL_STEPS, emptyDetails, getDetailsError, getBirthDateError, getStory, getChoice } from './content.js?v=0.9.0';
+import { api } from './customer.js?v=0.9.0';
 
 const dialog = document.getElementById('story-dialog');
 const content = document.getElementById('story-content');
@@ -253,7 +253,7 @@ function showAccount(message = '') {
 }
 
 function showPreviewInfo() {
-  paint(`<p class="dialog-label">玄與九爺</p><h2 id="dialog-title">點樣免費睇命盤？</h2><p class="dialog-lead">只用虛構資料。填寫只留本頁，關閉或重新整理會清除；目前不設登入及保存，紫微排盤只用本頁核對資料，固定故事唔係個人分析。</p><div class="dialog-actions">${button('重新試紫微排盤', 'direct')}</div>`, 'questions');
+  paint(`<p class="dialog-label">玄與九爺</p><h2 id="dialog-title">點樣免費睇命盤？</h2><p class="dialog-lead">只用虛構資料。填寫只留本頁，關閉或重新整理會清除；目前不設登入及保存。</p><div class="dialog-actions">${button('重新試紫微排盤', 'direct')}</div>`, 'questions');
 }
 
 function selectOption(trigger, action) {
@@ -461,20 +461,6 @@ document.addEventListener('click', async event => {
   if (action === 'reflect' && getChoice(currentStory, currentChoice)) showReflection();
 });
 
-document.querySelectorAll('[data-filter]').forEach(filter => {
-  filter.addEventListener('click', () => {
-    const category = filter.dataset.filter;
-    if (category !== 'all' && !getStory(category)) return;
-    document.querySelectorAll('[data-filter]').forEach(item => item.setAttribute('aria-pressed', String(item === filter)));
-    let visible = 0;
-    document.querySelectorAll('.story-card').forEach(card => {
-      card.hidden = category !== 'all' && card.dataset.story !== category;
-      if (!card.hidden) visible++;
-    });
-    document.getElementById('filter-status').textContent = `${filter.textContent}，${visible}篇故事`;
-  });
-});
-
 // Sound is optional: unavailable or blocked audio never stops the questionnaire.
 function createSceneSound() {
   let context = null, enabled = false, played = null, resuming = null, pending = null;
@@ -563,5 +549,6 @@ async function recheckPrivateSession() {
   }
 }
 syncSession().catch(() => {});
+window.addEventListener('pagehide', () => { if (publicPreview && dialog.open) closeVisit(); });
 window.addEventListener('pageshow', event => { if (event.persisted) recheckPrivateSession(); });
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && sessionState?.authenticated) recheckPrivateSession(); });
