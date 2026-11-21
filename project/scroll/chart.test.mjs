@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import { runInNewContext } from 'node:vm';
 import { calculateZiwei, natalMutagens, chartTiming, periodTempo, ZIWEI_RULES } from './chart.mjs';
 import { bookFromChart, EXAMPLE } from './book.mjs';
-import { STAR_COPY, HUA_COPY, TOPIC_COPY } from './empathy-copy.mjs';
+import { STAR_COPY, HUA_COPY, RELATING_COPY, TOPIC_COPY } from './empathy-copy.mjs';
 const box={self:{}};runInNewContext(readFileSync(new URL('../vendor/iztro-v2.6.5.min.js',import.meta.url),'utf8'),box);
 const engine=box.self.iztro, asOf='2026-11-21';
 const input=(date,gender='female',time='09:30')=>{const [year,month,day]=date.split('-');return {...EXAMPLE,year,month,day,gender,time};};
@@ -80,7 +80,13 @@ test('four-layer copy covers all fourteen stars and five topics, with actual tra
   assert.equal(Object.keys(STAR_COPY).length,14);
   for(const copy of Object.values(STAR_COPY))for(const key of Object.keys(TOPIC_COPY)) {
     const c=copy[key];for(const part of ['receive','release','question','line'])assert.equal(typeof c[part],'string');
-    assert.ok(c.receive.length>25);assert.match(c.release,/唔代表你唔夠好/);assert.ok(c.question.endsWith('？'));
+    assert.ok(c.receive.length>25);assert.ok(c.release.length>15);assert.ok(c.question.endsWith('？'));
   }
-  for(const star of ['太陰','文昌','文曲','左輔','右弼'])for(const key of ['strain','resource'])assert.ok(HUA_COPY[star][key].length>12);
+  assert.deepEqual(Object.keys(RELATING_COPY).sort(),Object.keys(STAR_COPY).sort());
+  for(const prompts of Object.values(RELATING_COPY)) {
+    assert.equal(prompts.length,2);assert.ok(prompts.every(text=>text.endsWith('？')));
+  }
+  for(const {strain,resource,space,evening} of Object.values(HUA_COPY)) {
+    assert.ok(strain.length>12 && resource.length>12 && space.length>12 && evening.length>12);
+  }
 });

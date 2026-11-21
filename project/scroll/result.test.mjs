@@ -71,6 +71,8 @@ test('result uses half-visible clues, an accessible teaser tail and a single cul
   assert.match(html,/<option value="田宅">家庭/);
   assert.match(html,/<details id="chart-details">/);assert.match(html,/<select id="topic-select">/);
   assert.match(html,/id="chapter-previews"/);assert.match(html,/id="quarter-previews"/);
+  assert.match(html,/青玉鏡・想靠近嘅相處/);
+  assert.doesNotMatch(html,/氣質線索|fate-years/);
   assert.doesNotMatch(html,/唔係今次命盤推算|未提供流年|未提供大限|只留喺今次頁面/);
   assert.equal((html.match(/class="lock-blur" aria-hidden="true"/g)||[]).length,7);
   assert.equal((html.match(/玄與九爺陪你睇清選擇，唔替你決定。/g)||[]).length,1);
@@ -149,5 +151,37 @@ test('the entry topic stays free across selectors, twelve palaces, chapter previ
     assert.equal(f.find('jiuye-quote').textContent,'唔靠張盤催你再聯絡。');
     for(const id of ['chapter-previews','quarter-previews','action-previews'])assert.equal(descendants(f.find(id)).filter(n=>n.tagName==='button').length,0);
     assert.ok(allText(f.find('empathy-body')).includes(love.other));
+  } finally {globalThis.document=old;}
+});
+
+test('the three delivery charts get distinct chart-led relationship rows and free endings',()=>{
+  const f=fixture(), old=globalThis.document;
+  globalThis.document={createElement:tag=>new f.Node(tag)};
+  const samples=[
+    ['1995-08-15','09:30','male','事業','武曲、貪狼','太陰化忌落喺子女宮','天機化祿喺父母宮','未去過嘅小店','聽你講完','一個靜位','未行過嘅街','接一接手'],
+    ['2000-08-16','03:30','female','愛情','七殺','天同化忌落喺疾厄宮','太陽化祿喺子女宮','直講今日想見面','返嚟講埋下半句','講一次自己想點','行埋去陪一陣','唔使一晚追晒答案'],
+    ['1988-03-12','19:30','female','財運','武曲、天相','天機化忌落喺父母宮','貪狼化祿喺財帛宮','輪流話事','有變就早講','唔使喺心入面估幾輪','喺夜市','唔只係今晚想鬆一口氣'],
+  ];
+  try {
+    const result=attachResult(f.report);
+    const rows=()=>Array.from({length:5},(_,i)=>f.find('fate-'+i).textContent);
+    const rendered=samples.map(([date,time,gender,subject,spouse,ji,lu,...phrases])=>{
+      const [year,month,day]=date.split('-');
+      const native=calculateZiwei({...EXAMPLE,year,month,day,time,gender},box.self.iztro,{asOf:'2026-11-21'});
+      result.show({chart:native,alias:'同一個名',subject});
+      const free=f.find('empathy-body').children.map(p=>p.textContent);
+      const closing=f.find('jiuye-quote').textContent, clues=rows();
+      assert.equal(free.length,4);assert.ok(free[2].includes(ji));assert.ok(free[3].includes(lu));
+      assert.doesNotMatch(free.join('')+closing,/呢份用心唔係缺點|如果你認得呢一幕|留一個你負擔到嘅範圍/);
+      assert.ok(clues[0].startsWith(spouse));
+      for(let i=0;i<4;i++)assert.ok(clues[i+1].includes(phrases[i]) && clues[i+1].endsWith('？'));
+      assert.ok(closing.includes(phrases[4]));
+      f.find('topic-select').handlers.change({target:{value:'田宅'}});
+      assert.deepEqual(rows(),clues,'changing topic cannot swap out the chart’s relationship clues');
+      result.clear();assert.deepEqual(rows(),['','','','','']);
+      return {clues,ending:[...free.slice(1),closing]};
+    });
+    for(let i=1;i<5;i++)assert.equal(new Set(rendered.map(r=>r.clues[i])).size,3);
+    for(let i=0;i<4;i++)assert.equal(new Set(rendered.map(r=>r.ending[i])).size,3);
   } finally {globalThis.document=old;}
 });

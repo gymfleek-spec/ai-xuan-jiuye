@@ -1,4 +1,4 @@
-# v0.17.0｜同理、四化與三年命書引子
+# v0.17.1｜同盤相處引子與同理收尾
 
 本次分支由 `fc0f769` 根目錄的 **v0.16.1 source ZIP** 恢復，並以它取代舊 `project/` v0.11.0；不沿用舊版工作檔混合建置。唯一現行入口是 `scroll/page.html` → `build.mjs` → `public-preview/`。
 

@@ -10,6 +10,7 @@ const root=fileURLToPath(new URL('./',import.meta.url)), src=join(root,'scroll')
 const output=join(root,'public-preview'), single=join(root,'玄與九爺-港島夜話.html');
 const assets=join(src,'art');
 const read=(...path)=>readFileSync(join(...path),'utf8');
+const {version}=JSON.parse(read(root,'package.json'));
 const out=(path,data)=>{mkdirSync(dirname(path),{recursive:true});writeFileSync(path,data);};
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const sha=data=>createHash('sha256').update(data).digest('hex');
@@ -24,7 +25,7 @@ function frame(key){
   return '<div class="frame '+key+'"><img src="'+artwork+'" width="1536" height="1024" alt="'+esc(views[key].alt)+'"'+priority+'></div>';
 }
 const chapters=book.chapters.map((c,i)=>'<section class="story teaser-card" data-key="'+c.key+'"><header class="chapter-head"><span class="serial">第'+markers[i]+'章</span><h2>'+esc(c.label)+'</h2></header>'+c.teaser.map(v=>'<p class="teaser-intro">'+esc(v)+'</p>').join('')+'<div class="teaser-fade" aria-hidden="true" inert><span>────────　──────</span><span>──────　────────</span></div></section>').join('\n');
-let html=read(src,'page.html').replace('@@BOOK_ART@@',()=>frame('seat')).replace('@@ELEMENT@@',esc(book.element)).replace('@@CHART_LABEL@@',esc('1995-08-15 · 19:30 · 男 ｜ '+book.element)).replace('@@CHAPTERS@@',()=>chapters);
+let html=read(src,'page.html').replaceAll('@@VERSION@@',version).replace('@@BOOK_ART@@',()=>frame('seat')).replace('@@ELEMENT@@',esc(book.element)).replace('@@CHART_LABEL@@',esc('1995-08-15 · 19:30 · 男 ｜ '+book.element)).replace('@@CHAPTERS@@',()=>chapters);
 const withoutModules=s=>s.replace(/^import [^\n]+;\n/gm,'').replace(/^export \{[^\n]+ from [^\n]+;\n/gm,'').replace(/^export /gm,'');
 const app="(()=>{\n'use strict';\n"+getBirthDateError.toString()+'\n'+['scroll/empathy-copy.mjs','scroll/chart.mjs','scroll/book.mjs','motion/motion.mjs','ziwei.js','scroll/result.mjs','scroll/reader.mjs'].map(f=>withoutModules(read(root,f))).join('\n')+'\n})();';
 assert.doesNotMatch(app,/^import |^export |<\/script/mi);assert.doesNotMatch(engine,/<\/script/i);
@@ -55,7 +56,7 @@ assert.doesNotMatch(inline,/<script[^>]+src=|(?:src|href)="(?:art\/|reading\.|iz
 for(const [name,value] of files) out(join(output,name),value);
 const disk=readdirSync(output,{recursive:true,withFileTypes:true}).filter(x=>x.isFile()).map(e=>join(e.parentPath,e.name).slice(output.length+1)).sort();
 assert.deepEqual(disk,[...files.keys()].sort(),'unexpected file in publish directory');
-const info={version:'0.17.0',artwork:2,views:5,bytes:[...files.values()].reduce((n,s)=>n+Buffer.byteLength(s),0),files:Object.fromEntries([...files].map(([p,v])=>[p,sha(v)])),portable_sha256:sha(inline)};
+const info={version,artwork:2,views:5,bytes:[...files.values()].reduce((n,s)=>n+Buffer.byteLength(s),0),files:Object.fromEntries([...files].map(([p,v])=>[p,sha(v)])),portable_sha256:sha(inline)};
 out(single,inline);
 out(join(root,'index.html'),inline);out(join(root,'release-manifest.json'),JSON.stringify(info,null,2)+'\n');
 console.log(JSON.stringify({version:info.version,mode:'release',files:files.size,publicBytes:info.bytes,singleFileBytes:Buffer.byteLength(inline),portable_sha256:info.portable_sha256}));

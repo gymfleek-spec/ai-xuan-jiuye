@@ -1,5 +1,6 @@
 import { getPalaceReading, readingFact, palaceTitle, READING_TOPICS, periodTempo } from './chart.mjs';
 import { bookFromChart } from './book.mjs';
+import { HUA_COPY, RELATING_COPY } from './empathy-copy.mjs';
 
 export function resultFromChart(chart, subject) {
   const book = bookFromChart(chart), readings = chart.palaces.map(p => getPalaceReading(chart, p.name));
@@ -103,7 +104,7 @@ export function attachResult(report) {
     find('tempo-curve').setAttribute('aria-label', '三年盤面相對節奏。' + timing.annual.map((p,i) => p.year + '年財運' + (wealth[i] ?? '不適用') + '，事業' + (career[i] ?? '不適用')).join('；'));
     const valid = wealth.filter(v => v !== null), max = Math.max(...valid), min = Math.min(...valid);
     const years = value => timing.annual.filter((p,i) => wealth[i] !== null && wealth[i] === value).map(p => p.year).join('／');
-    put('curve-high', !valid.length ? '三年唔在可排運限內，先照顧眼前。' : max === min ? '三年節奏相近・先重新看清自己嘅籌碼。' : years(max) + '・唔靠盲衝，先重新定價。');
+    put('curve-high', !valid.length ? '三年唔在可排運限內，先照顧眼前。' : max === min ? '三年節奏相近・先重新看清自己嘅籌碼。' : years(max) + '・先睇清手上嘅長處，再諗下一步。');
     put('curve-low', !valid.length ? '留低心力，按眼前需要行。' : max === min ? '唔使追高低・留空間，慢慢行。' : years(min) + '・先留空間，再算人情。');
     const validCareer=career.filter(v=>v!==null), careerHigh=Math.max(...validCareer);
     put('turn-year',validCareer.length && new Set(validCareer).size>1 ? timing.annual.filter((p,i)=>career[i]===careerHigh).map(p=>p.year).join('／') : '2026–2028');
@@ -115,8 +116,11 @@ export function attachResult(report) {
       return teaser(p.year + '・第' + p.quarter + '季', [p.monthly.stem + p.monthly.branch + '流月，' + lu.star + '化祿落本命' + palaceTitle(lu.palace) + '，可以先望一望手上已有嘅資源。',ji.star + '化忌落本命' + palaceTitle(ji.palace) + '，有邊份用力可以慢半拍？'],current.selected,true);
     });
     find('quarter-previews').replaceChildren(...cards);
-    const couple = current.book.chapters.find(c => c.key === '夫妻');
-    const clues = [couple.stars.join('、') + '・' + couple.theme, '肯聽你講完・唔急住改變你', '眼神好定・說話有交帶', '有自己空間・亦記得問候', '一杯熱茶・一句「辛苦晒」'];
+  }
+  function paintRelating() {
+    const { stars, theme, ji, lu } = chapterFor('夫妻');
+    // Show both stars in the basis; when paired, use the companion for the two reflection prompts.
+    const clues = [stars.join('、') + '・' + theme, ...RELATING_COPY[stars.at(-1)], HUA_COPY[ji.star].space, HUA_COPY[lu.star].evening];
     clues.forEach((value,i) => put('fate-' + i,value));
   }
   find('topic-select').addEventListener('change', e => topic(e.target.value));
@@ -142,7 +146,7 @@ export function attachResult(report) {
         button.addEventListener('click',() => palace(p.name)); grid.append(button);
       }
       const center = node('div','','palace-center'); center.append(node('strong','紫微斗數'),node('span',current.book.element),node('span','本命十二宮')); grid.append(center);
-      topic(current.selected); paintTiming();
+      topic(current.selected); paintTiming(); paintRelating();
       find('chapter-previews').replaceChildren(...current.book.chapters.map(c => teaser(c.label + (c.key === current.selected ? '・由呢一題開始' : '・再行深一步'),c.teaser,c.key)));
       const selected = chapterFor(current.selected);
       find('action-previews').replaceChildren(teaser('穩陣・留力先行',selected.steady,current.selected),teaser('破局・試出新路',selected.breakthrough,current.selected));

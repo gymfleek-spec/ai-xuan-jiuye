@@ -14,13 +14,13 @@ export function bookFromChart(chart) {
   const chapters=ORDER.map(key=>{
     const r=getPalaceReading(chart,key);
     if(!r) throw new Error('未能核對五篇嘅宮位，今次唔會顯示不完整嘅解讀。');
-    const stars=r.opposite?r.opposite.stars:r.stars, [a,b]=stars, copy=STAR_COPY[a.name][key];
+    const stars=r.opposite?r.opposite.stars:r.stars, [a]=stars, copy=STAR_COPY[a.name][key];
     const names=stars.map(s=>s.name).join('、');
     const source=palaceTitle(key)+'・'+r.branch+'位 ／ '+(r.opposite?'借'+palaceTitle(r.opposite.palace)+'・'+r.opposite.branch+'位':'本宮主星')+' ／ '+names;
-    const strain=(ji.palace===key?'呢一題':'再從另一個角度睇')+'，本命'+ji.star+'化忌落喺'+palaceTitle(ji.palace)+'：'+HUA_COPY[ji.star].strain;
-    const resource='本命'+lu.star+'化祿喺'+palaceTitle(lu.palace)+'，可以留意呢份資源：'+HUA_COPY[lu.star].resource;
+    const strain='本命'+ji.star+'化忌落喺'+palaceTitle(ji.palace)+'：'+HUA_COPY[ji.star].strain;
+    const resource='本命'+lu.star+'化祿喺'+palaceTitle(lu.palace)+'：'+HUA_COPY[lu.star].resource;
     return {key,label:r.label,source,fact:readingFact(r),stars:stars.map(s=>s.name),theme:a.theme,
-      lens:copy.receive,people:copy.release+(b?' '+b.name+'嘅「'+b.theme+'」亦喺呢張盤入面；兩份用心唔使一晚做晒。':''),other:strain,
+      lens:copy.receive,people:copy.release,other:strain,
       resource,question:copy.question,line:copy.line,borrow:r.opposite!==null,ji,lu,
       teaser:[copy.receive, a.name+'嘅「'+a.theme+'」，點樣由用力變成留有餘地，係呢一章想陪你拆嘅另一半。'],
       steady:[a.name+'嘅「'+a.theme+'」可以咁樣留力：'+TOPIC_COPY[key].steady[0],TOPIC_COPY[key].steady[1]],breakthrough:[a.name+'嘅「'+a.theme+'」亦可以試另一條路：'+TOPIC_COPY[key].breakthrough[0],TOPIC_COPY[key].breakthrough[1]]};
