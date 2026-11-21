@@ -1,0 +1,10 @@
+{
+  "name": "xuan-jiuye-private-draft",
+  "version": "0.17.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test reading.test.mjs ziwei.test.mjs scroll/*.test.mjs motion/motion.test.mjs && node --test --test-name-pattern='integrated tea room' journey.test.mjs",
+    "build": "node build.mjs"
+  }
+}
