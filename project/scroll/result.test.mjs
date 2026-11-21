@@ -137,7 +137,8 @@ test('the entry topic stays free across selectors, twelve palaces, chapter previ
     const tails=descendants(f.find('chapter-previews')).filter(n=>n.className==='teaser-fade');
     assert.equal(tails.length,5);for(const t of tails){assert.equal(t.getAttribute('aria-hidden'),'true');assert.equal(t.getAttribute('inert'),'');assert.ok(descendants(t).every(n=>n.tagName!=='button'));}
     const cta=descendants(f.find('chapter-previews')).find(n=>n.tagName==='button');cta.handlers.click();
-    assert.equal(f.find('purchase-price').textContent,'HK$88');f.find('close-purchase').handlers.click();
+    assert.equal(f.find('purchase-price').textContent,'HK$88');assert.equal(f.find('purchase-plan').textContent,'事業・單題拆局書');f.find('close-purchase').handlers.click();
+    f.find('purchase-cta').handlers.click();assert.equal(f.find('purchase-plan').textContent,'事業・單題拆局書','sticky CTA keeps the chapter selected from a teaser');f.find('close-purchase').handlers.click();
     assert.equal(f.find('empathy-body').children[0].className,'teaser-card','a price selection never grants access');
     f.find('topic-select').handlers.change({target:{value:'官祿'}});
     assert.ok(allText(f.find('empathy-body')).includes(career.other));

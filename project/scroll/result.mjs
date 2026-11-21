@@ -27,7 +27,7 @@ export function attachResult(report) {
     put('purchase-plan', key === 'full' ? '全盤三年命書' : (chapterFor(purchaseTopic || activeTopic)?.label || '') + '・單題拆局書');
     for (const sku of ['full','single']) find('sku-' + sku).setAttribute('aria-pressed', String(sku === key));
   }
-  function openPurchase(sku = plan, key = activeTopic) {
+  function openPurchase(sku = plan, key = purchaseTopic || activeTopic) {
     if (!current || !canOffer) return;
     purchaseTopic = key; pricing(sku); find('purchase-dialog').showModal();
   }
