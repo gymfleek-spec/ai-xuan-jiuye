@@ -1,0 +1,60 @@
+#threshold{max-width:var(--phone);margin:0 auto;background:#121a19;color:#fcf4dd;min-height:100vh;min-height:100svh;text-align:center;box-shadow:0 0 0 1px #70634644}.threshold-brand{height:42px;display:flex;align-items:center;justify-content:space-between;padding-inline:20px;color:#e3c995;border-bottom:1px solid #695b3e;background:#15201e}.threshold-brand strong{font:700 19px/1.3 var(--min);letter-spacing:.12em}.threshold-brand span{font:600 12px/1.4 var(--body);letter-spacing:.12em}.film-stage{position:relative;isolation:isolate;aspect-ratio:9/16;width:min(100%,calc(56.25svh - 24px));margin:auto;max-height:calc(100svh - 42px);background:#111817}.film-stage img,.film-stage video{display:block;width:100%;height:100%;object-fit:contain;position:absolute;inset:0}.knock{position:absolute;inset:auto 0 0;padding:60px 20px max(20px,env(safe-area-inset-bottom));background:linear-gradient(transparent,rgba(13,20,17,.86) 47%,#121a19)}.knock p{font:600 14px/1.5 var(--min);letter-spacing:.12em;color:#ead0a3}.knock h1{font:800 clamp(23px,6.3vw,38px)/1.5 var(--min);letter-spacing:.04em}.plaque{padding:10px 26px;margin-top:10px;min-height:48px;color:#332517;background:#f2d49b;border:3px double #7a613a;box-shadow:0 3px 12px #0009;font:700 18px/1.4 var(--min);letter-spacing:.1em}.plaque span{margin-left:.7em}.plaque:disabled{opacity:.7}#entry-foot,#viewer-help{padding:8px 16px;color:#d4c7ad;font:14px/1.5 var(--body)}#viewer-help{color:#ffdb91}
+#consult{--serif:var(--min);--sans:var(--body);--portrait-h:min(100dvh,177.7778vw,853.3333px);--desk-top:calc((100dvh - var(--portrait-h))/2 + var(--portrait-h)*.64);color-scheme:dark;width:min(100%,var(--phone));max-width:100vw;height:100vh;height:100dvh;max-height:100dvh;margin:0 auto;padding:0;overflow:hidden;border:0;background:#15201e;color:#fff4d7;box-shadow:0 20px 72px #0009}
+#consult::backdrop{background:#101815f5}
+#consult[data-phase="interaction"]{--desk-top:calc((100dvh - var(--portrait-h))/2 + var(--portrait-h)*.54)}
+#consult[data-phase="career-setup"]{--desk-top:calc((100dvh - var(--portrait-h))/2 + var(--portrait-h)*.46)}
+#consult .desk-art{position:absolute;inset:0;overflow:hidden;display:flex;justify-content:center;align-items:center}
+.scene-media{position:relative;width:100%;height:100%;flex:none}
+.scene-media>img,.scene-media>video{position:absolute;inset:0;width:100%;height:100%;display:block;object-fit:contain;object-position:50% 50%}
+#consult .scene-media{width:min(100%,56.25dvh);height:var(--portrait-h)}
+#consult:is([data-phase="career-ritual"]) .desk-art{display:none}
+.consult-body{position:relative;margin-top:var(--desk-top);max-height:calc(100dvh - var(--desk-top));overflow-y:auto;overscroll-behavior:contain;padding:17px clamp(18px,5vw,28px) max(16px,env(safe-area-inset-bottom));border-top:1px solid #95825c;background:#17261ff2;scroll-padding-block:16px}
+#consult[data-phase="career-ritual"] .consult-body{margin-top:0;max-height:100dvh;min-height:100dvh;padding-top:max(20px,env(safe-area-inset-top));background:#17261f}
+#dialog-title:focus{outline:none}
+@media(prefers-reduced-motion:no-preference){.step-copy{animation:desk-in .18s ease-out}@keyframes desk-in{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}}
+.desk-speaker{font:700 12px/1.7 var(--body);color:#e9c98e;letter-spacing:.08em}#consult h2{font:700 clamp(23px,5.5vw,28px)/1.43 var(--min);margin:3px 0 12px}.speech{font:600 21px/1.5 var(--min);margin-bottom:14px}.desk-replies,.desk-topics,.dialog-actions{display:flex;flex-direction:column;gap:8px}.desk-topics{gap:3px}.desk-topics .option{display:flex;align-items:baseline;justify-content:space-between;gap:8px;text-align:left;min-height:44px;color:#f5e6c7;background:transparent;border:0;border-top:1px solid #75806c88;padding:8px 3px}.option strong{font:700 18px/1.45 var(--min)}.option span{font-size:14px;color:#d0cbb9}#consult .button{border:1px solid #8a8067;border-radius:2px;padding:8px 13px;min-height:44px;font:600 16px/1.55 var(--body)}#consult .primary{background:#ebcf94;color:#29271d}#consult .secondary,#consult .question-skip{background:transparent;color:#f1e4c8}.profile-fields{display:flex;flex-direction:column;gap:12px;margin-bottom:12px}.profile-fields label{display:block;font:650 15px/1.6 var(--body)}.profile-fields :is(input,select,textarea){display:block;min-width:0;width:100%;min-height:44px;padding:8px 10px;margin-top:4px;background:#121d19;border:1px solid #938a72;border-radius:3px;color:#fff4db;font:400 17px/1.5 var(--body)}.profile-fields textarea{resize:vertical}.privacy-note,.career-summary{color:#ddd2ba;font:14px/1.6 var(--body);margin:9px 0}.form-error{color:#ffd59a;font-size:15px}.form-error:not(:empty){margin:8px 0}.dialog-actions{margin-top:12px}.leave{color:inherit;border:0;background:transparent;text-decoration:underline;text-underline-offset:.28em;font:500 15px/1.6 var(--body);min-height:44px;padding:8px 6px}.consult-body>.leave{margin-top:6px}.visit-note{margin-top:18px;padding:16px 0;border-top:1px solid #ab986d;border-bottom:1px solid #ab986d}.visit-note #visit-question{margin:.35em 0;font-family:var(--min)}.visit-note #visit-answer{margin:.4em 0 0}#finish{margin-left:24px}#consult :focus-visible{outline:3px solid #efb05e;outline-offset:2px}
+@media(max-height:480px){
+ .knock{padding-top:20px}.knock p{display:none}
+ #consult{overflow-y:auto}
+ #consult .desk-art{position:relative;height:42dvh}
+ #consult .scene-media{height:100%;width:min(100%,23.625dvh)}
+ .consult-body{margin-top:0;max-height:none;overflow:visible;padding-top:14px}
+}
+@media print{#threshold,#consult,#finish{display:none!important}}
+
+/* Original casting sequence: turn, trace, then let the seal settle. */
+.ritual-box{position:relative;text-align:center;padding:15px clamp(10px,4vw,30px);margin:12px 0;background:radial-gradient(ellipse at 50% 47%,#2d4234,#17271f 70%);border:1px solid #8d8364;box-shadow:inset 0 0 0 3px #192720,inset 0 0 0 4px #736b524d}
+.ritual-name{margin:0;font:600 clamp(20px,4vw,29px)/1.4 var(--serif);color:#f6e6bf}
+.ritual-birth{margin:.3em 0;color:#e6cc99;font:500 .87rem/1.5 var(--sans);font-variant-numeric:tabular-nums}
+.ritual-box svg{width:100%;height:auto;max-height:43dvh;display:block;margin:auto}
+.ritual-box[data-ink-set] :is(.dial-sweep,.dial-house,.dial-thread,.ritual-seal){animation:none}
+.ritual-fact{margin:.65em auto 0;max-width:28em;color:#f3e6cf;font:500 1rem/1.55 var(--serif)}
+.ritual-seal{display:inline-block;padding:3px 9px;border:3px double #df977f;color:#f4be9c;font:700 .85rem/1.4 var(--serif);letter-spacing:.12em;transform:rotate(-3deg)}
+@media(prefers-reduced-motion:no-preference){
+  .dial-sweep{transform-origin:160px 160px;animation:career-turn 1.7s cubic-bezier(.2,.8,.3,1) both}
+  .dial-house{animation:career-ink .5s ease-out backwards}
+  .dial-thread{stroke-dasharray:1;animation:career-trace 1.45s .75s ease-out both}
+  .ritual-seal{animation:career-imprint .38s 2.45s both}
+  @keyframes career-turn{from{transform:rotate(-42deg);opacity:.35}to{transform:rotate(0);opacity:1}}
+  @keyframes career-ink{from{opacity:.14}to{opacity:1}}
+  @keyframes career-trace{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
+  @keyframes career-imprint{from{opacity:0;transform:translateY(-6px) scale(1.25) rotate(-8deg)}to{opacity:1;transform:rotate(-3deg)}}
+}
+
+.sample-banner{padding:9px 18px;color:#392e20;background:#f6dca8;font:650 14px/1.6 var(--body)}.can-cast .sample-banner{display:none}html:not(.can-cast) #top[hidden]:target{display:block!important}html:not(.can-cast) :is(.visit-note,#finish){display:none}#viewer-help a{display:inline-block;padding:.3em}
+
+/* Hold the last decoded frame across the single-video source switch. */
+.scene-media>canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none}
+.scene-media>canvas[hidden]{display:none}
+
+/* Keep the portrait in the same viewport rectangle when the dialogue opens. */
+#threshold[data-phase="entering"]{height:100dvh;min-height:0;display:grid;place-items:center}
+#threshold[data-phase="entering"] .threshold-brand{display:none}
+#threshold[data-phase="entering"] .film-stage{width:min(100%,56.25dvh);max-height:100dvh}
+@media(max-height:480px){
+ #threshold[data-phase="entering"]{display:block}
+ #threshold[data-phase="entering"] .film-stage{height:42dvh;width:min(100%,23.625dvh)}
+}
+
+/* Reserve the complete greeting controls before placing the portrait overlay. */
+#consult[data-phase="entrance"]{--desk-top:min(calc((100dvh - var(--portrait-h))/2 + var(--portrait-h)*.64),calc(100dvh - 300px))}
