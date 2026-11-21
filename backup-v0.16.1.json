@@ -1,0 +1,79 @@
+{
+  "version": "0.16.1",
+  "created_at": "2026-11-21T05:04:33.820831+00:00",
+  "repository": "gymfleek-spec/ai-xuan-jiuye",
+  "branch": "baseline-v0.16.1",
+  "source_archive": {
+    "file": "xuan-jiuye-v0.16.1-source.zip",
+    "sha256": "2f8781ff7691f0c840eb0851aa3d973100348c02747baef9fc6c2b3b1758f7ea",
+    "bytes": 21033793,
+    "prefix": "project/",
+    "files": {
+      "README.md": "d4e971b8f76f02f90a0c4d03b7f8800b640aba2d09c6065d47b0c9fcbb98eac4",
+      "assets/arrival-same-room-v2.mp4": "426d8b820779d4b28c71e40896122c05acfd5189f587fd1043ea497677115392",
+      "assets/desk-same-room-v2.jpg": "a2dc24545c222ca43e7595b3377fa150d944c0267cb2dd3991586d11a722437e",
+      "assets/office-door-a4.jpg": "43fea0d16f3856ee775fa5162578e5d893e26eafa6dcde5c9dde6d3412e33f98",
+      "assets/office-entry-same-room-v1.mp4": "e6646d7e42e373b217d7f786e2e470c29c23daa2a79e89c745d12d05753e87c9",
+      "build.mjs": "59f74ca2833df5c810b8c0e8c0a9f19bb4ec5039ea8c3ddc8db880bee5e1dab9",
+      "content.js": "e288850ffa53b95adef9570ad761ad3581cd2450d9a1f85346197f1155c84f1a",
+      "journey.test.mjs": "354547b6d9ddedd07c9f93dec74336c440dfa3872ba68454633a2203a968310d",
+      "motion/NOTICE.md": "1d3ffd3f5f621726d60ff3d0950c6a68b7fc23e3cb0f0c9917385aba9e7c2e22",
+      "motion/motion.css": "2f5443bc869b175a3ae9f908aa25620060904ab31b202fbdc102748e2f47a033",
+      "motion/motion.mjs": "498e78f26b3036b6e6ee5e91a0922f0269d8578d99c17b15f152a02685e31301",
+      "motion/motion.test.mjs": "086f34993ccd10780f8d936e2e256e807df13c12dcbbf1adb7b0112915f97113",
+      "package.json": "3f0649dbd4760d38b69bbf462d9668ad8f1b2f939252a17f9e2202ce92603396",
+      "reading.test.mjs": "3bc855d770bfce8b814eee7f27fdd6984036d1fa0f39e1260e6b8ef667056371",
+      "scroll/art/SOURCES.md": "61b5ff918a38f56aeb2279fb97238fb7c667bc52bc4e146d50ae54d0054ca350",
+      "scroll/art/captions.json": "4c5c417a73a33594f16c25a70dc1f3cc30986f01606e205c0cdb568e7ec64eb0",
+      "scroll/art/hero.webp": "13240ac25f9cf0aca5f6a0da2bea1934cc56f4b581d89c098a259fa69d133ffb",
+      "scroll/art/interlude-1.webp": "23b36e4e8774d62c1192194b43949b22ac501dacd7c2c4051ac208bffc61264e",
+      "scroll/art/interlude-2.webp": "74e2ca2c8c96bb35278c70de7dfe836e846563c7a147871cdea9bf161a464cb8",
+      "scroll/art/tea-room.jpg": "9736e7f5522d2a176c44ec1e05fbb293e41fdd5a5547e45d8f30739e534aa0ec",
+      "scroll/book.mjs": "cba8528c890727d814b67f7319c47327942ab9f5c70a58446b5dd4f0419f6e1f",
+      "scroll/bridges.json": "d0f4d60ed69930059dd536d9508e86fe4bdcb111dc0315cbe1728b5338d0b2fa",
+      "scroll/chart.mjs": "b5ffa3b2840a9f6a3674798fa1ccf71307241c3e7e93f2cd5ee1ff73d9368e95",
+      "scroll/page.html": "9bfb9044cadaab0d10d71b6f7585d58946b976f9cc22bd6efd2ee7e036c20c2d",
+      "scroll/reader.mjs": "d343d32d114e29ae55bfd89125c589980ecdc37c9f8d08940cb938614795eb57",
+      "scroll/result.mjs": "a7260c7f22524b01be50e0a685e6afe9c890dd21f4d120638136a7aa4a3a7707",
+      "scroll/result.test.mjs": "72aca75601f415d0922de247796def0f2cbc49483901eff0c1ba58bf595b1623",
+      "scroll/scroll.test.mjs": "db24f289f7f393c69e06d2a4bd0b4ff663a149c44f9e27ced16036830b2bef79",
+      "scroll/style.css": "d92444a7845ad78ac265c7d3d8c3a355520810d5538cccc5d5aace3bfe743c2f",
+      "scroll/visit.css": "7f6bfb2be9113f4cee13dacf6850c61008853ddc4235e772d0c2244ff373e5f4",
+      "scroll/visit.test.mjs": "4388de00d456663a0fa90e5d791d32385bbcf2dafc11a06ea9fef1e6a38f5b98",
+      "vendor/THIRD_PARTY_NOTICES.txt": "4526a3a15a965dd493924833c9440aa4ec1f84950930239b7cc80186b7530dc3",
+      "vendor/iztro-v2.6.5.min.js": "6d7993c30d76b4720ccd6c981893738e1c5d3d8c925115ea910c1a161c41882b",
+      "ziwei.js": "ec514d84d6415a0f979f532b7900f247d8242ee0014f972a6c2d18d76fc00cd3",
+      "ziwei.test.mjs": "11c0096025b13fad9e23d70ecb217b4efbfc8d10f81d5ef251c905978d97b69a",
+      "玄與九爺-網頁初稿.html": "ad842b064a19523c809c40c755c1baa5f87a6b10072c93209f1eeed221ed1415"
+    }
+  },
+  "public_archive": {
+    "file": "xuan-jiuye-v0.16.1-public.zip",
+    "sha256": "3453d1e0aaff8892912cb8c199cc1d70e31cc753d46b99efdc9c9863f1a24dc1",
+    "bytes": 8713223,
+    "files": {
+      "reading.css": "9fa5de989945c8dd0449086db2e9426430f058972ec9c5d3f897b4df2466d728",
+      "reading.js": "a5e68783b703a3ef8f9fc63342c9ca769494f6dbf00fb192f8063257a2d96267",
+      "iztro-2.6.5.js": "6d7993c30d76b4720ccd6c981893738e1c5d3d8c925115ea910c1a161c41882b",
+      "THIRD_PARTY_NOTICES.txt": "4526a3a15a965dd493924833c9440aa4ec1f84950930239b7cc80186b7530dc3",
+      "art/tea-room.jpg": "9736e7f5522d2a176c44ec1e05fbb293e41fdd5a5547e45d8f30739e534aa0ec",
+      "assets/arrival-same-room-v2.mp4": "426d8b820779d4b28c71e40896122c05acfd5189f587fd1043ea497677115392",
+      "assets/office-entry-same-room-v1.mp4": "e6646d7e42e373b217d7f786e2e470c29c23daa2a79e89c745d12d05753e87c9",
+      "assets/desk-same-room-v2.jpg": "a2dc24545c222ca43e7595b3377fa150d944c0267cb2dd3991586d11a722437e",
+      "assets/office-door-a4.jpg": "43fea0d16f3856ee775fa5162578e5d893e26eafa6dcde5c9dde6d3412e33f98",
+      "index.html": "867210e5c1a5a2ed2f46e75070663064b9a2712fe92c2edf1321a6a435b89824"
+    }
+  },
+  "rebuilt_portable_sha256": "82cba65a4a44b3aad53bb5e973ecfdff5b76c82df83eef66db4236525ed4c203",
+  "excluded": [
+    "runtime databases, accounts, credentials, .env, logs, caches",
+    "historical binary media not used by v0.16.1",
+    "generated HTML and build output: rebuilt from source or in public ZIP",
+    "unrelated research, transfers and operational evidence"
+  ],
+  "notes": [
+    "Legacy 玄與九爺-網頁初稿.html is retained only because two existing ziwei tests read it; it is not the current entry page.",
+    "Source contents are exact copies; no product code, tests, permissions or website were changed.",
+    "The current website needs no backend, external CDN or npm dependencies."
+  ]
+}
