@@ -12,6 +12,9 @@
 !/backup-v0.17.0.json
 !/xuan-jiuye-v0.17.0-source.zip
 !/xuan-jiuye-v0.17.0-public.zip
+!/EXCERPTS-v0.17.0.md
+!/TEST-LOG-v0.17.0.txt
+!/VALIDATION-v0.17.0.json
 !/project/README.md
 !/project/assets/arrival-same-room-v2.mp4
 !/project/assets/desk-same-room-v2.jpg
@@ -50,6 +53,3 @@
 !/project/ziwei.js
 !/project/ziwei.test.mjs
 !/project/玄與九爺-網頁初稿.html
-!/EXCERPTS-v0.17.0.md
-!/TEST-LOG-v0.17.0.txt
-!/VALIDATION-v0.17.0.json

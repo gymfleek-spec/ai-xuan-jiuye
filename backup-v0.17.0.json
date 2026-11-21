@@ -1,4 +1,5 @@
 {
+  "revision": 2,
   "version": "0.17.0",
   "base": "fc0f7699698f41c10815b78d8da075835192bb0d",
   "branch": "feat/v0.17-empathy-teaser",
@@ -8,8 +9,8 @@
   "archives": {
     "source": {
       "file": "xuan-jiuye-v0.17.0-source.zip",
-      "sha256": "d09e524705e951d9e057793d663fd51dd1d54f68a12e956ccecb6f5430bae559",
-      "bytes": 21043986,
+      "sha256": "41c7c1bb3070ef7002579dfe7447b66c1d803061b865cae4443bb7fa277f422d",
+      "bytes": 21044057,
       "files": {
         "project/README.md": "3536c5b4baccccf22474037a930b6a2374c78b802cd6da316cc66fa54093a793",
         "project/assets/arrival-same-room-v2.mp4": "426d8b820779d4b28c71e40896122c05acfd5189f587fd1043ea497677115392",
@@ -38,8 +39,8 @@
         "project/scroll/empathy-copy.mjs": "7bf0273348e775fecc6872934850cd5aae3d808a225693c043ca7eefea6622e0",
         "project/scroll/page.html": "d9b996d4758735ea816a9106a85765b36f8d728325138cfd573255f1039655c6",
         "project/scroll/reader.mjs": "0b755773c88536a618395df0917a1cc85a729080166422a45e59be0e1e3f862f",
-        "project/scroll/result.mjs": "b925b3037a15b15b667d96498e4516450fe38cb2f903064fc3a505540c3bdfd7",
-        "project/scroll/result.test.mjs": "b206c5430f104ee0b73f4dc3e5ab586831180ef91b8630b536614114b5e1952e",
+        "project/scroll/result.mjs": "386708ac4f900a1b2b275b11a87f81407ffb97497535ed7ea2da634d0fd52e46",
+        "project/scroll/result.test.mjs": "a5ddb1f6ed9a7bd7ee5a66c8689f5fa8d32f548169e7eaf985f46a2984dbf019",
         "project/scroll/scroll.test.mjs": "5379720e14a67386589515614adf32066912bf3b1719bc31091dbb0d437ca57d",
         "project/scroll/style.css": "4c2a49c6b5e0c86cffc61a2461a197341688d5691f6901b461b1d2d3800a10ea",
         "project/scroll/visit.css": "71c137b791d2034e4bd146229bac04c7c167106a3b19833ecb975d6f7532dfe8",
@@ -53,8 +54,8 @@
     },
     "public": {
       "file": "xuan-jiuye-v0.17.0-public.zip",
-      "sha256": "ee089cec3a0f15d998834d1dbf878cd9d48dd94e32af024783b823beda081d43",
-      "bytes": 8717171,
+      "sha256": "adf4d72c8c547974aba1ef425af69828dcc53dcb73fa3989c5f36ff28d9d0a6d",
+      "bytes": 8717173,
       "files": {
         "THIRD_PARTY_NOTICES.txt": "4526a3a15a965dd493924833c9440aa4ec1f84950930239b7cc80186b7530dc3",
         "art/tea-room.jpg": "9736e7f5522d2a176c44ec1e05fbb293e41fdd5a5547e45d8f30739e534aa0ec",
@@ -62,12 +63,12 @@
         "assets/desk-same-room-v2.jpg": "a2dc24545c222ca43e7595b3377fa150d944c0267cb2dd3991586d11a722437e",
         "assets/office-door-a4.jpg": "43fea0d16f3856ee775fa5162578e5d893e26eafa6dcde5c9dde6d3412e33f98",
         "assets/office-entry-same-room-v1.mp4": "e6646d7e42e373b217d7f786e2e470c29c23daa2a79e89c745d12d05753e87c9",
-        "index.html": "0ab70f83f1456ee3a893988b37fe0ef1222093579a986d0764efe37d8fefa539",
+        "index.html": "c94b9fb0c34cadd43f9306930aaffe774cd28b615746be59aeda08e41c9a171e",
         "iztro-2.6.5.js": "6d7993c30d76b4720ccd6c981893738e1c5d3d8c925115ea910c1a161c41882b",
         "reading.css": "0aa8221dd37aa3bd230ff69caa3de9dee5cc437797631897a5300d46915955f3",
-        "reading.js": "29f76bad1a4405d62928075d65da61600d12c1db36e7736ae4db6c978fdbb68d"
+        "reading.js": "8af010dc10913d9012d2ca3312859fcab5ef5a6bd63a7a337c5e86e4502094c3"
       }
     }
   },
-  "portable_sha256": "cd112e3f74c9e15b0d6df863853efb1e75b062683d9285bf8380f2a96497c136"
+  "portable_sha256": "cf132ee542ed25876e9c1b9eaecec5bff087838224f47603463bdfcfa5b226e7"
 }

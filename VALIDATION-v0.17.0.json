@@ -2,17 +2,18 @@
   "version": "0.17.0",
   "base": "fc0f7699698f41c10815b78d8da075835192bb0d",
   "branch": "feat/v0.17-empathy-teaser",
-  "code_commit": "013ae346db623b7046e6de7d297bbf12e81fbdec",
+  "code_commit": "d2c99c6a177e6e3a11a3a986da723644e8a32bf0",
   "source_files_matched": 38,
   "source_restore_matches": true,
   "rebuilt_public_files_matched": 10,
   "rebuilt_portable_matches": true,
   "run": {
+    "revision": 2,
     "command": "npm run build && npm test",
-    "cwd": "fresh source ZIP restore/project",
+    "cwd": "fresh revision2 source ZIP restore/project",
     "exit_code": 0,
-    "started": "2026-11-21T09:00:54.977432+00:00",
-    "seconds": 29.686826,
+    "started": "2026-11-21T09:21:04.973328+00:00",
+    "seconds": 28.909092,
     "node": "v24.22.1",
     "npm": "11.19.1",
     "passes": [
@@ -54,5 +55,16 @@
     "real conversion study",
     "real payment backend"
   ],
-  "auth": "CLI write denied to the mismatched account; same authorized branch committed via the existing signed-in gymfleek-spec owner in the browser; no permission changes"
+  "auth": "CLI write denied to the mismatched account; same authorized branch committed via the existing signed-in gymfleek-spec owner in the browser; no permission changes",
+  "revision": 2,
+  "plan_reopen_browser_check": {
+    "selected_from_teaser": "愛情・單題拆局書",
+    "reopened_sticky_plan": "愛情・單題拆局書",
+    "price": "HK$88",
+    "unchanged_free_topic": "官祿",
+    "free_paragraphs": 4,
+    "script": "reading.js?v=8af010dc1"
+  },
+  "source_zip_sha256": "41c7c1bb3070ef7002579dfe7447b66c1d803061b865cae4443bb7fa277f422d",
+  "public_zip_sha256": "adf4d72c8c547974aba1ef425af69828dcc53dcb73fa3989c5f36ff28d9d0a6d"
 }
