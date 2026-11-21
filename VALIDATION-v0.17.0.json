@@ -1,0 +1,58 @@
+{
+  "version": "0.17.0",
+  "base": "fc0f7699698f41c10815b78d8da075835192bb0d",
+  "branch": "feat/v0.17-empathy-teaser",
+  "code_commit": "013ae346db623b7046e6de7d297bbf12e81fbdec",
+  "source_files_matched": 38,
+  "source_restore_matches": true,
+  "rebuilt_public_files_matched": 10,
+  "rebuilt_portable_matches": true,
+  "run": {
+    "command": "npm run build && npm test",
+    "cwd": "fresh source ZIP restore/project",
+    "exit_code": 0,
+    "started": "2026-11-21T09:00:54.977432+00:00",
+    "seconds": 29.686826,
+    "node": "v24.22.1",
+    "npm": "11.19.1",
+    "passes": [
+      79,
+      4
+    ],
+    "failures": [
+      0,
+      0
+    ],
+    "stderr_bytes": 0,
+    "warning_lines": []
+  },
+  "changed_against_v0161_zip": [
+    "project/README.md",
+    "project/build.mjs",
+    "project/package.json",
+    "project/scroll/book.mjs",
+    "project/scroll/chart.mjs",
+    "project/scroll/chart.test.mjs",
+    "project/scroll/empathy-copy.mjs",
+    "project/scroll/page.html",
+    "project/scroll/reader.mjs",
+    "project/scroll/result.mjs",
+    "project/scroll/result.test.mjs",
+    "project/scroll/scroll.test.mjs",
+    "project/scroll/style.css",
+    "project/scroll/visit.css",
+    "project/scroll/visit.test.mjs",
+    "project/ziwei.js"
+  ],
+  "test_scope": "79 current unit tests + 4 integrated tea room tests; author checks, not independent acceptance",
+  "not_run": [
+    "physical phones",
+    "Safari and WhatsApp browsers",
+    "screen reader",
+    "native date/time keyboard entry",
+    "weak network",
+    "real conversion study",
+    "real payment backend"
+  ],
+  "auth": "CLI write denied to the mismatched account; same authorized branch committed via the existing signed-in gymfleek-spec owner in the browser; no permission changes"
+}
