@@ -440,7 +440,19 @@ export function attachZiwei(dialog, content, paint, openBook) {
   }
   function showChoice(reply) {
     const hello = reply === 'curious' ? '我係玄，呢位係九爺。' : reply === 'yes' ? '好呀。' : '';
-    paint(`<p class="desk-speaker">玄</p><h2 id="dialog-title">${hello}想由邊方面睇起？</h2><div class="desk-topics">${Object.entries(READING_TOPICS).map(([palace, topic]) => `<button class="option" type="button" data-ziwei="focus" data-palace="${palace}"><strong>${topic.label}</strong><span>${topic.hint}</span></button>`).join('')}</div>`, 'interaction');
+    const plaques = {
+      官祿: ['官','留低定轉彎'], 夫妻: ['夫','關係拉扯'], 田宅: ['田','界線與歸屬'],
+      財帛: ['財','籌碼與節奏'], 命宮: ['命','大運轉折']
+    };
+    const cards = Object.entries(READING_TOPICS).map(([palace, topic]) => {
+      const [seal, line] = plaques[palace], house = palaceTitle(palace);
+      return `<button class="topic-card" type="button" data-ziwei="focus" data-palace="${palace}" aria-label="${topic.label}，${house}" aria-describedby="topic-hint-${palace}">
+        <span class="seal-badge" aria-hidden="true">${seal}</span>
+        <span class="topic-copy"><span class="topic-meta"><strong>${topic.label}</strong><span class="topic-palace">${house}</span></span><span class="topic-hint" id="topic-hint-${palace}">${topic.hint}・${line}</span></span>
+        <span class="topic-arrow" aria-hidden="true">›</span>
+      </button>`;
+    }).join('');
+    paint(`<header class="topic-heading"><p class="topic-eyebrow">玄・輕輕合上摺扇</p><h2 id="dialog-title">${hello}想由邊方面睇起？</h2><p class="topic-guide">先揀你今晚最在意嗰一件事，其餘之後隨時可以再睇。</p></header><div class="desk-topics" role="group" aria-label="話題選擇">${cards}</div>`, 'interaction');
   }
   const get = id => document.getElementById(id);
   const formError = '<p id="ziwei-error" class="form-error" role="alert"></p>';

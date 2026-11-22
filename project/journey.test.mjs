@@ -57,13 +57,20 @@ test('the desk waits for the film; a blocked click cannot choose a topic', () =>
     assert.equal(f.phase,'interaction');
   } finally { f.restore(); }
 });
-test('both greetings open the same five topics in one click; there is no landmark button', () => {
+test('integrated tea room: both greetings open five labelled jade topic buttons with one-click routing', () => {
   const f=fixture(); try {
     for (const [reply,copy] of [['curious','我係玄，呢位係九爺。'],['yes','好呀。']]) {
       f.open(false);assert.match(f.html,/有呀，想傾吓/);assert.match(f.html,/你係邊位/);
       assert.doesNotMatch(f.html,/look-altar|望吓周圍先|aria-pressed="true"|<form/);
       f.click('greet',{reply}); assert.equal(f.phase,'interaction'); assert.ok(f.html.includes(copy));
-      assert.equal((f.html.match(/data-ziwei="focus"/g)||[]).length,5);
+      const cards = [...f.html.matchAll(/<button[^>]*class="topic-card" type="button" data-ziwei="focus" data-palace="([^"]+)" aria-label="([^"]+)" aria-describedby="([^"]+)"/g)];
+      assert.deepEqual(cards.map(m=>m.slice(1)), [
+        ['官祿','事業，官祿宮','topic-hint-官祿'], ['夫妻','愛情，夫妻宮','topic-hint-夫妻'],
+        ['田宅','家庭，田宅宮','topic-hint-田宅'], ['財帛','財運，財帛宮','topic-hint-財帛'],
+        ['命宮','未來方向，命宮','topic-hint-命宮']
+      ]);
+      assert.doesNotMatch(f.html,/aria-pressed|tabindex=/);
+      for (const [,palace,,hint] of cards) assert.match(f.html,new RegExp('id="'+hint+'"[^>]*>[^<]+・[^<]+'));
       f.click('focus',{palace:'官祿'}); assert.equal(f.phase,'career-setup');assert.match(f.html,/點稱呼你好/);
       f.click('choose-focus'); assert.equal(f.phase,'interaction');
     }

@@ -17,14 +17,32 @@
   <div class="film-stage" id="film-stage" data-arrival="@@ARRIVAL@@" data-entry="@@ENTRY@@" data-door="@@DOOR@@" data-desk="@@DESK@@">
     <div class="scene-media" id="scene-media"><img id="scene-poster" src="@@LOBBY@@" width="1080" height="1920" alt="玄與灰狐九爺在枱前等你。" fetchpriority="high">
     <video id="scene-video" muted playsinline disablepictureinpicture disableremoteplayback preload="none" aria-hidden="true" hidden></video><canvas id="scene-hold" aria-hidden="true" hidden></canvas></div>
-    <div class="knock" id="invitation"><p>九巷仍然亮住燈。</p><h1>入嚟坐，慢慢講。</h1><button id="enter" class="plaque" type="button" disabled>推門入座 <span aria-hidden="true">→</span></button></div>
+    <div class="knock" id="invitation"><p>九巷仍然亮住燈。</p><h1>入嚟坐，慢慢講。</h1><button id="enter" class="btn-luopan" type="button" aria-label="推門入座" disabled>
+      <span class="corner-bracket cb-tl" aria-hidden="true"></span>
+      <span class="corner-bracket cb-tr" aria-hidden="true"></span>
+      <span class="corner-bracket cb-bl" aria-hidden="true"></span>
+      <span class="corner-bracket cb-br" aria-hidden="true"></span>
+      <svg class="luopan-icon" viewBox="0 0 36 36" fill="none" aria-hidden="true">
+        <g class="luopan-spin">
+          <polygon points="18,2 29.3,6.7 34,18 29.3,29.3 18,34 6.7,29.3 2,18 6.7,6.7" stroke="#d6b264" stroke-width="1.2" fill="rgba(214,178,100,0.08)"/>
+          <circle cx="18" cy="18" r="10.5" stroke="#d6b264" stroke-width="0.9" stroke-dasharray="2.5 2"/>
+          <circle cx="18" cy="18" r="5" stroke="#f4df9e" stroke-width="1"/>
+          <path d="M18 4V9M18 27V32M4 18H9M27 18H32" stroke="#f4df9e" stroke-width="1"/>
+        </g>
+        <circle cx="18" cy="18" r="2" fill="#f4df9e"/>
+      </svg>
+      <span class="btn-luopan-text">推門入座</span>
+      <svg class="btn-luopan-arrow" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M5 12H18M18 12L13 7M18 12L13 17" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button></div>
   </div>
-  <p id="entry-foot">用虛構資料試排　·　唔使登入或付款</p>
+  <p id="entry-foot">免費入室試盤 · 唔使登入或付款</p>
   <p id="viewer-help" role="status">如果撳唔到「推門入座」，請用手機瀏覽器打開網頁。只想睇版面，可以<a href="#top">翻開虛構例盤</a>。</p>
 </section>
 <dialog id="consult" aria-labelledby="dialog-title">
   <div class="desk-art" id="desk-scene" aria-label="玄與九爺陪你慢慢講"></div>
-  <div class="consult-body" id="consult-body"><div id="story-content" tabindex="-1"></div><button class="leave" id="leave-desk" type="button">返門口</button></div>
+  <div class="consult-body" id="consult-body"><div id="story-content" tabindex="-1"></div><button class="leave" id="leave-desk" type="button"><span class="desk-leave-label">返門口</span><span class="topic-leave-label"><span aria-hidden="true">←</span> 返回茶室門口</span></button></div>
 </dialog>
 <main class="roll" id="top" hidden>
 <p class="sample-banner">虛構例盤 ／ 呢份係閱讀樣本，唔係你嘅命盤。</p>
