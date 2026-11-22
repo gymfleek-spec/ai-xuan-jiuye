@@ -1,6 +1,6 @@
 import { getPalaceReading, readingFact, palaceTitle, READING_TOPICS, periodTempo } from './chart.mjs';
-import { bookFromChart } from './book.mjs';
-import { HUA_COPY, RELATING_COPY } from './empathy-copy.mjs';
+import { bookFromChart, bookPreviews } from './book.mjs';
+import { relatingPrompts } from './empathy-copy.mjs';
 
 export function resultFromChart(chart, subject) {
   const book = bookFromChart(chart), readings = chart.palaces.map(p => getPalaceReading(chart, p.name));
@@ -37,18 +37,34 @@ export function attachResult(report) {
   });
   find('purchase-cta').addEventListener('click', () => openPurchase());
   find('close-purchase').addEventListener('click', () => find('purchase-dialog').close());
-  function teaser(title, lines, key, full = false) {
-    const card = node('section', '', 'teaser-card'); card.dataset.topic = key;
-    card.append(node('h3', title), ...lines.map(line => node('p', line, 'teaser-intro')));
-    // Decorative marks only: neither DOM nor the accessibility tree contains a hidden paid chapter.
+  function teaserTail(lines = 1) {
+    // Decorative marks only: there is no full chapter hidden behind the fade.
     const tail = node('div', '', 'teaser-fade'); tail.setAttribute('aria-hidden','true'); tail.setAttribute('inert','');
-    for (let i = 0; i < 3; i++) tail.append(node('span', '────────　──────'));
-    card.append(tail);
-    if (canOffer) {
-      const button = node('button', full ? '全盤三年命書・HK$148' : '單題拆局書・HK$88', 'teaser-cta');
-      button.type = 'button'; button.setAttribute('aria-label',title+'・'+button.textContent); button.addEventListener('click', () => openPurchase(full ? 'full' : 'single', key)); card.append(button);
-    }
+    for (let i = 0; i < lines; i++) tail.append(node('span', '────────　──────'));
+    return tail;
+  }
+  function teaser(title, lines) {
+    const card = node('section', '', 'teaser-card');
+    card.append(node('h3', title), ...lines.map(line => node('p', line, 'teaser-intro')), teaserTail(3));
     return card;
+  }
+  function paintChapterPreviews() {
+    find('book-previews').hidden = !canOffer;
+    find('chapter-previews').replaceChildren(...(canOffer ? bookPreviews(current.book, current.selected).map(c => {
+      const card = node('section', '', 'chapter-preview');
+      card.append(node('h3', c.title), ...c.lines.map(line => node('p', line)));
+      return card;
+    }) : []));
+    find('topic-previews').replaceChildren(...(canOffer ? current.book.chapters.filter(c => c.key !== current.selected).map(c => {
+      const item = node('details', ''); item.setAttribute('name','other-topics'); item.dataset.topic = c.key;
+      const peek = node('div', '', 'topic-peek');
+      peek.append(...c.teaser.map(line => node('p', line)), teaserTail());
+      item.append(node('summary', c.label), peek);
+      item.addEventListener('toggle', () => {
+        if (item.open && current && canOffer) { purchaseTopic = c.key; pricing(plan); }
+      });
+      return item;
+    }) : []));
   }
   function basis(chapter) {
     const { timing, mutagens } = current.book;
@@ -68,16 +84,17 @@ export function attachResult(report) {
   function topic(key) {
     const chapter = chapterFor(key); if (!chapter) return;
     activeTopic = key; purchaseTopic = key; find('topic-select').value = key;
+    for (const item of find('topic-previews').querySelectorAll('details')) item.open = false;
     put('pattern-badge', current.book.element + ' · ' + chapter.source);
     put('empathy-headline', name + '，由' + chapter.label + '開始，一件一件慢慢拆。');
     const free = key === current.selected;
     find('empathy-body').replaceChildren(...(free
       ? [chapter.lens, chapter.people, chapter.other, chapter.resource].map(v => node('p', v))
-      : [teaser(chapter.label + '・另一半慢慢拆', chapter.teaser, key)]));
+      : [teaser(chapter.label + '・另一半慢慢拆', chapter.teaser)]));
     put('jiuye-quote', !canOffer ? safeReply : free ? chapter.question + ' 可以試吓講：' + chapter.line : READING_TOPICS[key].question);
     find('resonance').hidden = !free;
     find('resonance').setAttribute('aria-pressed','false'); put('resonance','呢句講中咗 ✦');
-    basis(chapter); find('basis').open = false; pricing(plan); palace(key);
+    basis(chapter); find('basis').open = false; pricing(plan); palace(key); paintRelating(key);
   }
   function palace(key) {
     const reading = current?.readings.find(r => r.palace === key); if (!reading) return;
@@ -110,18 +127,12 @@ export function attachResult(report) {
     put('turn-year',validCareer.length && new Set(validCareer).size>1 ? timing.annual.filter((p,i)=>career[i]===careerHigh).map(p=>p.year).join('／') : '2026–2028');
     const now = timing.current;
     put('decadal-label', now.status === 'ready' ? now.decadal.active ? '目前十年大限：' + now.decadal.range.join('–') + '虛歲・' + palaceTitle(now.decadal.natalPalace) : '目前童限・先讀本命與流年節奏' : '本命仍可讀・目前超出十年大限範圍');
-    const cards = timing.quarters.map(p => {
-      if (p.status !== 'ready') return teaser(p.year + '・第' + p.quarter + '季', ['呢一季' + (p.status === 'before-birth' ? '仍在出生之前。' : '超出引擎運限範圍。'),'先由眼前能做嘅一小步開始。'],current.selected,true);
-      const ji = p.monthly.activations.find(r => r.hua === '忌'), lu = p.monthly.activations.find(r => r.hua === '祿');
-      return teaser(p.year + '・第' + p.quarter + '季', [p.monthly.stem + p.monthly.branch + '流月，' + lu.star + '化祿落本命' + palaceTitle(lu.palace) + '，可以先望一望手上已有嘅資源。',ji.star + '化忌落本命' + palaceTitle(ji.palace) + '，有邊份用力可以慢半拍？'],current.selected,true);
-    });
-    find('quarter-previews').replaceChildren(...cards);
   }
-  function paintRelating() {
+  function paintRelating(key) {
     const { stars, theme, ji, lu } = chapterFor('夫妻');
-    // Show both stars in the basis; when paired, use the companion for the two reflection prompts.
-    const clues = [stars.join('、') + '・' + theme, ...RELATING_COPY[stars.at(-1)], HUA_COPY[ji.star].space, HUA_COPY[lu.star].evening];
+    const clues = [stars.join('、') + '・' + theme, ...relatingPrompts(key, stars.at(-1), ji.star, lu.star)];
     clues.forEach((value,i) => put('fate-' + i,value));
+    put('fate-4-label', key === '官祿' ? '交接嗰一刻' : key === '財帛' ? '合作嗰一刻' : '想像一個晚上');
   }
   find('topic-select').addEventListener('change', e => topic(e.target.value));
   find('resonance').addEventListener('click', () => {
@@ -146,17 +157,14 @@ export function attachResult(report) {
         button.addEventListener('click',() => palace(p.name)); grid.append(button);
       }
       const center = node('div','','palace-center'); center.append(node('strong','紫微斗數'),node('span',current.book.element),node('span','本命十二宮')); grid.append(center);
-      topic(current.selected); paintTiming(); paintRelating();
-      find('chapter-previews').replaceChildren(...current.book.chapters.map(c => teaser(c.label + (c.key === current.selected ? '・由呢一題開始' : '・再行深一步'),c.teaser,c.key)));
-      const selected = chapterFor(current.selected);
-      find('action-previews').replaceChildren(teaser('穩陣・留力先行',selected.steady,current.selected),teaser('破局・試出新路',selected.breakthrough,current.selected));
+      topic(current.selected); paintTiming(); paintChapterPreviews();
       find('chart-details').open = find('topic-menu').open = false;
     },
     clear() {
       if (find('purchase-dialog').open) find('purchase-dialog').close();
       current = null; name = safeReply = ''; canOffer = false; activeTopic = purchaseTopic = '';
-      find('purchase-cta').hidden = true; pricing('full');
-      for (const id of ['pattern-badge','empathy-headline','empathy-body','jiuye-quote','basis-detail','result-grid','palace-detail','chapter-previews','action-previews','quarter-previews','decadal-label','curve-high','curve-low','turn-year',...Array.from({length:5},(_,i) => 'fate-' + i)]) find(id).replaceChildren();
+      find('purchase-cta').hidden = find('book-previews').hidden = true; pricing('full');
+      for (const id of ['pattern-badge','empathy-headline','empathy-body','jiuye-quote','basis-detail','result-grid','palace-detail','chapter-previews','topic-previews','decadal-label','curve-high','curve-low','turn-year',...Array.from({length:5},(_,i) => 'fate-' + i)]) find(id).replaceChildren();
       for (const id of ['wealth-line','career-line']) find(id).setAttribute('d','');
       for (const el of report.querySelectorAll('.js-user-name')) el.textContent = '';
       find('basis').open = find('chart-details').open = find('topic-menu').open = false;

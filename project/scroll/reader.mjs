@@ -7,7 +7,7 @@ const threshold=byId('threshold'), report=byId('top'), dialog=byId('consult'), c
 const stage=byId('film-stage'), video=byId('scene-video'), poster=byId('scene-poster'), enter=byId('enter');
 const media=byId('scene-media'), deskScene=byId('desk-scene'), panel=byId('consult-body');
 const reception=poster.getAttribute('src'), desk=stage.dataset.desk;
-const invitation=byId('invitation'), sample=byId('sample');
+const invitation=byId('invitation');
 const results=attachResult(report);
 let phase='home';
 
@@ -26,7 +26,7 @@ function showBook({chart,input,alias,question,subject,reply,offer}){
   byId('visit-label').textContent='枱邊嗰句　／　'+subject;
   byId('visit-question').textContent=question?'「'+question+'」':'';byId('visit-question').hidden=!question;
   byId('visit-answer').textContent='九爺：'+reply;
-  byId('offer').hidden=!offer;sample.open=false;
+  byId('offer').hidden=!offer;
   phase='reading';player.pause();dialog.close();content.replaceChildren();report.hidden=false;
   window.scrollTo(0,0);byId('cover-title').focus({preventScroll:true});
 }
@@ -51,7 +51,7 @@ function home(animate=true){
   const wasReading=phase==='reading';
   phase='home';if(dialog.open)dialog.close();content.replaceChildren();dialog.removeAttribute('data-phase');
   delete threshold.dataset.phase;
-  report.hidden=true;sample.open=false;
+  report.hidden=true;
   if(wasReading){
     results.clear();
     for(const n of ['edition-label','chart-label','visit-label','visit-question','visit-answer'].map(byId))n.textContent='';

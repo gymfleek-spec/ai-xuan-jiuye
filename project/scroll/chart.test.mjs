@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import { runInNewContext } from 'node:vm';
 import { calculateZiwei, natalMutagens, chartTiming, periodTempo, ZIWEI_RULES } from './chart.mjs';
 import { bookFromChart, EXAMPLE } from './book.mjs';
-import { STAR_COPY, HUA_COPY, RELATING_COPY, TOPIC_COPY } from './empathy-copy.mjs';
+import { STAR_COPY, HUA_COPY, RELATING_COPY, relatingPrompts, TOPIC_COPY } from './empathy-copy.mjs';
 const box={self:{}};runInNewContext(readFileSync(new URL('../vendor/iztro-v2.6.5.min.js',import.meta.url),'utf8'),box);
 const engine=box.self.iztro, asOf='2026-11-21';
 const input=(date,gender='female',time='09:30')=>{const [year,month,day]=date.split('-');return {...EXAMPLE,year,month,day,gender,time};};
@@ -89,4 +89,15 @@ test('four-layer copy covers all fourteen stars and five topics, with actual tra
   for(const {strain,resource,space,evening} of Object.values(HUA_COPY)) {
     assert.ok(strain.length>12 && resource.length>12 && space.length>12 && evening.length>12);
   }
+});
+
+test('contextual relationship prompts cover every major star and natal transformation, not just the delivery charts',()=>{
+  for(const key of Object.keys(TOPIC_COPY)) for(const star of Object.keys(STAR_COPY)) for(const hua of Object.keys(HUA_COPY)) {
+    const lines=relatingPrompts(key,star,hua,hua);
+    assert.equal(lines.length,4);
+    assert.ok(lines.every(line=>line.length>12));
+  }
+  const unpack=relatingPrompts('官祿','貪狼','太陰','天機');
+  const share=relatingPrompts('官祿','天相','武曲','紫微');
+  for(let i=0;i<4;i++) assert.notEqual(unpack[i],share[i]);
 });

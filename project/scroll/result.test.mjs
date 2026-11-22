@@ -22,7 +22,7 @@ test('new result uses the same five natal topics and all twelve real palaces, in
 
 function fixture(){
   class Node{
-    constructor(tag){this.tagName=tag;this.children=[];this.dataset={};this.style={};this.attributes={};this.handlers={};this.textContent='';}
+    constructor(tag){this.tagName=tag;this.children=[];this.dataset={};this.style={};this.attributes={};this.handlers={};this.textContent='';this.open=false;}
     append(...nodes){this.children.push(...nodes);}
     replaceChildren(...nodes){this.children=nodes;this.textContent='';}
     addEventListener(name,fn){this.handlers[name]=fn;}
@@ -70,7 +70,8 @@ test('result uses half-visible clues, an accessible teaser tail and a single cul
   const html=readFileSync(new URL('./page.html',import.meta.url),'utf8'),js=readFileSync(new URL('./result.mjs',import.meta.url),'utf8');
   assert.match(html,/<option value="田宅">家庭/);
   assert.match(html,/<details id="chart-details">/);assert.match(html,/<select id="topic-select">/);
-  assert.match(html,/id="chapter-previews"/);assert.match(html,/id="quarter-previews"/);
+  assert.match(html,/id="chapter-previews"/);assert.match(html,/id="topic-previews"/);
+  assert.doesNotMatch(html+js,/quarter-previews|action-previews|teaser-cta/);
   assert.match(html,/青玉鏡・想靠近嘅相處/);
   assert.doesNotMatch(html,/氣質線索|fate-years/);
   assert.doesNotMatch(html,/唔係今次命盤推算|未提供流年|未提供大限|只留喺今次頁面/);
@@ -125,10 +126,19 @@ test('the entry topic stays free across selectors, twelve palaces, chapter previ
     const model=resultFromChart(native,'事業'), career=model.book.chapters[0], love=model.book.chapters[1];
     assert.ok(allText(f.find('empathy-body')).includes(career.other));
     assert.ok(f.find('jiuye-quote').textContent.includes(career.line));
-    assert.equal(f.find('chapter-previews').children.length,5);assert.equal(f.find('quarter-previews').children.length,12);assert.equal(f.find('action-previews').children.length,2);
+    const chapters = f.find('chapter-previews').children, previews = f.find('topic-previews').children;
+    assert.deepEqual(chapters.map(c=>c.children[0].textContent),[
+      '第一章：本命內耗與天賦','第二章：2026–2028 財運與轉折','第三章：緣分與貴人磁場','第四章：穩陣 vs 破局雙選擇'
+    ]);
+    assert.match(allText(chapters[1]),/化祿落本命/);
+    assert.deepEqual(previews.map(c=>c.dataset.topic),['夫妻','田宅','財帛','命宮']);
+    for(const item of previews) {
+      assert.equal(item.tagName,'details');assert.equal(item.getAttribute('name'),'other-topics');
+      assert.deepEqual(item.children[1].children.map(c=>c.tagName),['p','p','div']);
+    }
     f.find('topic-select').handlers.change({target:{value:'夫妻'}});
     assert.equal(f.find('resonance').hidden,true);
-    for(const id of ['empathy-body','chapter-previews','action-previews','quarter-previews']) {
+    for(const id of ['empathy-body','chapter-previews','topic-previews']) {
       assert.ok(!allText(f.find(id)).includes(love.people),'locked prose is not in the DOM');
       assert.ok(!allText(f.find(id)).includes(love.other));
     }
@@ -136,20 +146,25 @@ test('the entry topic stays free across selectors, twelve palaces, chapter previ
     for(const button of f.find('result-grid').children.filter(n=>n.tagName==='button')) {
       button.handlers.click();assert.ok(!allText(f.find('palace-detail')).includes(love.people));
     }
-    const tails=descendants(f.find('chapter-previews')).filter(n=>n.className==='teaser-fade');
-    assert.equal(tails.length,5);for(const t of tails){assert.equal(t.getAttribute('aria-hidden'),'true');assert.equal(t.getAttribute('inert'),'');assert.ok(descendants(t).every(n=>n.tagName!=='button'));}
-    const cta=descendants(f.find('chapter-previews')).find(n=>n.tagName==='button');cta.handlers.click();
-    assert.equal(f.find('purchase-price').textContent,'HK$88');assert.equal(f.find('purchase-plan').textContent,'事業・單題拆局書');f.find('close-purchase').handlers.click();
-    f.find('purchase-cta').handlers.click();assert.equal(f.find('purchase-plan').textContent,'事業・單題拆局書','sticky CTA keeps the chapter selected from a teaser');f.find('close-purchase').handlers.click();
+    for(const root of ['chapter-previews','topic-previews','empathy-body']) assert.ok(descendants(f.find(root)).every(n=>n.tagName!=='button'));
+    const tails=descendants(f.find('topic-previews')).filter(n=>n.className==='teaser-fade');
+    assert.equal(tails.length,4);for(const t of tails){assert.equal(t.getAttribute('aria-hidden'),'true');assert.equal(t.getAttribute('inert'),'');}
+    f.find('sku-single').handlers.click();
+    const family=previews[1];family.open=true;family.handlers.toggle();
+    assert.equal(f.find('purchase-dialog').open,false,'opening the preview does not open pricing');
+    f.find('purchase-cta').handlers.click();
+    assert.equal(f.find('purchase-price').textContent,'HK$88');assert.equal(f.find('purchase-plan').textContent,'家庭・單題拆局書');f.find('close-purchase').handlers.click();
     assert.equal(f.find('empathy-body').children[0].className,'teaser-card','a price selection never grants access');
     f.find('topic-select').handlers.change({target:{value:'官祿'}});
+    assert.equal(family.open,false);assert.equal(f.find('purchase-plan').textContent,'事業・單題拆局書');
     assert.ok(allText(f.find('empathy-body')).includes(career.other));
     const shape=f.find('wealth-line').getAttribute('d');assert.match(shape,/^M12 /);assert.match(shape,/L308 /);
     assert.ok(allText(f.find('basis-detail')).includes('太陰化忌在子女宮'));
-    result.clear();for(const id of ['chapter-previews','quarter-previews','action-previews'])assert.equal(f.find(id).children.length,0);
+    result.clear();for(const id of ['chapter-previews','topic-previews'])assert.equal(f.find(id).children.length,0);
     result.show({chart:native,alias:'界線',subject:'愛情',offer:false,reply:'唔靠張盤催你再聯絡。'});
     assert.equal(f.find('jiuye-quote').textContent,'唔靠張盤催你再聯絡。');
-    for(const id of ['chapter-previews','quarter-previews','action-previews'])assert.equal(descendants(f.find(id)).filter(n=>n.tagName==='button').length,0);
+    assert.equal(f.find('book-previews').hidden,true);
+    for(const id of ['chapter-previews','topic-previews'])assert.equal(f.find(id).children.length,0);
     assert.ok(allText(f.find('empathy-body')).includes(love.other));
   } finally {globalThis.document=old;}
 });
@@ -158,9 +173,9 @@ test('the three delivery charts get distinct chart-led relationship rows and fre
   const f=fixture(), old=globalThis.document;
   globalThis.document={createElement:tag=>new f.Node(tag)};
   const samples=[
-    ['1995-08-15','09:30','male','事業','武曲、貪狼','太陰化忌落喺子女宮','天機化祿喺父母宮','未去過嘅小店','聽你講完','一個靜位','未行過嘅街','接一接手'],
-    ['2000-08-16','03:30','female','愛情','七殺','天同化忌落喺疾厄宮','太陽化祿喺子女宮','直講今日想見面','返嚟講埋下半句','講一次自己想點','行埋去陪一陣','唔使一晚追晒答案'],
-    ['1988-03-12','19:30','female','財運','武曲、天相','天機化忌落喺父母宮','貪狼化祿喺財帛宮','輪流話事','有變就早講','唔使喺心入面估幾輪','喺夜市','唔只係今晚想鬆一口氣'],
+    ['1995-08-15','09:30','male','事業','武曲、貪狼','太陰化忌落喺子女宮','天機化祿喺父母宮','一齊拆掂個局','一齊追','聽朝再對','同拍檔各畫一步','接一接手'],
+    ['2000-08-16','03:30','female','愛情','七殺','天同化忌落喺疾厄宮','太陽化祿喺子女宮','直講今日想見面','到咗未','講一次自己想點','行埋去陪一陣','唔使一晚追晒答案'],
+    ['1988-03-12','19:30','female','財運','武曲、天相','天機化忌落喺父母宮','貪狼化祿喺財帛宮','輪流話事','墊咗邊筆','唔使自己估幾輪','一人講成本','唔只係今晚想鬆一口氣'],
   ];
   try {
     const result=attachResult(f.report);
@@ -176,8 +191,11 @@ test('the three delivery charts get distinct chart-led relationship rows and fre
       assert.ok(clues[0].startsWith(spouse));
       for(let i=0;i<4;i++)assert.ok(clues[i+1].includes(phrases[i]) && clues[i+1].endsWith('？'));
       assert.ok(closing.includes(phrases[4]));
-      f.find('topic-select').handlers.change({target:{value:'田宅'}});
-      assert.deepEqual(rows(),clues,'changing topic cannot swap out the chart’s relationship clues');
+      const otherTopic = subject === '財運' ? '官祿' : '財帛';
+      f.find('topic-select').handlers.change({target:{value:otherTopic}});
+      assert.equal(rows()[0],clues[0],'switching topic retains the same chart evidence');
+      for(let i=1;i<5;i++) assert.notEqual(rows()[i],clues[i]);
+      assert.equal(f.find('resonance').hidden,true,'switching clues does not unlock free prose');
       result.clear();assert.deepEqual(rows(),['','','','','']);
       return {clues,ending:[...free.slice(1),closing]};
     });

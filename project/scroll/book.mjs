@@ -30,3 +30,20 @@ export function bookFromChart(chart) {
     first:'按'+career.stars[0]+'嘅角度，'+career.steady.join(''),second:career.breakthrough.join(''),take:direction.line};
   return {chapters,sample,element:chart.fiveElementsClass,timing:chart.timing,mutagens:chart.mutagens};
 }
+
+export function bookPreviews(book, key) {
+  const selected = book.chapters.find(c => c.key === key);
+  const people = book.chapters.find(c => c.key === '夫妻');
+  const { quarters, asOf } = book.timing;
+  const ready = quarters.filter(p => p.status === 'ready');
+  const quarter = ready.find(p => p.date >= asOf) ?? ready.at(-1);
+  const lu = quarter?.monthly.activations.find(r => r.hua === '祿');
+  return [
+    {title:'第一章：本命內耗與天賦',lines:['由'+selected.label+'出發，睇清'+selected.stars[0]+'嘅「'+selected.theme+'」幾時幫到你，幾時令你用多咗力。']},
+    {title:'第二章：2026–2028 財運與轉折',lines:[lu
+      ? quarter.year+'年第'+quarter.quarter+'季嘅盤面引子：'+lu.star+'化祿落本命'+palaceTitle(lu.palace)+'，先睇清楚手上已有嘅資源。'
+      : '呢三年未有可排嘅運限，先睇眼前有咩資源可以用。']},
+    {title:'第三章：緣分與貴人磁場',lines:['由'+people.stars.join('、')+'嘅「'+people.theme+'」，諗一諗邊種相處令你自在，邊種幫忙你先接得住。']},
+    {title:'第四章：穩陣 vs 破局雙選擇',lines:['穩陣｜'+selected.steady[1],'破局｜'+selected.breakthrough[1]]}
+  ];
+}
