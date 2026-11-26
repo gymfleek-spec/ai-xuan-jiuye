@@ -635,7 +635,7 @@ test('optional sample review, readable delivery and a local text file do not gat
  for(const palace of ['官祿','夫妻','田宅','財帛','命宮']){
   const f=fixture();try{
    f.start(palace);f.alias('測試人甲');f.born();f.ask('測試原句乙');f.endRitual();const lines=f.lines();
-   assert.match(f.html,/翻開延伸手記樣板/);assert.match(f.html,/只供試讀，未開放購買/);
+   assert.match(f.html,/翻開延伸手記/);assert.match(f.html,/兩個日常例子/);
    f.click('preview-review');assert.match(f.html,/唔會落單、扣款或寄電郵/);
    f.click('preview-report');const report=f.nodes['extra-pages'].children;assert.equal(report.length,8);
    const link=f.links.at(-1);assert.ok(link.href.startsWith('data:text/plain;charset=utf-8,'));
@@ -679,7 +679,7 @@ test('no sales invitation in the existing safety, consent or financial-risk rout
  }
 });
 
-test('integrated tea room opens only after the same chart is cast and the final ink settles',()=>{
+test('integrated tea room opens the same chart after its 1.2-second ritual',()=>{
   const received=[];const f=fixture(false,visit=>received.push(visit));
   try {
     for(const [time,branch,borrow] of [['19:30','午',true],['09:30','亥',false]]){
@@ -687,7 +687,9 @@ test('integrated tea room opens only after the same chart is cast and the final 
       const n=received.length;assert.equal(f.phase,'career-ritual');
       assert.doesNotMatch(f.html,/六格/);
       assert.match(f.nodes['ritual-seal'].textContent,/命盤已成/);
-      f.nodes['ritual-seal'].onanimationend();assert.equal(f.timer().delay,600);assert.equal(n,received.length);
+      assert.equal(f.timer().delay,1200);assert.equal(n,received.length);
+      assert.match(f.nodes['ritual-birth'].textContent,/按你填嘅生辰校盤/);
+      assert.doesNotMatch(f.nodes['ritual-birth'].textContent,/1995|真太陽時/);
       f.tick();assert.equal(received.length,n+1);const v=received.at(-1);
       const r=v.chart.palaces.find(p=>p.name==='財帛');
       assert.equal(r.earthlyBranch,branch);assert.equal(!r.majorStars.some(s=>s.type==='major'),borrow);
@@ -697,18 +699,18 @@ test('integrated tea room opens only after the same chart is cast and the final 
     }
   } finally {f.restore();}
 });
-test('integrated tea room: reduced motion still announces the cast; no-contact suppresses the offer',()=>{
+test('integrated tea room: reduced motion removes the intentional delay; no-contact suppresses the offer',()=>{
   let shown;const f=fixture(true,v=>shown=v);
   try {
     f.start('夫妻');f.alias();f.born();f.ask('對方叫我唔好再聯絡');
-    assert.equal(shown,undefined);assert.equal(f.phase,'career-ritual');assert.equal(f.timer().delay,700);
+    assert.equal(shown,undefined);assert.equal(f.phase,'career-ritual');assert.equal(f.timer().delay,0);
     f.tick();assert.equal(shown.offer,false);assert.match(shown.reply,/聯絡|意願/);
   }finally{f.restore();}
 });
 test('integrated tea room: leaving during the seal cancels stale results and the next visit is clean',()=>{
   let hits=0;const f=fixture(false,()=>hits++);
   try{
-    f.start('官祿');f.alias();f.born();f.ask('人工');f.nodes['ritual-seal'].onanimationend();
+    f.start('官祿');f.alias();f.born();f.ask('人工');
     const stale=f.timer().fn;f.close();stale();assert.equal(hits,0);
     f.start('田宅');assert.equal(f.field('alias').value,'');f.alias('另一位');
     assert.equal(f.field('date').value,'');f.born();assert.equal(f.field('question').value,'');

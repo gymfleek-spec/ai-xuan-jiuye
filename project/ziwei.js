@@ -280,23 +280,23 @@ const extraChapters = {
 const skipAfterword = topics => topics.some(t => ['先顧安全','暫停聯絡','尊重對方意願','下注同號碼','投資同買賣'].includes(t));
 
 const notebooks = {
-  官祿: {prompts:careerPrompts, general:generalCareerPrompt, intro:'官祿宮就係睇工作嗰格。', question:'最近工作上，想問啲乜？', example:'例如：幾樣嘢同時要交，點排先後？', privacy:'用虛構處境試，唔好寫真名、公司名或聯絡資料。'},
-  夫妻: {prompts:lovePrompts, intro:'夫妻宮睇嘅係兩個人點相處，單身都可以參考。', question:'感情上，有咩想問？', example:'例如：想見多啲，但一開口就拗，點講好？', privacy:'用虛構處境試，唔好寫自己或對方嘅真名、帳號或聯絡資料。', general:[null,
+  官祿: {prompts:careerPrompts, general:generalCareerPrompt, intro:'官祿宮就係睇工作嗰格。', question:'最近工作上，想問啲乜？', example:'例如：幾樣嘢同時要交，點排先後？', privacy:'講件事就得，唔使寫真名、公司名或聯絡資料。'},
+  夫妻: {prompts:lovePrompts, intro:'夫妻宮睇嘅係兩個人點相處，單身都可以參考。', question:'感情上，有咩想問？', example:'例如：想見多啲，但一開口就拗，點講好？', privacy:'講件事就得，唔使寫任何人嘅真名、帳號或聯絡資料。', general:[null,
     '冇特別問題都得。我哋先睇夫妻宮，諗吓自己鍾意點樣同人相處。',
     '有人陪你時，你最珍惜嘅係一齊做一件事，定係可以自在咁靜一陣？',
     '揀一個令你覺得自在嘅相處片段，寫低：「我鍾意嗰刻，因為＿＿。」',
     '而家有冇拍拖都用得着。唔似你嘅例子，唔使夾硬認。']},
-  田宅: {prompts:familyPrompts, intro:'田宅宮係睇屋企同日常起居嗰格。', question:'屋企有件咩事，你想傾吓？', example:'例如：屋企啲家務點分，先唔使次次都係我提？', privacy:'用虛構例子就得，唔使寫家人真名、住址或聯絡資料。', general:[null,
+  田宅: {prompts:familyPrompts, intro:'田宅宮係睇屋企同日常起居嗰格。', question:'屋企有件咩事，你想傾吓？', example:'例如：屋企啲家務點分，先唔使次次都係我提？', privacy:'唔使寫家人嘅真名、住址或聯絡資料。', general:[null,
     '冇特別問題都得。我哋由田宅宮講起：一個地方，點樣先住得自在？',
     '有冇一個位，坐低就可以抖一抖？一張凳都可以，唔一定要有自己間房。',
     '今晚揀屋企一個自己用嘅位，放低一樣令你覺得舒服嘅嘢，試一晚就得。',
     '自己住定同人住，都唔使套落某一種家庭。生活例子似你先攞嚟用。']},
-  財帛: {prompts:moneyPrompts, intro:'財帛宮係睇點用手上資源嗰格，唔係估身家。', question:'關於用錢，有咩想傾？', example:'例如：想儲錢去旅行，點開始？', privacy:'用虛構例子就得，唔使寫真實金額、戶口或單據資料。', general:[null,
+  財帛: {prompts:moneyPrompts, intro:'財帛宮係睇點用手上資源嗰格，唔係估身家。', question:'關於用錢，有咩想傾？', example:'例如：想儲錢去旅行，點開始？', privacy:'講個情況就得，唔使寫確實金額、戶口或單據資料。', general:[null,
     '冇特別問題都得。我哋睇財帛宮，用「想買一樣嘢」做例，唔使交代身家。',
     '如果同一樣嘢可以遲一日先買，有咩資料會幫你決定？',
     '諗一樣你見過但未買嘅嘢，寫低佢用嚟做乜。唔買都可以完成呢一步。',
     '星位可以當一個角度，唔會決定你有幾多錢。']},
-  命宮: {prompts:directionPrompts, intro:'命宮係呢度用嚟對照自己點揀路嗰格，唔係預告將來。', question:'諗緊下一步，有邊件事想問？', example:'例如：轉工定進修，兩條路點揀？', privacy:'用虛構選擇就得，唔使寫真名、公司名或聯絡資料。', general:[null,
+  命宮: {prompts:directionPrompts, intro:'命宮係呢度用嚟對照自己點揀路嗰格，唔係預告將來。', question:'諗緊下一步，有邊件事想問？', example:'例如：轉工定進修，兩條路點揀？', privacy:'講低你喺度考慮嘅選擇就得，唔使寫真名、公司名或聯絡資料。', general:[null,
     '冇定好目標都可以睇。我哋由命宮開始，諗吓有新嘢想試嗰陣，咩會幫你行出第一步。',
     '試想像有一個鐘自己安排：邊件小事你願意分十分鐘畀佢？',
     '留低一句：「如果有十分鐘，我想試＿＿。」得閒先試，唔使而家揀一世。',
@@ -376,7 +376,7 @@ function makePalaceCard(r) {
   c.textAlign='center';write(r.branch,450,660,74,'#e5bb7f','serif');c.textAlign='left';
   write('壹　／　盤面',100,874,30,'#dfbd87'); paragraph(readingFact(r),960,40,62);
   write('貳　／　留一問',100,1222,30,'#dfbd87'); paragraph(r.question,1306,36,56);
-  write('虛構例盤　·　傳統文化參考',100,1487,26,'#bfccb9');
+  write('玄與九爺 · 九巷茶室',100,1487,26,'#bfccb9');
   const url=canvas.toDataURL('image/png');
   if (!url.startsWith('data:image/png;base64,')) throw new Error('card');
   return url;
@@ -421,7 +421,6 @@ export function attachZiwei(dialog, content, paint, openBook) {
   let input = emptyInput(), chart = null, reviewed = null, active = false, focusPalace = '';
   const action = (label, name, kind = 'primary', palace) => `<button class="button ${kind}" type="button" data-ziwei="${name}"${palace ? ` data-palace="${palace}"` : ''}>${label}</button>`;
   const label = '';
-  const privacy = '<p class="privacy-note">只用虛構資料；資料只留本頁，不保存。</p>';
   const rules = '<details class="ziwei-rules"><summary>排盤方式</summary><p>採用西曆及出生地當地鐘錶時間，不校正夏令時間或真太陽時。23:00起按翌日排盤；閏月初一至十五按前月，十六日起按後月。按本命四化與當期運限，整理2026–2028嘅節奏。</p></details>';
 
   function text(tag, value, className) {
@@ -457,12 +456,12 @@ export function attachZiwei(dialog, content, paint, openBook) {
   const get = id => document.getElementById(id);
   const formError = '<p id="ziwei-error" class="form-error" role="alert"></p>';
   function showAlias() {
-    paint(`<p class="desk-speaker">玄 · ${READING_TOPICS[focusPalace].label}手記　01 / 03</p><h2 id="dialog-title">點稱呼你好？</h2><form id="career-alias-form" autocomplete="off" novalidate><div class="profile-fields"><label for="ziwei-alias">寫個化名，等我為你開卷。<input id="ziwei-alias" maxlength="18" placeholder="例如：阿澄" required></label></div>${privacy}${formError}<div class="dialog-actions"><button class="button primary" type="submit">填生辰</button>${action('返去揀話題','choose-focus','secondary')}</div></form>`, 'career-setup');
+    paint(`<p class="desk-speaker">玄 · ${READING_TOPICS[focusPalace].label}手記　01 / 03</p><h2 id="dialog-title">點稱呼你好？</h2><form id="career-alias-form" autocomplete="off" novalidate><div class="profile-fields"><label for="ziwei-alias">寫個化名，等我為你開卷。<input id="ziwei-alias" maxlength="18" placeholder="例如：阿澄" required></label></div>${formError}<div class="dialog-actions"><button class="button primary" type="submit">填生辰</button>${action('返去揀話題','choose-focus','secondary')}</div></form>`, 'career-setup');
     get('ziwei-alias').value = alias;
   }
   function showNotebookBirth() {
     chart = reviewed = null;
-    paint(`<p class="desk-speaker">玄 · 生辰入盤　02 / 03</p><h2 id="dialog-title">留低出生時間，等玄為你開盤。</h2><form id="career-birth-form" autocomplete="off" novalidate><div class="profile-fields"><label for="ziwei-date">西曆出生日期<input id="ziwei-date" type="date" min="1900-01-01" required></label><label for="ziwei-time">出生地當地時間<input id="ziwei-time" type="time" required></label><label for="ziwei-gender">性別<select id="ziwei-gender" required><option value="">請選擇</option><option value="male">男</option><option value="female">女</option></select></label></div><p class="privacy-note">只用虛構生辰試閱；未知時辰時，先確認資料，唔使勉強估。</p>${formError}<div class="dialog-actions"><button class="button primary" type="submit">下一步</button>${action('返回稱呼','edit-alias','secondary')}</div></form>`, 'career-setup');
+    paint(`<p class="desk-speaker">玄 · 生辰入盤　02 / 03</p><h2 id="dialog-title">留低出生時間，等玄為你開盤。</h2><form id="career-birth-form" autocomplete="off" novalidate><div class="profile-fields"><label for="ziwei-date">西曆出生日期<input id="ziwei-date" type="date" min="1900-01-01" required></label><label for="ziwei-time">出生地當地時間<input id="ziwei-time" type="time" required></label><label for="ziwei-gender">性別<select id="ziwei-gender" required><option value="">請選擇</option><option value="male">男</option><option value="female">女</option></select></label></div><p class="privacy-note">唔肯定時辰，可以先核對，唔使勉強估。</p>${formError}<div class="dialog-actions"><button class="button primary" type="submit">下一步</button>${action('返回稱呼','edit-alias','secondary')}</div></form>`, 'career-setup');
     get('ziwei-date').value = input.day ? [input.year,input.month,input.day].join('-') : '';
     get('ziwei-time').value = input.time;
     get('ziwei-gender').value = input.gender;
@@ -470,14 +469,14 @@ export function attachZiwei(dialog, content, paint, openBook) {
   function showQuestion() {
     chosenTopic = '';
     chart = reviewed = null;
-    paint(`<p class="desk-speaker">玄 · 一事一問　03 / 03</p><h2 id="dialog-title">${notebook().question}</h2><p id="career-summary" class="career-summary"></p><form id="career-question-form" autocomplete="off" novalidate><div class="profile-fields"><label for="ziwei-question">寫低想問嘅事（選填）<textarea id="ziwei-question" maxlength="240" rows="3" placeholder="${notebook().example}"></textarea></label></div><p class="privacy-note">${notebook().privacy}</p>${formError}<div class="dialog-actions"><button class="button primary" type="submit">起盤睇免費手記</button><button class="button question-skip" type="submit" value="skip-question" aria-label="略過提問，直接起盤">略過提問</button>${action('修改生辰','career-birth','secondary')}</div></form>`, 'career-setup');
+    paint(`<p class="desk-speaker">玄 · 一事一問　03 / 03</p><h2 id="dialog-title">${notebook().question}</h2><p id="career-summary" class="career-summary"></p><form id="career-question-form" autocomplete="off" novalidate><div class="profile-fields"><label for="ziwei-question">寫低想問嘅事（選填）<textarea id="ziwei-question" maxlength="240" rows="3" placeholder="${notebook().example}"></textarea></label></div><p class="privacy-note">${notebook().privacy}</p>${formError}<div class="dialog-actions"><button class="button primary" type="submit">開始為我排盤</button><button class="button question-skip" type="submit" value="skip-question" aria-label="略過提問，直接起盤">略過提問</button>${action('修改生辰','career-birth','secondary')}</div></form>`, 'career-setup');
     get('career-summary').textContent = alias + '　／　' + [input.year,input.month,input.day].join(' · ') + '　' + input.time + '　' + (input.gender === 'male' ? '男' : '女');
     get('ziwei-question').value = question;
   }
   function startRitual(reading) {
-    paint(`<p class="desk-speaker">${reading.label}　／　起盤</p><h2 id="dialog-title">為你點星</h2><section class="ritual-box" id="ritual-box"><p class="ritual-name" id="ritual-name"></p><p id="ritual-birth" class="ritual-birth"></p><svg id="career-dial" viewBox="0 0 320 320" aria-hidden="true"></svg><span class="ritual-seal" id="ritual-seal"></span><p class="ritual-fact" id="ritual-fact"></p></section>${openBook ? '' : action('直接睇六格','read-comic','secondary')}`, 'career-ritual');
+    paint(`<p class="desk-speaker">${reading.label}　／　起盤</p><h2 id="dialog-title">為你點星</h2><section class="ritual-box" id="ritual-box"${openBook ? ' data-quick-ritual' : ''}><p class="ritual-name" id="ritual-name"></p><p id="ritual-birth" class="ritual-birth" role="status"></p><svg id="career-dial" viewBox="0 0 320 320" aria-hidden="true"></svg><span class="ritual-seal" id="ritual-seal"></span><p class="ritual-fact" id="ritual-fact"></p></section>${openBook ? '' : action('直接睇六格','read-comic','secondary')}`, 'career-ritual');
     get('ritual-name').textContent = alias + '嘅' + reading.label + '盤';
-    get('ritual-birth').textContent = input.year + ' 年 ' + input.month + ' 月 ' + input.day + ' 日　' + input.time;
+    get('ritual-birth').textContent = '玄正按你填嘅生辰校盤……';
     get('ritual-seal').textContent = (openBook ? '命盤已成　·　' : '') + (reading.opposite ? '取對宮參看' : '本宮主星入卷');
     get('ritual-fact').textContent = openBook ? '先為你點亮'+reading.label+'嗰盞燈；坐穩，唔使急住有答案。' : readingFact(reading);
     const svg = get('career-dial');
@@ -493,8 +492,9 @@ export function attachZiwei(dialog, content, paint, openBook) {
       try { openBook({chart,input,alias,question,subject:reading.label,reply,offer:!skipAfterword(topics)}); }
       catch { showQuestion(); errorMessage({field:'question',message:'未能打開今次嘅命書。請核對資料再試。'}); }
     };
-    if (globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
-      ritualTimer = setTimeout(reveal, openBook ? 700 : 0);
+    const reduce = globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    if (openBook || reduce) {
+      ritualTimer = setTimeout(reveal, reduce ? 0 : 1200);
       return;
     }
     const seal = get('ritual-seal');
@@ -516,11 +516,11 @@ export function attachZiwei(dialog, content, paint, openBook) {
 <div class="xj-cover"><img src="assets/office-desk-chair-v12.jpg" alt="玄收起摺扇，灰狐九爺坐喺枱邊。" width="1080" height="1920">
 <div class="xj-invite"><small>可選加閱　·　延伸手記</small><h3 id="xj-extra-title">同一件事，<br>換個處境呢？</h3>
 <p><b>九爺</b>　頭先嗰一步，你已經可以試。想睇遇到另一種情況可以點做？揀一篇，玄同你翻開兩個例子。</p></div></div>
-<div class="xj-index"><strong>翻開延伸手記樣板</strong><p>先放你啱啱睇嘅${READING_TOPICS[focusPalace].label}篇。每篇都有兩個虛構處境，睇完可以帶走文字版。</p><small>只供試讀，未開放購買。</small></div>
+<div class="xj-index"><strong>翻開延伸手記</strong><p>先放你啱啱睇嘅${READING_TOPICS[focusPalace].label}篇。每篇都有兩個日常例子，睇完可以帶走文字版。</p></div>
 ${order.map((palace,i) => {
       const c=extraChapters[palace], label=READING_TOPICS[palace].label;
-      return `<details name="xj-shelf"><summary><span><small>${i===0?'接住今篇':'另篇試讀'}　／　${label}</small>${c.title}</span><span class="xj-plus" aria-hidden="true"></span></summary>
-<article class="xj-sample"><small>玄開卷　／　${label}篇 · 虛構例子</small><h4>${c.title}</h4><p class="xj-preface"><b>玄</b>　${c.scene}</p>
+      return `<details name="xj-shelf"><summary><span><small>${i===0?'接住今篇':'另篇選讀'}　／　${label}</small>${c.title}</span><span class="xj-plus" aria-hidden="true"></span></summary>
+<article class="xj-sample"><small>玄開卷　／　${label}篇 · 日常例子</small><h4>${c.title}</h4><p class="xj-preface"><b>玄</b>　${c.scene}</p>
 <div class="xj-scenes">${c.cases.map(([when,what],j)=>`<section><small>${j?'貳':'壹'}　／　${when}</small><p>${what}</p></section>`).join('')}</div>
 <p class="xj-try"><b>九爺留一句</b><br>${c.step}</p><div class="dialog-actions">${action('睇'+label+'篇收錄咩','preview-review','primary',palace)}</div></article></details>`;
     }).join('')}
@@ -588,21 +588,21 @@ ${order.map((palace,i) => {
     const r=getPalaceReading(chart,palace), c=extraChapters[palace];
     if (!r) return;
     if (review) {
-      paint(`<p class="desk-speaker">玄與九爺　／　卷後選讀</p><h2 id="dialog-title">核對試讀內容</h2><p class="extra-chapter-name">${r.label}篇　／　${c.title}</p><p>同一張例盤，今篇睇${palaceTitle(r.palace)}。打開就有盤上嘅星、頭先兩個虛構處境同九爺留低嗰一步，成篇可以下載。</p><p class="privacy-note">免費示範。唔會落單、扣款或寄電郵。</p><div class="dialog-actions">${action('打開示範手記','preview-report','primary',palace)}${action('唔加閱，返原篇','read-comic','secondary')}</div>`, 'ziwei');
+      paint(`<p class="desk-speaker">玄與九爺　／　卷後選讀</p><h2 id="dialog-title">打開延伸手記</h2><p class="extra-chapter-name">${r.label}篇　／　${c.title}</p><p>同一張盤，今篇睇${palaceTitle(r.palace)}。打開就有盤上嘅星、頭先兩個日常例子同九爺留低嗰一步，成篇可以下載。</p><div class="dialog-actions">${action('打開手記','preview-report','primary',palace)}${action('唔加閱，返原篇','read-comic','secondary')}</div>`, 'ziwei');
       return;
     }
-    paint(`<p class="desk-speaker">延伸手記　／　試行 2 · 2</p><h2 id="dialog-title">${r.label} · 示範手記</h2><article class="extra-pages" id="extra-pages"></article><p class="privacy-note">呢份係本頁試讀，唔係已購買嘅報告。</p><div id="extra-copy"></div><div class="dialog-actions">${action('返原篇免費手記','read-comic','secondary')}<button class="button secondary" type="button" data-action="close">完成，返回首頁</button></div>`, 'ziwei');
+    paint(`<p class="desk-speaker">延伸手記</p><h2 id="dialog-title">${r.label} · 延伸手記</h2><article class="extra-pages" id="extra-pages"></article><div id="extra-copy"></div><div class="dialog-actions">${action('返原篇免費手記','read-comic','secondary')}<button class="button secondary" type="button" data-action="close">完成，返回首頁</button></div>`, 'ziwei');
     const stars = r.opposite?.stars || r.stars;
     const sections=[
       ['今篇睇邊度',r.label+'篇 · '+palaceTitle(r.palace)+'\n'+c.title],
       ['張盤見到乜',readingFact(r)+'\n'+stars.map(s=>s.name+'可以從「'+s.theme+'」去睇。').join('')],
-      ['點樣對照','虛構例子，唔係預測。玄：'+c.scene+'\n\n'+c.cases.map(([when,what])=>when+'：'+what).join('\n\n')],
+      ['點樣對照','日常例子。玄：'+c.scene+'\n\n'+c.cases.map(([when,what])=>when+'：'+what).join('\n\n')],
       ['留一步試吓',c.step]
     ];
     for (const [title,body] of sections) get('extra-pages').append(text('h3',title),text('p',body));
-    const a=text('a','下載呢份示範手記（文字檔）','button primary');
+    const a=text('a','下載呢份手記（文字檔）','button primary');
     a.download='Xuan-Jiuye-sample-'+r.label+'.txt';
-    a.href='data:text/plain;charset=utf-8,'+encodeURIComponent('\uFEFF玄與九爺　／　虛構例盤 · 免費示範\n\n'+sections.map(pair=>pair.join('\n')).join('\n\n'));
+    a.href='data:text/plain;charset=utf-8,'+encodeURIComponent('\uFEFF玄與九爺　／　延伸手記\n\n'+sections.map(pair=>pair.join('\n')).join('\n\n'));
     get('extra-copy').append(a);
   }
   function showReveal() {
@@ -610,7 +610,7 @@ ${order.map((palace,i) => {
   }
   function showDate() {
     chart = reviewed = null;
-    paint(`${label}<h2 id="dialog-title">例子入面嘅人，邊日出世？</h2><p class="dialog-lead">填一個虛構嘅西曆出生日期。</p><form id="ziwei-date-form" autocomplete="off" novalidate><div class="birth-fields"><label for="ziwei-year">年<input id="ziwei-year" data-ziwei-field="year" type="text" inputmode="numeric" placeholder="YYYY" required></label><label for="ziwei-month">月<input id="ziwei-month" data-ziwei-field="month" type="text" inputmode="numeric" placeholder="MM" required></label><label for="ziwei-day">日<input id="ziwei-day" data-ziwei-field="day" type="text" inputmode="numeric" placeholder="DD" required></label></div>${privacy}<p id="ziwei-error" class="form-error" role="alert"></p><div class="dialog-actions"><button class="button primary" type="submit">填出生時間</button></div></form><button class="dialog-back" type="button" data-ziwei="back-intro">返去揀主題</button>`, 'ziwei-date');
+    paint(`${label}<h2 id="dialog-title">你邊日出世？</h2><p class="dialog-lead">請填西曆出生日期。</p><form id="ziwei-date-form" autocomplete="off" novalidate><div class="birth-fields"><label for="ziwei-year">年<input id="ziwei-year" data-ziwei-field="year" type="text" inputmode="numeric" placeholder="YYYY" required></label><label for="ziwei-month">月<input id="ziwei-month" data-ziwei-field="month" type="text" inputmode="numeric" placeholder="MM" required></label><label for="ziwei-day">日<input id="ziwei-day" data-ziwei-field="day" type="text" inputmode="numeric" placeholder="DD" required></label></div><p id="ziwei-error" class="form-error" role="alert"></p><div class="dialog-actions"><button class="button primary" type="submit">填出生時間</button></div></form><button class="dialog-back" type="button" data-ziwei="back-intro">返去揀主題</button>`, 'ziwei-date');
     for (const key of ['year', 'month', 'day']) document.getElementById(`ziwei-${key}`).value = input[key];
   }
   function showOptions() {
@@ -662,11 +662,11 @@ ${order.map((palace,i) => {
   }
   function showResult(focusNote = false, opened = focusPalace || '命宮') {
     if (chart.status === 'needs-input') {
-      paint(`${label}<h2 id="dialog-title">資料未足，先唔落盤。</h2><p class="dialog-lead">出生時間同性別齊咗，再返嚟排盤。</p><div class="dialog-actions">${action('返回資料', 'edit-options')}</div>${privacy}`, 'ziwei');
+      paint(`${label}<h2 id="dialog-title">資料未足，先唔落盤。</h2><p class="dialog-lead">出生時間同性別齊咗，再返嚟排盤。</p><div class="dialog-actions">${action('返回資料', 'edit-options')}</div>`, 'ziwei');
       return;
     }
     const initialPalace = focusPalace || '命宮';
-    paint(`${label}<h2 id="dialog-title">十二宮命盤</h2><p class="dialog-lead">先由「${READING_TOPICS[initialPalace].label}」睇起。想睇全盤，可以打開下面嘅十二宮。</p><p id="ziwei-result-context" class="reading-fact"></p><div class="ziwei-reading" id="ziwei-reading"></div><div class="dialog-actions palace-switches">${Object.entries(READING_TOPICS).map(([name, topic]) => `<button class="button secondary" type="button" data-ziwei="palace" data-palace="${name}" aria-pressed="false">${topic.label}</button>`).join('')}</div><section id="ziwei-palace-note" tabindex="-1" aria-live="polite" aria-atomic="true"></section><details class="ziwei-chart-details"><summary>打開十二宮命盤</summary><div class="ziwei-scroll" tabindex="0" role="region" aria-label="十二宮命盤，窄螢幕可左右捲動"><div class="ziwei-grid" id="ziwei-grid"></div></div></details>${rules}<p class="privacy-note">只作傳統文化參考，不作健康、投資或人生決定依據。本命四化與三年運限或完整論命。</p><div class="dialog-actions">${notebook() && getPalaceReading(chart,focusPalace) ? action('再睇六格對話','read-comic') : ''}${action('修改資料', notebook() ? 'career-birth' : 'edit-options', notebook() ? 'secondary' : 'primary')}</div>${privacy}`, 'ziwei-result');
+    paint(`${label}<h2 id="dialog-title">十二宮命盤</h2><p class="dialog-lead">先由「${READING_TOPICS[initialPalace].label}」睇起。想睇全盤，可以打開下面嘅十二宮。</p><p id="ziwei-result-context" class="reading-fact"></p><div class="ziwei-reading" id="ziwei-reading"></div><div class="dialog-actions palace-switches">${Object.entries(READING_TOPICS).map(([name, topic]) => `<button class="button secondary" type="button" data-ziwei="palace" data-palace="${name}" aria-pressed="false">${topic.label}</button>`).join('')}</div><section id="ziwei-palace-note" tabindex="-1" aria-live="polite" aria-atomic="true"></section><details class="ziwei-chart-details"><summary>打開十二宮命盤</summary><div class="ziwei-scroll" tabindex="0" role="region" aria-label="十二宮命盤，窄螢幕可左右捲動"><div class="ziwei-grid" id="ziwei-grid"></div></div></details>${rules}<div class="dialog-actions">${notebook() && getPalaceReading(chart,focusPalace) ? action('再睇六格對話','read-comic') : ''}${action('修改資料', notebook() ? 'career-birth' : 'edit-options', notebook() ? 'secondary' : 'primary')}</div>`, 'ziwei-result');
     document.getElementById('ziwei-result-context').textContent = `${input.year}年${input.month}月${input.day}日 ${input.time} · ${chart.fiveElementsClass}`;
     const grid = document.getElementById('ziwei-grid');
     const scroll = grid.parentElement;
@@ -760,7 +760,7 @@ ${order.map((palace,i) => {
       if (name === 'example') {
         const {year,month,day,time,gender}=NOTEBOOK_EXAMPLE;
         get('ziwei-date').value=[year,month,day].join('-'); get('ziwei-time').value=time; get('ziwei-gender').value=gender;
-        get('ziwei-error').textContent='已代入虛構例盤。你可以修改生辰，或者去下一步。';
+        get('ziwei-error').textContent='已填入例子生辰。可以修改資料，或者去下一步。';
       }
       if (name === 'choose-career-topic' && topicsForVisit().includes(trigger.dataset.topic)) {
         chosenTopic=trigger.dataset.topic; showComic();

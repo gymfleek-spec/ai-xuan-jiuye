@@ -1,12 +1,17 @@
-const previewOrigin = 'https://xuan-jiuye-preview.pages.dev';
+const growthOrigin = 'https://xuan-jiuye-preview.pages.dev';
+export const WAITLIST_ROUTE = '/api/waitlist', EVENTS_ROUTE = '/api/events';
 
-// Only the reviewed waitlist route may relax the default connect-src policy.
-export function waitlistEndpoint(value='') {
+export function growthRoute(value='', route) {
   if (!value) return '';
-  if (value === '/api/waitlist') return previewOrigin + value;
-  if (/^https:\/\/[\w.-]+(?::\d+)?\/[\w.~-]+(?:\/[\w.~-]+)*$/i.test(value) &&
-      !/(?:^|\/)\.\.?(?:\/|$)/.test(value.slice(value.indexOf('/',8)))) {
-    try { return new URL(value).href; } catch { /* Do not echo invalid configuration. */ }
-  }
-  throw new Error('Use a dedicated HTTPS endpoint with no credentials, query or fragment.');
+  if ((route === WAITLIST_ROUTE || route === EVENTS_ROUTE) && (value === route || value === growthOrigin+route)) return route;
+  throw new Error('Growth endpoints must use the approved same-site routes.');
+}
+
+export function growthConnections(routes) {
+  return routes.filter(route=>route === WAITLIST_ROUTE || route === EVENTS_ROUTE).map(route=>growthOrigin+route).join(' ') || "'none'";
+}
+
+export function mountedGrowthRoute(name, route) {
+  const value=globalThis.document?.querySelector?.('meta[name="'+name+'-endpoint"]')?.content;
+  return value === route && (route === WAITLIST_ROUTE || route === EVENTS_ROUTE) ? route : '';
 }

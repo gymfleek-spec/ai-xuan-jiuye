@@ -1,6 +1,6 @@
-import { TOPIC_CODE, track } from './analytics.mjs';
-import { STAR_COPY } from './empathy-copy.mjs';
-import { checkedArtwork, checkedSignature, paintShareArtwork } from './share-art.mjs';
+import { TOPIC_CODE, track } from './scroll/analytics.mjs';
+import { STAR_COPY } from './scroll/empathy-copy.mjs';
+import { checkedArtwork, checkedSignature, paintShareArtwork } from './scroll/share-art.mjs';
 
 const SHARE_QUOTES = Object.freeze({
   官祿:'總係頂到最後嗰個，\n唔係唔識推，只係太想\n件事有交帶。今晚放低一份，\n唔等於你唔負責任。',
@@ -98,14 +98,14 @@ export function attachShareCard(find) {
       const link=document.createElement('a'); link.href=shareImageSource(canvas);
       link.download='jiuye-'+fields.topic+'.png';
       document.body.append(link); try {link.click();} finally {link.remove();}
-      track('share_card_downloaded',{topic:fields.topic});
+      track('share_card_saved',{topic:fields.topic});
     } catch { useImage=true; renderCard(); }
   });
   image.addEventListener('pointerdown', e=>{
     if (e.pointerType !== 'touch' || !fields || !useImage) return;
     stopPress(); press={x:e.clientX,y:e.clientY};
     pressTimer=setTimeout(()=>{
-      if (fields && press) track('share_card_downloaded',{topic:fields.topic});
+      if (fields && press) track('share_card_saved',{topic:fields.topic});
       stopPress();
     },550);
   });
@@ -116,7 +116,7 @@ export function attachShareCard(find) {
   // Some in-app browsers open their image menu before a pointer hold completes.
   image.addEventListener('contextmenu', e=>{
     if (e.isTrusted && fields && useImage && press) {
-      track('share_card_downloaded',{topic:fields.topic}); stopPress();
+      track('share_card_saved',{topic:fields.topic}); stopPress();
     }
   });
   copy.addEventListener('click',async()=>{

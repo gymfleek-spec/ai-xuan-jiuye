@@ -2,7 +2,7 @@ import { getPalaceReading, readingFact, palaceTitle, READING_TOPICS, periodTempo
 import { bookFromChart, bookPreviews } from './book.mjs';
 import { relatingPrompts } from './empathy-copy.mjs';
 import { TOPIC_CODE, SKU_CODE, track } from './analytics.mjs';
-import { attachShareCard, shareFields } from './shareCard.mjs';
+import { attachShareCard, shareFields } from '../shareCard.js';
 import { attachWaitlist } from './waitlist.mjs';
 
 export function guardGrowthOffer(reading) {
@@ -91,13 +91,13 @@ export function attachResult(report) {
     const parts = [chapter.fact + (chapter.borrow ? ' 借星仍然喺對宮，唔會搬入本宮。' : '')];
     parts.push('本命四化：' + mutagens.map(r => r.star + '化' + r.hua + '在' + palaceTitle(r.palace) + '（' + r.branch + '）').join('；') + '。');
     const now = timing.current;
-    parts.push('以香港日期 ' + timing.asOf + ' 查目前運限。' + (now.status === 'ready' ? now.decadal.active ? '目前大限為' + now.decadal.range.join('–') + '虛歲，落本命' + palaceTitle(now.decadal.natalPalace) + '。' : '目前仍在童限，未套用十年大限。' : '目前超出引擎十年大限範圍。'));
+    parts.push('以香港日期 ' + timing.asOf + ' 查目前運限。' + (now.status === 'ready' ? now.decadal.active ? '目前大限為' + now.decadal.range.join('–') + '虛歲，落本命' + palaceTitle(now.decadal.natalPalace) + '。' : '目前仍在童限，未套用十年大限。' : '呢個歲數唔適用十年大限。'));
     for (const year of timing.annual) {
       if (year.status !== 'ready') { parts.push(year.year + '：' + (year.status === 'before-birth' ? '出生前，不排運限。' : '超出運限範圍。')); continue; }
       const h = year.yearly;
       parts.push(year.year + '（' + h.stem + h.branch + '，取' + year.date + '）：' + (year.decadal.active ? '大限' + year.decadal.range.join('–') + '虛歲；' : '童限；') + h.activations.map(r => r.star + '化' + r.hua + '落本命' + palaceTitle(r.palace) + '／流年' + palaceTitle(r.flowPalace)).join('；') + '。');
     }
-    parts.push('曲線用同一張盤嘅四化落點整理相對節奏（tempo-v1），唔係回報率或事件機率：祿+2、權+1、科+1、忌−2；落本題宮×2、三方及對宮×1、其餘×0。大限×1、流年×2；逐季另加流月×1。未到大限起歲唔計大限。每年7月1日取年度值；每季3／6／9／12月15日各自查流月，唔將年度值複製四次。曲線同高低點只比較呢三年，分數相同就並列。');
+    parts.push('曲線用同一張盤嘅四化落點整理相對節奏：祿+2、權+1、科+1、忌−2；落本題宮×2、三方及對宮×1、其餘×0。大限×1、流年×2；逐季另加流月×1。未到大限起歲唔計大限。每年7月1日取年度值；每季3／6／9／12月15日各自查流月，唔將年度值複製四次。曲線同高低點只比較呢三年，分數相同就並列。');
     parts.push('按所填當地鐘錶時間，未校真太陽時；採農曆年界，所以1月1日未必已轉流年。');
     put('basis-detail', parts.join('\n\n'));
   }

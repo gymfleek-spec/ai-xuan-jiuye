@@ -6,24 +6,26 @@ import {EXAMPLE,makeBook} from './book.mjs';
 import {analyticsEvent,track} from './analytics.mjs';
 import {checkedEmail,registerWaitlist,attachWaitlist} from './waitlist.mjs';
 import {checkedSignature,paintShareArtwork} from './share-art.mjs';
-import {shareFields,needsShareImage} from './shareCard.mjs';
-import {waitlistEndpoint} from '../growth-config.mjs';
+import {shareFields,needsShareImage} from '../shareCard.js';
+import {growthRoute,growthConnections,WAITLIST_ROUTE,EVENTS_ROUTE} from '../growth-config.mjs';
 
-test('only a reviewed dedicated HTTPS waitlist route may relax the no-network default',()=>{
-  assert.equal(waitlistEndpoint(),'');
-  assert.equal(waitlistEndpoint('/api/waitlist'),'https://xuan-jiuye-preview.pages.dev/api/waitlist');
-  assert.equal(waitlistEndpoint('https://forms.example.invalid/xuan/a'),'https://forms.example.invalid/xuan/a');
+test('only the two reviewed same-site collection routes may relax the no-network default',()=>{
+  assert.equal(growthRoute(undefined,WAITLIST_ROUTE),'');
+  assert.equal(growthConnections([]),"'none'");
+  assert.equal(growthRoute('/api/waitlist',WAITLIST_ROUTE),WAITLIST_ROUTE);
+  assert.equal(growthRoute('https://xuan-jiuye-preview.pages.dev/api/events',EVENTS_ROUTE),EVENTS_ROUTE);
+  assert.equal(growthConnections([WAITLIST_ROUTE,EVENTS_ROUTE]),'https://xuan-jiuye-preview.pages.dev/api/waitlist https://xuan-jiuye-preview.pages.dev/api/events');
   for (const endpoint of [
-    'http://example.invalid/api/collect','//example.invalid/api/collect','https://example.invalid/',
-    'https://example.invalid/api/','https://example.invalid/api/../collect','https://example.invalid/api?email=a',
-    'https://a:b@example.invalid/api','https://example.invalid/api#data','https://example.invalid/a b',"'self'"
-  ]) assert.throws(()=>waitlistEndpoint(endpoint));
+    'http://xuan-jiuye-preview.pages.dev/api/waitlist','//xuan-jiuye-preview.pages.dev/api/waitlist','/api/waitlist/',
+    'https://example.invalid/api/waitlist','/api/../api/waitlist','/api/waitlist?email=a',
+    'https://a:b@xuan-jiuye-preview.pages.dev/api/waitlist','/api/waitlist#data','/api/events',"'self'"
+  ]) assert.throws(()=>growthRoute(endpoint,WAITLIST_ROUTE));
 });
 
 const showcase=[
  ['enter_room',{}], ['topic_selected',{topic:'career'}],
  ['chart_generated',{topic:'family'}], ['resonance_clicked',{topic:'love'}],
- ['share_card_downloaded',{topic:'wealth'}], ['share_quote_copied',{topic:'direction'}],
+ ['share_card_saved',{topic:'wealth'}], ['share_quote_copied',{topic:'direction'}],
  ['sku_selected',{sku:'single_88'}], ['unlock_modal_opened',{sku:'full_148',topic:'career'}],
  ['unlock_email_sent',{sku:'single_88',topic:'family'}]
 ];
@@ -34,7 +36,7 @@ test('all nine event schemas remove personal fields and reject unlisted, invalid
   for (const [event,payload] of [
     ['__proto__',{topic:'career'}],['chart_generated',{topic:'not_a_topic'}],
     ['topic_selected',{topic:'person@example.invalid'}],['unlock_email_sent',{topic:'career',sku:'full_388'}],
-    ['share_card_saved',{topic:'career'}],['topic_selected',Object.create({topic:'career'})]
+    ['share_card_downloaded',{topic:'career'}],['topic_selected',Object.create({topic:'career'})]
   ]) assert.equal(analyticsEvent(event,payload),null);
 });
 const flush = () => new Promise(resolve=>setImmediate(resolve));
@@ -56,7 +58,7 @@ test('anonymous events dispatch asynchronously and leave only a bounded page-loc
     assert.equal(records.length,0,'reading never waits for the event sink');
     await flush();
     assert.deepEqual(records,[['xuan:track',{event:'topic_selected',payload:{topic:'direction'}}]]);
-    track('share_card_downloaded',{topic:'wealth',method:'long_press',email:'qa@example.invalid'});
+    track('share_card_saved',{topic:'wealth',method:'long_press',email:'qa@example.invalid'});
     track('bogus',{});
     track('topic_selected',{get topic(){throw new Error('invalid input');}});
     await flush();
@@ -67,6 +69,24 @@ test('anonymous events dispatch asynchronously and leave only a bounded page-loc
     assert.equal(globalThis.__XUAN_EVENTS__.length,128);
     assert.ok(globalThis.__XUAN_EVENTS__.every(e=>e.event==='enter_room'&&Object.keys(e.payload).length===0));
     assert.equal(requests.length,0);
+  });
+});
+
+test('the optional event sink posts only the anonymous event and ignores an unavailable service',async()=>{
+  const requests=[],records=[];
+  await withStubs({
+    document:{querySelector:query=>({content:query==='meta[name="events-endpoint"]'?EVENTS_ROUTE:''})},
+    fetch:(url,init)=>{requests.push({url,...init});return Promise.reject(new Error('service unavailable'));},
+    dispatchEvent:e=>records.push(e.detail)
+  },async()=>{
+    track('unlock_email_sent',{topic:'career',sku:'full_148',email:'qa@example.invalid',birth:'1995-08-15'});
+    await flush();
+    const expected={event:'unlock_email_sent',payload:{topic:'career',sku:'full_148'}};
+    assert.deepEqual(records,[expected]);
+    assert.equal(requests.length,1);
+    assert.equal(requests[0].url,EVENTS_ROUTE); assert.equal(requests[0].method,'POST');
+    assert.deepEqual(JSON.parse(requests[0].body),expected);
+    assert.equal(requests[0].credentials,'omit'); assert.equal(requests[0].redirect,'error');
   });
 });
 
@@ -84,6 +104,7 @@ test('the waitlist sends its three fields only and requires a positive server re
   let reply={ok:true,json:async()=>({ok:true})};
   await withStubs({fetch:async (url,init)=>{seen.push({url,...init});return reply;}},async()=>{
     assert.equal(await registerWaitlist('',record),false);
+    assert.equal(await registerWaitlist('https://unreviewed.example.invalid/intake',record),false);
     assert.equal(await registerWaitlist('/api/waitlist',{...record,email:'a'}),false);
     assert.equal(await registerWaitlist('/api/waitlist',{...record,topic:'anything'}),false);
     assert.equal(seen.length,0);
@@ -91,6 +112,7 @@ test('the waitlist sends its three fields only and requires a positive server re
     assert.equal(await registerWaitlist('/api/waitlist',record,scope.signal),true);
     const req=seen[0], payload=JSON.parse(req.body);
     assert.deepEqual(payload,{email:'QA@share.example.invalid',sku:'full_148',topic:'career'});
+    assert.equal(req.url,WAITLIST_ROUTE);assert.equal(req.method,'POST');
     assert.equal(req.credentials,'omit');assert.equal(req.redirect,'error');assert.equal(req.referrerPolicy,'no-referrer');
     assert.equal(req.signal,scope.signal);
     for (const mock of [{ok:false,json:async()=>({ok:true})},{ok:true,json:async()=>({})},{ok:true,json:async()=>({ok:'true'})}]) {
@@ -110,55 +132,46 @@ function modalFixture(endpoint) {
   return {find,ctrl,submit:()=>find('waitlist-form').handlers.submit({preventDefault(){}})};
 }
 
-test('the disconnected modal saves one session draft only after validation; the event stays anonymous',async()=>{
-  const f=modalFixture(''),events=[],saved=new Map(),requests=[];
+test('the disconnected modal disables the form, makes no storage or network write, and never claims a signup',async()=>{
+  const f=modalFixture(''),events=[],writes=[],requests=[];
   await withStubs({
     fetch:(...args)=>{requests.push(args);return Promise.reject(new Error('unexpected offline network'));},
     dispatchEvent:e=>events.push(e.detail),
-    sessionStorage:{setItem:(key,value)=>saved.set(key,value)}
+    sessionStorage:{setItem:(...args)=>writes.push(args)}
   },async()=>{
     f.ctrl.open('full_148','wealth');
     assert.equal(f.find('waitlist-form').hidden,false);
-    assert.equal(f.find('waitlist-email').disabled,false);
-    assert.equal(f.find('waitlist-submit').textContent,'暫存電郵');
-    f.find('waitlist-email').value='invalid';await f.submit();
-    assert.match(f.find('waitlist-status').textContent,/有效/);assert.equal(saved.size,0);
+    assert.equal(f.find('waitlist-email').disabled,true);
+    assert.equal(f.find('waitlist-submit').disabled,true);
+    assert.equal(f.find('waitlist-closed').hidden,false);
     f.find('waitlist-email').value='qa@example.invalid';await f.submit();await flush();
-    assert.equal(f.find('waitlist-local').hidden,false);
-    assert.equal(f.find('waitlist-form').hidden,true);assert.equal(f.find('waitlist-email').value,'');
     assert.equal(f.find('waitlist-success').hidden,true);
-    assert.match(f.find('purchase-title').textContent,/分頁暫存/);
-    assert.match(f.find('waitlist-local').textContent,/冇傳出，亦未正式留位/);
-    assert.deepEqual(JSON.parse(saved.get('xuan:waitlist-draft')),{email:'qa@example.invalid',sku:'full_148',topic:'wealth'});
-    assert.deepEqual(events,[{event:'unlock_modal_opened',payload:{sku:'full_148',topic:'wealth'}},{event:'unlock_email_sent',payload:{sku:'full_148',topic:'wealth'}}]);
-    f.ctrl.clear();
-    assert.equal(f.find('waitlist-local').hidden,true);assert.equal(f.find('purchase-dialog').open,false);
-    f.ctrl.open('single_88','family');f.find('waitlist-email').value='other@example.invalid';await f.submit();await flush();
-    assert.equal(saved.size,1);assert.deepEqual(JSON.parse(saved.get('xuan:waitlist-draft')),{email:'other@example.invalid',sku:'single_88',topic:'family'});
-    assert.equal(requests.length,0);
+    assert.equal(f.find('purchase-title').textContent,'早鳥優先解鎖');
+    assert.deepEqual(events,[{event:'unlock_modal_opened',payload:{sku:'full_148',topic:'wealth'}}]);
+    assert.equal(writes.length,0);assert.equal(requests.length,0);
+    f.ctrl.clear();assert.equal(f.find('waitlist-email').value,'');
+    assert.equal(f.find('purchase-dialog').open,false);
   });
 });
 
-test('blocked session storage and an unreviewed runtime endpoint cannot claim saving or sending the email',async()=>{
-  const events=[],requests=[];
+test('an unreviewed runtime override cannot turn on the signup',async()=>{
+  const requests=[];
   await withStubs({
-    document:{querySelector:()=>({content:''})},__XUAN_WAITLIST_ENDPOINT__:'https://unreviewed.example.invalid/intake',
-    sessionStorage:{setItem(){throw new Error('storage disabled');}},
-    fetch:(...args)=>{requests.push(args);return Promise.reject(new Error('unexpected network'));},
-    dispatchEvent:e=>events.push(e.detail)
+    document:{querySelector:query=>({content:query==='meta[name="waitlist-endpoint"]'?WAITLIST_ROUTE:''})},
+    __XUAN_WAITLIST_ENDPOINT__:'https://unreviewed.example.invalid/intake',
+    fetch:(...args)=>{requests.push(args);return Promise.reject(new Error('unexpected network'));}
   },async()=>{
     const f=modalFixture();
     assert.equal(globalThis.__XUAN_WAITLIST_ENDPOINT__,'');
     f.ctrl.open('single_88','career');f.find('waitlist-email').value='qa@example.invalid';await f.submit();await flush();
-    assert.equal(f.find('purchase-title').textContent,'電郵格式已核對');
-    assert.match(f.find('waitlist-local').textContent,/留唔低電郵/);
+    assert.equal(f.find('waitlist-email').disabled,true);
     assert.equal(f.find('waitlist-success').hidden,true);
-    assert.deepEqual(events.map(e=>e.event),['unlock_modal_opened']);assert.equal(requests.length,0);
+    assert.equal(requests.length,0);
   });
 });
 
 test('the configured modal waits for confirmation, shows failure safely, and ignores a response after closing',async()=>{
-  const f=modalFixture('https://forms.example.invalid/xj'),requests=[],events=[];
+  const f=modalFixture(WAITLIST_ROUTE),requests=[],events=[];
   await withStubs({
     fetch:(url,req)=>new Promise(resolve=>requests.push({req,resolve})),
     dispatchEvent:e=>events.push(e.detail),

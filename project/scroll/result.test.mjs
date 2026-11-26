@@ -82,7 +82,9 @@ test('result uses half-visible clues, an accessible teaser tail and a single cul
   assert.match(js,/tail.setAttribute\('aria-hidden','true'\)/);assert.match(js,/tail.setAttribute\('inert',''\)/);
   assert.match(html,/id="purchase-cta"/);assert.match(html,/id="purchase-dialog"/);
   assert.match(html,/<input id="waitlist-email" type="email"[^>]+disabled/);
-  assert.match(html,/id="waitlist-local" hidden>今次冇送出電郵，亦未保留名額/);
+  assert.match(html,/id="waitlist-closed">早鳥登記暫未開放/);
+  assert.match(html,/<footer class="result-footer">[\s\S]*不代替醫療、法律或投資建議。/);
+  assert.doesNotMatch(html+readFileSync(new URL('../ziwei.js',import.meta.url),'utf8'),/虛構資料|虛構生辰|虛構例盤|已觸發事件|分頁暫存|只留本頁/);
   assert.match(html,/<select id="share-signature"/);assert.doesNotMatch(html,/<input id="share-signature"/);
   assert.doesNotMatch(html,/<form[^>]+action=|<input[^>]+name=|1,284|真實讀者回饋|三萬字|未解鎖|預覽版|已解鎖|模擬解鎖|Demo|測試|漏斗監察|切換：|https?:\/\//);
   assert.doesNotMatch(js,/innerHTML|localStorage|sessionStorage|fetch\(|sendBeacon|XMLHttpRequest/);

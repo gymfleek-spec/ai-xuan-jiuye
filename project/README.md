@@ -1,11 +1,12 @@
-# v0.18.0｜判詞卡、早鳥通知及匿名事件
+# v0.18.0｜判詞卡、開卷儀式及早鳥
 
-現行來源：`scroll/page.html` → `build.mjs` → `project/public-preview/`（相對此目錄即 `public-preview/`）。Node 24+，零外部 npm 依賴。現版不收款，沒有外部收集服務；排盤引擎、入座、五題及四層免費閱讀沿用 v0.17.2。
+[公開預覽](https://xuan-jiuye-preview.pages.dev/)；唯一部署目錄 `project/public-preview/`。原生 ES Modules、Node 24+、零外部 npm 依賴、固定 iztro 2.6.5。
 
-- `shareCard.mjs`／`share-art.mjs` 用本機原畫及向量 QR 合成 720×1280 PNG。格局由原選題同盤取值；稱呼只可從不含個資的預設選項選擇，留空不印，不帶入排盤化名、生辰、時辰或性別。手機內置瀏覽器可長按圖片；長按事件僅代表操作，不能證明已存相簿。
-- 早鳥窗沒有外部端點時，只有按下「暫存電郵」並通過格式檢查，才用 `sessionStorage` 保存同一分頁的一筆 `{email,sku,topic}`；覆蓋上一筆，不傳送，也不顯示正式留位。儲存不可用時只回報格式已核對。沒有本機長期記錄、推廣外發或扣款。
-- 日後獲批才在建置設定 `WAITLIST_ENDPOINT` 為 `/api/waitlist` 或專用 HTTPS 路徑。`window.__XUAN_WAITLIST_ENDPOINT__` 只接受與建置審核值相同的路徑；正式模式先要收到服務成功收錄的 2xx 及 `{"ok":true}` 才顯示留位。傳送 JSON 固定三欄；不帶憑證、不跟重定向。離線單檔和未接服務的公開建置一律 `connect-src 'none'`。
-- `xuan:track` 派發匿名事件，`window.__XUAN_EVENTS__` 只保留當頁最近 128 筆，沒有網絡上報。資料只含事件名和適用的課題或方案；`unlock_email_sent` 在離線版只代表暫存動作，不代表寄信或送出。公開 UI 沒有事件面板。
+- `shareCard.js`／`scroll/share-art.mjs`：用本機九爺原畫及向量 QR 合成 720×1280 PNG。格局取自原選題；卡面稱呼可留空或選預設，不讀排盤化名、生辰、時辰、性別或原句。下載／長按事件只代表操作，不能證明已存入相簿。
+- 儀式約 1.2 秒；減少動態不設等待。排盤仍依出生地鐘錶時間，沒有額外索取出生地或宣稱校正真太陽時。
+- 目前公開站沒有可用登記或事件收集服務。早鳥窗顯示 HK$88／HK$148，不收集或暫存電郵，不收款；未收到服務誠實的 2xx 加 `{"ok":true}` 不顯示留位。
+- 日後有經驗證及批准的同站服務，可在建置分別設定 `WAITLIST_ENDPOINT=/api/waitlist`、`EVENTS_ENDPOINT=/api/events`。只接受兩條固定路徑；未設定一律 `connect-src 'none'`，單檔離線版永不接線。早鳥 JSON 固定 `{email,sku,topic}`；匿名事件 JSON 只含事件名及 `topic`／`sku`，不帶憑證、跨站重定向或訪客識別碼。
+- 9 個匿名事件經 `xuan:track` 派發，`__XUAN_EVENTS__` 只留當頁最近 128 筆。未接收集服務無網絡上報；`unlock_email_sent` 只於登記成功後記錄，不代表已寄出電郵。
 
 ```sh
 npm run build && npm test

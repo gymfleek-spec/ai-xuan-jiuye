@@ -64,12 +64,13 @@
 !/project/scroll/analytics.mjs
 !/project/scroll/waitlist.mjs
 !/project/scroll/share-art.mjs
-!/project/scroll/shareCard.mjs
+!/project/shareCard.js
 !/project/scroll/growth.css
 !/project/scroll/growth.test.mjs
 !/project/assets/jiuye-v2.png
 !/project/assets/tea-room-qr.png
 
 !/docs/screenshots-v0.18.0/
-!/docs/screenshots-v0.18.0/01-share-card.png
-!/docs/screenshots-v0.18.0/02-waitlist.png
+!/docs/screenshots-v0.18.0/01-share-card-9x16.png
+!/docs/screenshots-v0.18.0/02-mobile-share-section.png
+!/docs/screenshots-v0.18.0/03-mobile-waitlist-modal.png

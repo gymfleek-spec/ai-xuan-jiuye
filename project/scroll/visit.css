@@ -34,13 +34,16 @@
   .dial-house{animation:career-ink .5s ease-out backwards}
   .dial-thread{stroke-dasharray:1;animation:career-trace 1.45s .75s ease-out both}
   .ritual-seal{animation:career-imprint .38s 2.45s both}
+  [data-quick-ritual] .dial-sweep{animation-duration:.72s}
+  [data-quick-ritual] .dial-thread{animation-duration:.55s;animation-delay:.18s}
+  [data-quick-ritual] .ritual-seal{animation-duration:.3s;animation-delay:.73s}
   @keyframes career-turn{from{transform:rotate(-42deg);opacity:.35}to{transform:rotate(0);opacity:1}}
   @keyframes career-ink{from{opacity:.14}to{opacity:1}}
   @keyframes career-trace{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
   @keyframes career-imprint{from{opacity:0;transform:translateY(-6px) scale(1.25) rotate(-8deg)}to{opacity:1;transform:rotate(-3deg)}}
 }
 
-.sample-banner{padding:9px 18px;color:#392e20;background:#f6dca8;font:650 14px/1.6 var(--body)}.can-cast .sample-banner{display:none}html:not(.can-cast) #top[hidden]:target{display:block!important}html:not(.can-cast) :is(.visit-note,#finish){display:none}#viewer-help a{display:inline-block;padding:.3em}
+
 
 /* Hold the last decoded frame across the single-video source switch. */
 .scene-media>canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none}

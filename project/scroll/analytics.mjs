@@ -1,3 +1,5 @@
+import { EVENTS_ROUTE, mountedGrowthRoute } from '../growth-config.mjs';
+
 export const TOPIC_CODE = Object.freeze({官祿:'career',夫妻:'love',田宅:'family',財帛:'wealth',命宮:'direction'});
 export const SKU_CODE = Object.freeze({single:'single_88',full:'full_148'});
 const eventTopics = Object.values(TOPIC_CODE), eventSkus = Object.values(SKU_CODE);
@@ -6,13 +8,20 @@ const eventFields = Object.freeze({
   topic_selected: ['topic'],
   chart_generated: ['topic'],
   resonance_clicked: ['topic'],
-  share_card_downloaded: ['topic'],
+  share_card_saved: ['topic'],
   share_quote_copied: ['topic'],
   sku_selected: ['sku'],
   unlock_modal_opened: ['sku','topic'],
   unlock_email_sent: ['sku','topic']
 });
 const localEvents = [];
+
+export async function postGrowth(endpoint, body, options={}) {
+  return fetch(endpoint,{
+    ...options, method:'POST', headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(body), credentials:'omit', redirect:'error', referrerPolicy:'no-referrer'
+  });
+}
 const eventChecks = {
   topic: v => eventTopics.includes(v),
   sku: v => eventSkus.includes(v)
@@ -41,6 +50,8 @@ export function track(name, payload) {
         globalThis.__XUAN_EVENTS__=Object.freeze(localEvents.slice());
         globalThis.dispatchEvent?.(new CustomEvent('xuan:track',{detail:event}));
       } catch { /* Counting must not affect reading. */ }
+      const endpoint=mountedGrowthRoute('events',EVENTS_ROUTE);
+      if (endpoint) void postGrowth(endpoint,event,{keepalive:true}).catch(()=>{});
     });
   } catch { /* An invalid or unavailable event is discarded. */ }
 }
