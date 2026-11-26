@@ -6,6 +6,8 @@
 <meta name="theme-color" content="#141b1c">
 <meta name="referrer" content="no-referrer">
 <meta name="prototype-version" content="@@VERSION@@">
+<meta name="waitlist-endpoint" content="@@WAITLIST_ENDPOINT@@">
+<meta name="analytics-endpoint" content="@@ANALYTICS_ENDPOINT@@">
 <meta http-equiv="Content-Security-Policy" content="@@POLICY@@">
 <meta name="description" content="跟玄與灰狐九爺，沿香港一個夜晚讀一張紫微盤。事業、愛情、家庭、財運同未來，一卷讀完。">
 <title>玄與九爺｜你嘅命格往後將點樣流轉</title>
@@ -66,6 +68,22 @@
     <div class="card-actions"><button class="pill" id="resonance" type="button" aria-pressed="false">呢句講中咗 ✦</button></div>
     <details id="basis"><summary>查看命盤依據</summary><div class="basis-copy" role="region" aria-label="命盤依據全文" tabindex="0"><p id="basis-detail"></p></div></details>
   </div></div>
+  <section class="jy-keepsake" id="share-card" aria-labelledby="share-title" data-portrait="@@SHARE_PORTRAIT@@" data-qr="@@SHARE_QR@@" hidden>
+    <h3 id="share-title">九爺留畀你嘅一張判詞</h3>
+    <div class="jy-card-stage" id="share-stage" hidden>
+      <canvas id="share-canvas" role="img" hidden></canvas>
+      <img id="share-image" width="1080" height="1920" alt="" hidden>
+    </div>
+    <p id="share-hint" class="jy-notice" hidden>長按上方圖片儲存至相簿</p>
+    <p id="share-quote" class="jy-notice" hidden></p>
+    <p class="jy-notice">卡片只留格局同呢句話，唔印出生日期、時辰或性別。</p>
+    <div class="jy-sign"><label for="share-signature">卡片署名 <small>（選填）</small></label>
+      <input id="share-signature" maxlength="12" autocomplete="off" placeholder="留空就唔印" aria-describedby="share-sign-error">
+    </div>
+    <p class="jy-notice jy-error" id="share-sign-error" role="alert" hidden>署名只用文字，唔好填生辰、性別或聯絡資料。</p>
+    <div class="jy-card-actions"><button id="share-save" class="jy-save" type="button" disabled>儲存 9:16 判詞卡發 IG Story</button><button id="share-copy" type="button">複製呢句金句</button></div>
+    <p id="share-notice" class="jy-notice" role="status"></p>
+  </section>
 </section>
 <section class="chapter-section" aria-labelledby="wealth-title">
   <p class="center muted">點樣順應流勢，唔再白行冤枉路</p><div class="knot-divider" aria-hidden="true">◇</div><h2 class="echo-chapter" id="wealth-title" data-text="財運">財運</h2>
@@ -79,13 +97,13 @@
   <div class="inset"><div class="fate-card"><p class="jade-copy micro">青玉鏡・想靠近嘅相處</p><h2 id="fate-title">靠近一個人，<br>你最在意乜？</h2><div class="silhouette" aria-hidden="true"></div><dl><div><dt>盤上相處角度</dt><dd class="half-peek"><span class="lock-blur" aria-hidden="true">細節慢慢拆</span>・<span id="fate-0"></span></dd></div><div><dt>想被點對待</dt><dd class="half-peek"><span class="lock-blur" aria-hidden="true">細節慢慢拆</span>・<span id="fate-1"></span></dd></div><div><dt>你重視嘅細節</dt><dd class="half-peek"><span class="lock-blur" aria-hidden="true">細節慢慢拆</span>・<span id="fate-2"></span></dd></div><div><dt>留幾多空間</dt><dd class="half-peek"><span class="lock-blur" aria-hidden="true">細節慢慢拆</span>・<span id="fate-3"></span></dd></div><div><dt id="fate-4-label">想像一個晚上</dt><dd class="half-peek"><span class="lock-blur" aria-hidden="true">細節慢慢拆</span>・<span id="fate-4"></span></dd></div></dl></div></div>
 </section>
 <section class="inset chart-section" aria-label="同盤十二宮">
-  <details id="chart-details"><summary><span>展開你嘅紫微十二宮互動命盤<small>點任何一宮，睇星曜同四化落點。</small></span></summary><div class="result-grid" id="result-grid"></div><section id="palace-detail" class="palace-detail" aria-live="polite" aria-atomic="true"></section></details>
+  <details id="chart-details"><summary><span>展開你嘅紫微十二宮互動命盤<small>點任何一宮，睇星曜同四化落點。</small></span></summary><div class="chart-reading" id="chart-reading" role="region" aria-label="十二宮盤面及所選宮位" tabindex="0"><div class="result-grid" id="result-grid"></div><section id="palace-detail" class="palace-detail" aria-live="polite" aria-atomic="true"></section></div></details>
   <noscript><p class="micro muted">互動十二宮需要啟用 JavaScript；下面保留虛構例盤嘅篇章引子。</p></noscript>
 </section>
 <section class="offer" id="offer" aria-labelledby="offer-title">
   <p class="center muted">除此之外，仲有一大疊</p><h2 id="offer-title" class="center editorial gold-copy">由 <span class="js-user-name">例盤讀者</span> 呢張盤，<br>逐章讀落去嘅命書</h2>
   <div class="parchment-scroll"><p class="eyebrow center">XUAN &amp; JIUYE</p><h3>玄與九爺・三年命書</h3><ul><li>十二宮本命星曜同本宮／對宮依據</li><li>事業、愛情、家庭、財運同未來方向</li><li>由盤上星曜，對照日常處境</li><li>九爺留畀你慢慢諗嘅一句說話</li><li>2026–2028逐季節奏與兩條行動路線</li></ul><p class="micro">先拆眼前嗰一題；另一半，留低逐步行。</p></div>
-  <div class="price-card" id="pricing"><div class="sku-options" role="group" aria-label="命書方案"><button id="sku-full" type="button" aria-pressed="true">全盤三年命書</button><button id="sku-single" type="button" aria-pressed="false">單題拆局書</button></div><dl aria-live="polite" aria-atomic="true"><div><dt>命書定價</dt><dd id="price-original" class="price-original">HK$388</dd></div><div class="price-saving"><dt>優惠</dt><dd id="price-discount">-HK$240</dd></div><div class="price-total"><dt>命書價</dt><dd id="price-final">HK$148</dd></div></dl></div>
+  <div class="price-card" id="pricing"><div class="sku-options" role="group" aria-label="命書方案"><button id="sku-full" type="button" aria-pressed="true">全盤三年命書 <small>HK$148</small></button><button id="sku-single" type="button" aria-pressed="false">單題拆局書 <small>HK$88</small></button></div><dl aria-live="polite" aria-atomic="true"><div><dt>命書定價</dt><dd id="price-original" class="price-original">HK$388</dd></div><div class="price-saving"><dt>優惠</dt><dd id="price-discount">-HK$240</dd></div><div class="price-total"><dt>命書價</dt><dd id="price-final">HK$148</dd></div></dl></div>
   <div class="comic-panel book-panel">@@BOOK_ART@@<div class="panel-caption editorial">呢份，留低嘅唔係定論，<br><strong class="gold-copy">而係一句可以帶返日常嘅說話。</strong></div></div>
 </section>
 <article class="inset" id="book" aria-labelledby="book-title"><header class="frontispiece"><p class="eyebrow" id="edition-label">虛構例盤</p><h2 id="book-title">命書：由四章引子開始</h2><p id="chart-label">@@CHART_LABEL@@</p><div class="visit-note"><p id="visit-label"></p><p id="visit-question" hidden></p><p id="visit-answer"></p></div></header><div id="book-previews">
@@ -97,8 +115,22 @@
 </div></article>
 
 <footer class="result-footer"><a href="#top">返卷首 ↑</a><button class="leave" id="finish" type="button">讀完，返門口</button><p>玄與九爺陪你睇清選擇，唔替你決定。內容作傳統文化與自我反思參考，不代替醫療、法律或投資建議。</p></footer>
-<div class="sticky-cta-wrap"><button class="plaque-btn" id="purchase-cta" type="button" hidden>解鎖 <span class="js-user-name">例盤讀者</span> 嘅玄與九爺命書（<span id="cta-price">HK$148</span>）</button></div>
-<dialog class="purchase-dialog" id="purchase-dialog" aria-labelledby="purchase-title"><h2 id="purchase-title">你嘅命書選擇</h2><p id="purchase-plan">全盤三年命書</p><strong class="purchase-price" id="purchase-price">HK$148</strong><p>付款服務暫未開通，唔會落單或扣款。</p><button class="plaque-btn" id="close-purchase" type="button">返回命書</button></dialog>
+<div class="sticky-cta-wrap" id="purchase-wrap" hidden><button class="plaque-btn" id="purchase-cta" type="button" hidden aria-haspopup="dialog">解鎖 <span class="js-user-name">例盤讀者</span> 嘅<span id="cta-book">完整命書</span>（<span id="cta-price">HK$148</span>）</button></div>
+<dialog class="jy-early" id="purchase-dialog" aria-labelledby="purchase-title">
+  <div class="jy-top"><p class="jy-plan" id="purchase-plan">全盤三年命書</p><strong class="jy-price" id="purchase-price">HK$148</strong></div>
+  <h2 id="purchase-title" tabindex="-1">為你保留早鳥優惠名額</h2>
+  <p id="waitlist-closed">早鳥登記暫未開放，依家唔會收電郵、落單或扣款。</p>
+  <p id="waitlist-intro" hidden>完整版命書仲做緊最後校對。開通嗰日會優先寄早鳥連結畀你，唔會寄其他宣傳信。</p>
+  <p class="jy-help" id="waitlist-privacy" hidden>只會記低 Email、所選方案、課題同登記時間，唔會傳送生辰或命盤，亦唔會扣款。</p>
+  <form id="waitlist-form" autocomplete="off" novalidate hidden>
+    <label for="waitlist-email">接收早鳥連結嘅 Email</label>
+    <input id="waitlist-email" type="email" maxlength="254" required disabled autocomplete="off" placeholder="name@example.com" aria-describedby="waitlist-privacy waitlist-status">
+    <button class="jy-submit" id="waitlist-submit" type="submit" disabled>為我留低早鳥名額</button>
+  </form>
+  <p class="jy-notice jy-error" id="waitlist-status" role="status"></p>
+  <p id="waitlist-success" hidden>多謝你等玄與九爺。完整版命書準備好嗰日，我哋會優先寄早鳥連結畀你；今次冇傳送生辰資料，亦冇扣款。</p>
+  <button class="jy-close" id="close-purchase" type="button">先返去睇免費手記</button>
+</dialog>
 </main>
 @@SCRIPTS@@
 </body></html>

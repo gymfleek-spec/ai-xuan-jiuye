@@ -341,6 +341,18 @@ function notebookTopics(question, prompts) {
   return [...found];
 }
 
+export function readingBoundary(question, palace) {
+  const text = question.normalize('NFKC');
+  if (/自殺|自殘|自傷|想死|唔想生存|唔想活|想傷害自己|人身危險/i.test(text)) {
+    return '如果你而家有即時危險，請先聯絡當地緊急服務，或者請信得過嘅人陪你。呢件事唔使自己一個頂，亦唔靠張盤判斷。';
+  }
+  const danger = palace === '夫妻' ? [lovePrompts,familyPrompts] : [familyPrompts,lovePrompts];
+  for (const prompts of danger) if (prompts['先顧安全'][0].test(text)) return prompts['先顧安全'][1];
+  for (const key of ['暫停聯絡','尊重對方意願']) if (lovePrompts[key][0].test(text)) return lovePrompts[key][1];
+  const money = notebookTopics(text,moneyPrompts).find(key=>skipAfterword([key]));
+  return money ? moneyPrompts[money][1] : '';
+}
+
 const NOTEBOOK_EXAMPLE = Object.freeze({ year:'1995', month:'08', day:'15', time:'09:30', precision:'exact', gender:'male', place:'' });
 
 // The renderer accepts chart evidence only, never the birth form, alias or free-text question.
@@ -410,7 +422,7 @@ function drawNotebookDial(svg, palaces, {palace, branch}) {
   add('text',{x:160,y:179,'text-anchor':'middle',fill:'#dbc199','font-size':12},branch+' 位');
 }
 
-export function attachZiwei(dialog, content, paint, openBook) {
+export function attachZiwei(dialog, content, paint, openBook, onTopicSelected) {
   const emptyInput = () => ({ year: '', month: '', day: '', precision: 'unknown', time: '', gender: '', place: '' });
   let alias = '', question = '', chosenTopic = '', ritualTimer;
   let activeHouse = '', cardFromChart = false, lastAction = '';
@@ -489,8 +501,10 @@ export function attachZiwei(dialog, content, paint, openBook) {
       if (!openBook) { showComic(); return; }
       const topics=topicsForVisit(), topic=topics.find(t=>skipAfterword([t])) || selectedTopic(topics);
       const entry=familyScenes(topic)===ownChoreScenes ? soloChores : notebook().prompts[topic] || notebook().general;
-      const reply=question && !topic ? '你提到嘅事，唔可以單憑張盤斷定。先由'+palaceTitle(focusPalace)+'嗰章對照你見過嘅情況。' : entry[1];
-      try { openBook({chart,input,alias,question,subject:reading.label,reply,offer:!skipAfterword(topics)}); }
+      const boundary=readingBoundary(question,focusPalace);
+      const reply=boundary || (question && !topic ? '你提到嘅事，唔可以單憑張盤斷定。先由'+palaceTitle(focusPalace)+'嗰章對照你見過嘅情況。' : entry[1]);
+      try { openBook({chart,input,alias,question,subject:reading.label,reply,offer:!boundary && !skipAfterword(topics),
+        topic:focusPalace,hasEmptyPalace:reading.opposite !== null}); }
       catch { showQuestion(); errorMessage({field:'question',message:'未能打開今次嘅命書。請核對資料再試。'}); }
     };
     if (globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
@@ -753,7 +767,9 @@ ${order.map((palace,i) => {
     const name = trigger.dataset.ziwei;
     if (name === 'greet' && ['curious', 'yes'].includes(trigger.dataset.reply)) showChoice(trigger.dataset.reply);
     if (name === 'choose-focus') { clearVisit(); showChoice(); }
-    if (name === 'focus' && Object.hasOwn(READING_TOPICS,trigger.dataset.palace)) { focusPalace=trigger.dataset.palace; showAlias(); }
+    if (name === 'focus' && Object.hasOwn(READING_TOPICS,trigger.dataset.palace)) {
+      focusPalace=trigger.dataset.palace; showAlias(); onTopicSelected?.(focusPalace);
+    }
     if (notebook()) {
       if (name === 'edit-alias') showAlias();
       if (name === 'career-birth') showNotebookBirth();

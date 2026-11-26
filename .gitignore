@@ -1,4 +1,4 @@
-# Explicit v0.17 source and release allowlist; no runtime data.
+# Explicit source and release allowlist; no runtime data.
 *
 !/project/
 !/project/assets/
@@ -60,3 +60,12 @@
 !/docs/screenshots-v0.17.1/2000-love.png
 !/docs/screenshots-v0.17.1/1988-wealth.png
 !/docs/screenshots-v0.17.1/desktop-entry.png
+!/project/growth-config.mjs
+!/project/scroll/analytics.mjs
+!/project/scroll/waitlist.mjs
+!/project/scroll/share-art.mjs
+!/project/scroll/shareCard.mjs
+!/project/scroll/growth.css
+!/project/scroll/growth.test.mjs
+!/project/assets/jiuye-v2.png
+!/project/assets/tea-room-qr.png

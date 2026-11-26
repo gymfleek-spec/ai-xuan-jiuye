@@ -1,6 +1,7 @@
 import { attachSceneSequence } from '../motion/motion.mjs';
 import { attachZiwei } from '../ziwei.js';
 import { attachResult } from './result.mjs';
+import { TOPIC_CODE, track } from './analytics.mjs';
 
 const byId=id=>document.getElementById(id);
 const threshold=byId('threshold'), report=byId('top'), dialog=byId('consult'), content=byId('story-content');
@@ -19,18 +20,18 @@ function paintStep(html,step){
   if(step==='career-ritual')player.pause();
   else if(phase==='consult' && !document.hidden)void player.play();
 }
-function showBook({chart,input,alias,question,subject,reply,offer}){
+function showBook({chart,input,alias,question,subject,reply,offer,topic,hasEmptyPalace}){
   results.show({chart,alias,subject,offer,reply});
   byId('edition-label').textContent='本次命盤　／　'+alias;
   byId('chart-label').textContent=[input.year,input.month,input.day].join('-')+' · '+input.time+' · '+(input.gender==='male'?'男':'女')+' ｜ '+chart.fiveElementsClass;
   byId('visit-label').textContent='枱邊嗰句　／　'+subject;
   byId('visit-question').textContent=question?'「'+question+'」':'';byId('visit-question').hidden=!question;
   byId('visit-answer').textContent='九爺：'+reply;
-  byId('offer').hidden=!offer;
   phase='reading';player.pause();dialog.close();content.replaceChildren();report.hidden=false;
   window.scrollTo(0,0);byId('cover-title').focus({preventScroll:true});
+  track('chart_generated',{topic:TOPIC_CODE[topic],has_empty_palace:hasEmptyPalace});
 }
-const ask=attachZiwei(dialog,content,paintStep,showBook);
+const ask=attachZiwei(dialog,content,paintStep,showBook,topic=>track('topic_selected',{topic:TOPIC_CODE[topic]}));
 
 function meet(normal){
   if(phase!=='entering')return;
@@ -65,6 +66,7 @@ function home(animate=true){
 }
 enter.addEventListener('click',()=>{
   if(phase!=='home')return;
+  track('enter_room',{entry_btn:'luopan_v1'});
   phase='entering';invitation.hidden=true;byId('entry-foot').hidden=true;enter.disabled=true;
   threshold.dataset.phase='entering';
   window.scrollTo(0,0);poster.alt='步入大門，先見佛龕，向右望就係玄同九爺。';

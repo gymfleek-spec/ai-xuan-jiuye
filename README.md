@@ -1,28 +1,17 @@
-# 玄與九爺 v0.17.2｜四章引子與話題青玉鏡
+# 玄與九爺 v0.18.0｜九爺判詞與早鳥登記
 
-審閱分支：`feat/v0.17-empathy-teaser`，由 **fc0f769** 的 v0.16.1 source ZIP 恢復後升級。這條分支的 `project/` 已是 **0.17.2 現行源碼**，不再是舊 v0.11.0。
+[公開預覽](https://xuan-jiuye-preview.pages.dev/)｜整合分支 `feat/v0.18-growth-validation`，以 v0.17.2 的 `0e9cf58` 為基準。
 
 ```sh
-git clone --single-branch --branch feat/v0.17-empathy-teaser https://github.com/gymfleek-spec/ai-xuan-jiuye.git
-cd ai-xuan-jiuye/project
+cd project
 npm run build && npm test
 python3 -m http.server 4187 --bind 127.0.0.1 --directory public-preview
 ```
 
-Node.js 24+，零外部 npm 依賴，Vanilla ES Modules＋固定 iztro 2.6.5。毋須 npm install 或後台。只用虛構生辰試閱。
+Node.js 24+、原生 ES Modules、固定 iztro 2.6.5，毋須安裝 npm 依賴。**唯一發布目錄是 `project/public-preview/`**，只部署本次建置的檔案。根目錄舊 `public-preview/` 已退出工作樹，仍可從 Git 歷史還原；歷史 ZIP 不是發布來源。
 
-- [v0.17.1 三盤截圖與圖說](docs/CAPTIONS-v0.17.1.md)
+- `scroll/shareCard.mjs`／`share-art.mjs`：只在入室原選的一題合成 1080×1920 判詞卡；同一副本命盤的五行局及本宮／借星、定稿判詞、選填署名及固定首頁 QR。不讀出生資料、不沿用稱呼、不外傳。可下載、長按高清圖或複製金句，不自動發帖。
+- `scroll/waitlist.mjs`：HK$88／HK$148 方案及早鳥視窗，不收款；未配置收集端點時不顯示電郵表單、不作登記。非聯絡同意、危險、投資／彩票等分流同時停用判詞卡、推介及登記。
+- `scroll/analytics.mjs`：九個動作只輸出白名單欄位；預設只在本頁觸發，不儲存、不傳出去。詳見[工程說明](project/README.md)。下載及長按事件代表操作意圖，不能判定相簿已儲存。
 
-### v0.17.0 上一版留檔
-
-- [上一版改動、驗證及限制](DELIVERY-v0.17.0.md)
-- [三盤完整實測摘錄](EXCERPTS-v0.17.0.md)
-- [實際83項測試完整輸出](TEST-LOG-v0.17.0.txt)及[驗證範圍](VALIDATION-v0.17.0.json)
-- [現行工程說明](project/README.md)
-- [完整可重建 source ZIP](xuan-jiuye-v0.17.0-source.zip)，解壓到空目錄後進入 `project/` 執行上述建置。
-- [10個安全站檔 public ZIP](xuan-jiuye-v0.17.0-public.zip)，是 v0.17.0 審閱產物。
-- [逐檔 SHA-256 清單](backup-v0.17.0.json)
-
-根目錄的舊 public-preview、BACKUP、歷史清單與舊 ZIP 保留歷史用途；不是本版入口。用 `project/public-preview/` 的本次建置輸出作發布。
-
-此版保留 v0.17.1 同理正文及入座首屏，將卷末整合成四章引子及其他四題手風琴。青玉鏡仍按夫妻宮參看的星曜、本命忌與祿選四條問題，事業、愛情、財運各有對應情境。排盤沿用本命四化、大限、三年流年及12季原生查詢；曲線是有完整依據的相對節奏指標，不是已驗證的財富回報或事件準確率。所選一題的前半免費，其餘四題只露出兩句引子，由同一個底部按鈕開啟方案。單題HK$88／全盤HK$148僅顯示方案，付款服務未開通，沒有訂單、扣款、Email或假解鎖。
+舊版對照：[v0.17.1 三盤](docs/CAPTIONS-v0.17.1.md)｜[v0.17.0 交付留檔](DELIVERY-v0.17.0.md)。

@@ -28,6 +28,7 @@ function fixture(){
     addEventListener(name,fn){this.handlers[name]=fn;}
     setAttribute(k,v){this.attributes[k]=v;}getAttribute(k){return this.attributes[k];}
     showModal(){this.open=true;}close(){this.open=false;}
+    focus(){}removeAttribute(k){delete this.attributes[k];}
     querySelectorAll(selector){return this.children.filter(c=>c.tagName===selector);}
     get innerHTML(){throw new Error('result must use text nodes');}set innerHTML(_){throw new Error('unsafe HTML write');}
   }
@@ -43,7 +44,7 @@ test('result safely renders a hostile alias, switches without replacing the char
   try{
     const result=attachResult(f.report),native=chart('19:30'),before=JSON.stringify(native);
     const alias='<img src=x onerror=alert(1)>';
-    result.show({chart:native,alias,subject:'財運'});
+    result.show({chart:native,alias,subject:'財運',offer:true});
     assert.equal(f.names[0].textContent,alias);assert.ok(f.find('empathy-headline').textContent.startsWith(alias));
     const grid=f.find('result-grid').children;
     assert.equal(grid.length,13);assert.equal(grid.filter(n=>n.tagName==='button').length,12);
@@ -61,7 +62,7 @@ test('result safely renders a hostile alias, switches without replacing the char
     result.clear();assert.equal(f.names[0].textContent,'');assert.equal(f.find('result-grid').children.length,0);
     assert.equal(f.find('empathy-headline').textContent,'');assert.equal(f.find('resonance').getAttribute('aria-pressed'),'false');
     f.find('resonance').handlers.click();assert.equal(f.find('resonance').getAttribute('aria-pressed'),'false');
-    result.show({chart:chart('09:30'),alias:'第二盤',subject:'財運'});
+    result.show({chart:chart('09:30'),alias:'第二盤',subject:'財運',offer:true});
     assert.match(f.find('pattern-badge').textContent,/亥位.*天府/);assert.doesNotMatch(f.find('empathy-headline').textContent,/onerror/);
   }finally{globalThis.document=old;}
 });
@@ -79,7 +80,8 @@ test('result uses half-visible clues, an accessible teaser tail and a single cul
   assert.equal((html.match(/玄與九爺陪你睇清選擇，唔替你決定。/g)||[]).length,1);
   assert.match(js,/tail.setAttribute\('aria-hidden','true'\)/);assert.match(js,/tail.setAttribute\('inert',''\)/);
   assert.match(html,/id="purchase-cta"/);assert.match(html,/id="purchase-dialog"/);
-  assert.doesNotMatch(html,/<input[^>]+type="email"|1,284|真實讀者回饋|三萬字|未解鎖|預覽版|已解鎖|模擬解鎖|切換：|https?:\/\//);
+  assert.match(html,/<input id="waitlist-email" type="email"[^>]+disabled/);
+  assert.doesNotMatch(html,/<form[^>]+action=|<input[^>]+name=|1,284|真實讀者回饋|三萬字|未解鎖|預覽版|已解鎖|模擬解鎖|Demo|測試|漏斗監察|切換：|https?:\/\//);
   assert.doesNotMatch(js,/innerHTML|localStorage|sessionStorage|fetch\(|sendBeacon|XMLHttpRequest/);
   const css=readFileSync(new URL('./style.css',import.meta.url),'utf8');
   assert.match(css,/max-width:440px/);assert.match(css,/prefers-reduced-motion:no-preference/);
@@ -122,10 +124,13 @@ const allText = root => descendants(root).map(n=>n.textContent).join('');
 test('the entry topic stays free across selectors, twelve palaces, chapter previews and purchase buttons',()=>{
   const f=fixture(), old=globalThis.document;globalThis.document={createElement:tag=>new f.Node(tag)};
   try {
-    const result=attachResult(f.report), native=chart('09:30');result.show({chart:native,alias:'一題',subject:'事業'});
+    const result=attachResult(f.report), native=chart('09:30');result.show({chart:native,alias:'一題',subject:'事業',offer:true});
     const model=resultFromChart(native,'事業'), career=model.book.chapters[0], love=model.book.chapters[1];
     assert.ok(allText(f.find('empathy-body')).includes(career.other));
     assert.ok(f.find('jiuye-quote').textContent.includes(career.line));
+    assert.equal(f.find('share-card').hidden,false);
+    assert.match(f.find('share-quote').textContent,/總係頂到最後嗰個/);
+    f.find('share-signature').value='另填署名';
     const chapters = f.find('chapter-previews').children, previews = f.find('topic-previews').children;
     assert.deepEqual(chapters.map(c=>c.children[0].textContent),[
       '第一章：本命內耗與天賦','第二章：2026–2028 財運與轉折','第三章：緣分與貴人磁場','第四章：穩陣 vs 破局雙選擇'
@@ -138,6 +143,9 @@ test('the entry topic stays free across selectors, twelve palaces, chapter previ
     }
     f.find('topic-select').handlers.change({target:{value:'夫妻'}});
     assert.equal(f.find('resonance').hidden,true);
+    assert.equal(f.find('share-card').hidden,true);
+    assert.equal(f.find('share-signature').value,'');
+    assert.equal(f.find('share-quote').textContent,'');
     for(const id of ['empathy-body','chapter-previews','topic-previews']) {
       assert.ok(!allText(f.find(id)).includes(love.people),'locked prose is not in the DOM');
       assert.ok(!allText(f.find(id)).includes(love.other));
@@ -158,12 +166,15 @@ test('the entry topic stays free across selectors, twelve palaces, chapter previ
     f.find('topic-select').handlers.change({target:{value:'官祿'}});
     assert.equal(family.open,false);assert.equal(f.find('purchase-plan').textContent,'事業・單題拆局書');
     assert.ok(allText(f.find('empathy-body')).includes(career.other));
+    assert.equal(f.find('share-card').hidden,false);
+    assert.equal(f.find('share-signature').value,'');
     const shape=f.find('wealth-line').getAttribute('d');assert.match(shape,/^M12 /);assert.match(shape,/L308 /);
     assert.ok(allText(f.find('basis-detail')).includes('太陰化忌在子女宮'));
     result.clear();for(const id of ['chapter-previews','topic-previews'])assert.equal(f.find(id).children.length,0);
     result.show({chart:native,alias:'界線',subject:'愛情',offer:false,reply:'唔靠張盤催你再聯絡。'});
     assert.equal(f.find('jiuye-quote').textContent,'唔靠張盤催你再聯絡。');
-    assert.equal(f.find('book-previews').hidden,true);
+    for (const id of ['book-previews','offer','purchase-wrap','share-card','resonance']) assert.equal(f.find(id).hidden,true);
+    f.find('purchase-cta').handlers.click();assert.equal(f.find('purchase-dialog').open,false);
     for(const id of ['chapter-previews','topic-previews'])assert.equal(f.find(id).children.length,0);
     assert.ok(allText(f.find('empathy-body')).includes(love.other));
   } finally {globalThis.document=old;}
@@ -183,7 +194,7 @@ test('the three delivery charts get distinct chart-led relationship rows and fre
     const rendered=samples.map(([date,time,gender,subject,spouse,ji,lu,...phrases])=>{
       const [year,month,day]=date.split('-');
       const native=calculateZiwei({...EXAMPLE,year,month,day,time,gender},box.self.iztro,{asOf:'2026-11-21'});
-      result.show({chart:native,alias:'同一個名',subject});
+      result.show({chart:native,alias:'同一個名',subject,offer:true});
       const free=f.find('empathy-body').children.map(p=>p.textContent);
       const closing=f.find('jiuye-quote').textContent, clues=rows();
       assert.equal(free.length,4);assert.ok(free[2].includes(ji));assert.ok(free[3].includes(lu));

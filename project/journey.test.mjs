@@ -734,3 +734,23 @@ test('integrated tea room: bare no-contact requests withhold offers without gues
     }finally{f.restore();}
   }
 });
+
+test('integrated tea room: safety answers and offer gate apply even on a different entry topic',()=>{
+  for(const [palace,question,answer] of [
+    ['官祿','佢威脅我，仲話想同我傾','安全'],
+    ['命宮','唔想再聯絡','界線'],
+    ['田宅','想買邊隻股票','股票'],
+    ['夫妻','想揀六合彩幸運號碼','唔會用命盤估中獎號碼'],
+    ['財帛','我想傷害自己','緊急服務']
+  ]) {
+    let shown;const f=fixture(true,v=>shown=v);
+    try {
+      f.start(palace);f.alias();f.born();f.ask(question);f.tick();
+      assert.equal(shown.offer,false,question);
+      assert.ok(shown.reply.includes(answer),shown.reply);
+      assert.equal(shown.topic,palace);
+      const natal=shown.chart.palaces.find(p=>p.name===palace);
+      assert.equal(shown.hasEmptyPalace,!natal.majorStars.some(s=>s.type==='major'));
+    } finally {f.restore();}
+  }
+});
