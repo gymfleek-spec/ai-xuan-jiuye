@@ -45,6 +45,7 @@ test('result safely renders a hostile alias, switches without replacing the char
     const result=attachResult(f.report),native=chart('19:30'),before=JSON.stringify(native);
     const alias='<img src=x onerror=alert(1)>';
     result.show({chart:native,alias,subject:'財運',offer:true});
+    assert.equal(f.find('share-signature').value,'');
     assert.equal(f.names[0].textContent,alias);assert.ok(f.find('empathy-headline').textContent.startsWith(alias));
     const grid=f.find('result-grid').children;
     assert.equal(grid.length,13);assert.equal(grid.filter(n=>n.tagName==='button').length,12);
@@ -81,6 +82,7 @@ test('result uses half-visible clues, an accessible teaser tail and a single cul
   assert.match(js,/tail.setAttribute\('aria-hidden','true'\)/);assert.match(js,/tail.setAttribute\('inert',''\)/);
   assert.match(html,/id="purchase-cta"/);assert.match(html,/id="purchase-dialog"/);
   assert.match(html,/<input id="waitlist-email" type="email"[^>]+disabled/);
+  assert.match(html,/id="waitlist-local" hidden>今次冇送出電郵，亦未保留名額/);
   assert.doesNotMatch(html,/<form[^>]+action=|<input[^>]+name=|1,284|真實讀者回饋|三萬字|未解鎖|預覽版|已解鎖|模擬解鎖|Demo|測試|漏斗監察|切換：|https?:\/\//);
   assert.doesNotMatch(js,/innerHTML|localStorage|sessionStorage|fetch\(|sendBeacon|XMLHttpRequest/);
   const css=readFileSync(new URL('./style.css',import.meta.url),'utf8');
@@ -130,6 +132,7 @@ test('the entry topic stays free across selectors, twelve palaces, chapter previ
     assert.ok(f.find('jiuye-quote').textContent.includes(career.line));
     assert.equal(f.find('share-card').hidden,false);
     assert.match(f.find('share-quote').textContent,/總係頂到最後嗰個/);
+    assert.equal(f.find('share-signature').value,'一題');
     f.find('share-signature').value='另填署名';
     const chapters = f.find('chapter-previews').children, previews = f.find('topic-previews').children;
     assert.deepEqual(chapters.map(c=>c.children[0].textContent),[

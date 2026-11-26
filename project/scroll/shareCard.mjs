@@ -74,9 +74,9 @@ export function attachShareCard(find) {
       }
     });
   }
-  function set(next) {
+  function set(next, preferredSignature = '') {
     observer?.disconnect(); observer=null; clearTimeout(drawTimer); stopPress();
-    fields=next; section.hidden=!next; signature.value='';
+    fields=next; section.hidden=!next; signature.value=next ? checkedSignature(preferredSignature) || '' : '';
     signature.setAttribute('aria-invalid','false');
     canvas.width=canvas.height=0; canvas.setAttribute('aria-label',''); canvas.hidden=true;
     image.removeAttribute('src'); image.alt=''; image.hidden=true;
@@ -104,14 +104,14 @@ export function attachShareCard(find) {
       const link=document.createElement('a'); link.href=shareImageSource(canvas);
       link.download='jiuye-'+fields.topic+'.png';
       document.body.append(link); try {link.click();} finally {link.remove();}
-      track('share_card_downloaded',{topic:fields.topic,method:'download'});
+      track('share_card_saved',{topic:fields.topic});
     } catch { useImage=true; renderCard(); }
   });
   image.addEventListener('pointerdown', e=>{
     if (e.pointerType !== 'touch' || !fields || !useImage) return;
     stopPress(); press={x:e.clientX,y:e.clientY};
     pressTimer=setTimeout(()=>{
-      if (fields && press) track('share_card_downloaded',{topic:fields.topic,method:'long_press'});
+      if (fields && press) track('share_card_saved',{topic:fields.topic});
       stopPress();
     },550);
   });
@@ -122,7 +122,7 @@ export function attachShareCard(find) {
   // Some in-app browsers open their image menu before a pointer hold completes.
   image.addEventListener('contextmenu', e=>{
     if (e.isTrusted && fields && useImage && press) {
-      track('share_card_downloaded',{topic:fields.topic,method:'long_press'}); stopPress();
+      track('share_card_saved',{topic:fields.topic}); stopPress();
     }
   });
   copy.addEventListener('click',async()=>{

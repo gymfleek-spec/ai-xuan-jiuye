@@ -20,7 +20,7 @@ function paintStep(html,step){
   if(step==='career-ritual')player.pause();
   else if(phase==='consult' && !document.hidden)void player.play();
 }
-function showBook({chart,input,alias,question,subject,reply,offer,topic,hasEmptyPalace}){
+function showBook({chart,input,alias,question,subject,reply,offer,topic}){
   results.show({chart,alias,subject,offer,reply});
   byId('edition-label').textContent='本次命盤　／　'+alias;
   byId('chart-label').textContent=[input.year,input.month,input.day].join('-')+' · '+input.time+' · '+(input.gender==='male'?'男':'女')+' ｜ '+chart.fiveElementsClass;
@@ -29,7 +29,7 @@ function showBook({chart,input,alias,question,subject,reply,offer,topic,hasEmpty
   byId('visit-answer').textContent='九爺：'+reply;
   phase='reading';player.pause();dialog.close();content.replaceChildren();report.hidden=false;
   window.scrollTo(0,0);byId('cover-title').focus({preventScroll:true});
-  track('chart_generated',{topic:TOPIC_CODE[topic],has_empty_palace:hasEmptyPalace});
+  track('chart_generated',{topic:TOPIC_CODE[topic]});
 }
 const ask=attachZiwei(dialog,content,paintStep,showBook,topic=>track('topic_selected',{topic:TOPIC_CODE[topic]}));
 
@@ -66,7 +66,7 @@ function home(animate=true){
 }
 enter.addEventListener('click',()=>{
   if(phase!=='home')return;
-  track('enter_room',{entry_btn:'luopan_v1'});
+  track('enter_room');
   phase='entering';invitation.hidden=true;byId('entry-foot').hidden=true;enter.disabled=true;
   threshold.dataset.phase='entering';
   window.scrollTo(0,0);poster.alt='步入大門，先見佛龕，向右望就係玄同九爺。';

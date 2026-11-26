@@ -86,7 +86,7 @@ export function attachResult(report) {
     parts.push('按所填當地鐘錶時間，未校真太陽時；採農曆年界，所以1月1日未必已轉流年。');
     put('basis-detail', parts.join('\n\n'));
   }
-  function topic(key) {
+  function topic(key, initialSignature = '') {
     const chapter = chapterFor(key); if (!chapter) return;
     activeTopic = key; purchaseTopic = key; find('topic-select').value = key;
     find('chart-reading').scrollTop = 0;
@@ -99,7 +99,7 @@ export function attachResult(report) {
       : [teaser(chapter.label + '・另一半慢慢拆', chapter.teaser)]));
     put('jiuye-quote', !canOffer ? safeReply : free ? chapter.question + ' 可以試吓講：' + chapter.line : READING_TOPICS[key].question);
     find('resonance').hidden = !free || !canOffer;
-    share.set(free && canOffer ? shareFields(chapter, current.book.element) : null);
+    share.set(free && canOffer ? shareFields(chapter, current.book.element) : null, initialSignature);
     find('resonance').setAttribute('aria-pressed','false'); put('resonance','呢句講中咗 ✦');
     basis(chapter); find('basis').open = false; pricing(plan); palace(key); paintRelating(key);
   }
@@ -166,7 +166,7 @@ export function attachResult(report) {
         button.addEventListener('click',() => palace(p.name)); grid.append(button);
       }
       const center = node('div','','palace-center'); center.append(node('strong','紫微斗數'),node('span',current.book.element),node('span','本命十二宮')); grid.append(center);
-      topic(current.selected); paintTiming(); paintChapterPreviews();
+      topic(current.selected, name); paintTiming(); paintChapterPreviews();
       find('chart-details').open = find('topic-menu').open = false;
     },
     clear() {

@@ -2,25 +2,22 @@ export const TOPIC_CODE = Object.freeze({官祿:'career',夫妻:'love',田宅:'f
 export const SKU_CODE = Object.freeze({single:'single_88',full:'full_148'});
 const eventTopics = Object.values(TOPIC_CODE), eventSkus = Object.values(SKU_CODE);
 const eventFields = Object.freeze({
-  enter_room: ['entry_btn'],
+  enter_room: [],
   topic_selected: ['topic'],
-  chart_generated: ['topic','has_empty_palace'],
+  chart_generated: ['topic'],
   resonance_clicked: ['topic'],
-  share_card_downloaded: ['topic','method'],
+  share_card_saved: ['topic'],
   share_quote_copied: ['topic'],
   sku_selected: ['sku'],
   unlock_modal_opened: ['sku','topic'],
-  unlock_email_sent: ['sku','topic']
+  unlock_email_submitted: ['sku','topic']
 });
 const eventChecks = {
-  entry_btn: v => v === 'luopan_v1',
   topic: v => eventTopics.includes(v),
-  sku: v => eventSkus.includes(v),
-  has_empty_palace: v => typeof v === 'boolean',
-  method: v => v === 'download' || v === 'long_press'
+  sku: v => eventSkus.includes(v)
 };
 
-export function analyticsEvent(event, input) {
+export function analyticsEvent(event, input = {}) {
   if (typeof event !== 'string' || !Object.hasOwn(eventFields,event) || !input) return null;
   const payload = {};
   for (const field of eventFields[event]) {

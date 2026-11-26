@@ -16,7 +16,7 @@ export async function registerWaitlist(endpoint,{email,sku,topic},signal) {
   if (!endpoint || !address || !Object.values(SKU_CODE).includes(sku) || !Object.values(TOPIC_CODE).includes(topic)) return false;
   const response = await fetch(endpoint,{
     method:'POST', headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({email:address,sku,topic,timestamp:new Date().toISOString()}),
+    body:JSON.stringify({email:address,sku,topic}),
     signal, credentials:'omit', redirect:'error', referrerPolicy:'no-referrer'
   });
   return response.ok && (await response.json())?.ok === true;
@@ -25,17 +25,17 @@ export async function registerWaitlist(endpoint,{email,sku,topic},signal) {
 export function attachWaitlist(find, endpoint = globalThis.document?.querySelector?.('meta[name="waitlist-endpoint"]')?.content) {
   const modal = find('purchase-dialog'), title = find('purchase-title'), form = find('waitlist-form');
   const email = find('waitlist-email'), submit = find('waitlist-submit'), close = find('close-purchase');
-  const status = find('waitlist-status'), success = find('waitlist-success');
+  const status = find('waitlist-status'), success = find('waitlist-success'), local = find('waitlist-local');
   let context = null, pending = null;
   function reset() {
     pending?.abort(); pending = context = null;
     email.value = ''; email.readOnly = false; email.setAttribute('aria-invalid','false');
     title.textContent = '為你保留早鳥優惠名額';
-    form.hidden = success.hidden = true;
+    success.hidden = local.hidden = true; form.hidden = false;
     find('waitlist-intro').hidden = find('waitlist-privacy').hidden = !endpoint;
     find('waitlist-closed').hidden = !!endpoint;
-    if (endpoint) form.hidden = false;
-    email.disabled = submit.disabled = !endpoint;
+    email.disabled = submit.disabled = false;
+    submit.textContent = endpoint ? '為我留低早鳥名額' : '核對電郵格式';
     status.textContent = '';
     close.textContent = '先返去睇免費手記';
   }
@@ -52,12 +52,19 @@ export function attachWaitlist(find, endpoint = globalThis.document?.querySelect
   });
   form.addEventListener('submit', async e=>{
     e.preventDefault();
-    if (!endpoint || !modal.open || !context || pending || !success.hidden) return;
+    if (!modal.open || !context || pending) return;
     const address = checkedEmail(email.value);
     if (!address) {
       email.setAttribute('aria-invalid','true');
-      status.textContent = '請輸入有效嘅 Email 地址，先寄得到連結畀你。';
+      status.textContent = '請輸入有效嘅 Email 地址。';
       email.focus();
+      return;
+    }
+    if (!endpoint) {
+      context = null; email.value = ''; status.textContent = '';
+      form.hidden = find('waitlist-closed').hidden = true;
+      title.textContent = '電郵格式已核對'; local.hidden = false;
+      close.textContent = '返去繼續睇免費手記'; title.focus();
       return;
     }
     const request = new AbortController(), selection = context;
@@ -78,7 +85,7 @@ export function attachWaitlist(find, endpoint = globalThis.document?.querySelect
     title.textContent = '已為你留好位置';
     form.hidden = find('waitlist-intro').hidden = find('waitlist-privacy').hidden = true;
     success.hidden = false; close.textContent = '返去繼續睇免費手記'; title.focus();
-    track('unlock_email_sent',selection);
+    track('unlock_email_submitted',selection);
   });
   return {
     open(sku,topic) {

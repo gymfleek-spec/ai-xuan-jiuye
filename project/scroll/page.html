@@ -72,13 +72,13 @@
     <h3 id="share-title">九爺留畀你嘅一張判詞</h3>
     <div class="jy-card-stage" id="share-stage" hidden>
       <canvas id="share-canvas" role="img" hidden></canvas>
-      <img id="share-image" width="1080" height="1920" alt="" hidden>
+      <img id="share-image" width="720" height="1280" alt="" hidden>
     </div>
     <p id="share-hint" class="jy-notice" hidden>長按上方圖片儲存至相簿</p>
     <p id="share-quote" class="jy-notice" hidden></p>
-    <p class="jy-notice">卡片只留格局同呢句話，唔印出生日期、時辰或性別。</p>
-    <div class="jy-sign"><label for="share-signature">卡片署名 <small>（選填）</small></label>
-      <input id="share-signature" maxlength="12" autocomplete="off" placeholder="留空就唔印" aria-describedby="share-sign-error">
+    <p class="jy-notice">化名可以改或刪走；唔會印出生日期、時辰或性別。</p>
+    <div class="jy-sign"><label for="share-signature">卡片署名 <small>（可刪）</small></label>
+      <input id="share-signature" maxlength="18" autocomplete="off" placeholder="留空就唔印" aria-describedby="share-sign-error">
     </div>
     <p class="jy-notice jy-error" id="share-sign-error" role="alert" hidden>署名只用文字，唔好填生辰、性別或聯絡資料。</p>
     <div class="jy-card-actions"><button id="share-save" class="jy-save" type="button" disabled>儲存 9:16 判詞卡發 IG Story</button><button id="share-copy" type="button">複製呢句金句</button></div>
@@ -119,15 +119,16 @@
 <dialog class="jy-early" id="purchase-dialog" aria-labelledby="purchase-title">
   <div class="jy-top"><p class="jy-plan" id="purchase-plan">全盤三年命書</p><strong class="jy-price" id="purchase-price">HK$148</strong></div>
   <h2 id="purchase-title" tabindex="-1">為你保留早鳥優惠名額</h2>
-  <p id="waitlist-closed">早鳥登記暫未開放，依家唔會收電郵、落單或扣款。</p>
+  <p id="waitlist-closed">早鳥登記暫未開放。可以先核對電郵格式，唔會送出或保留名額。</p>
   <p id="waitlist-intro" hidden>完整版命書仲做緊最後校對。開通嗰日會優先寄早鳥連結畀你，唔會寄其他宣傳信。</p>
-  <p class="jy-help" id="waitlist-privacy" hidden>只會記低 Email、所選方案、課題同登記時間，唔會傳送生辰或命盤，亦唔會扣款。</p>
+  <p class="jy-help" id="waitlist-privacy" hidden>只會記低 Email、所選方案同課題，唔會傳送生辰或命盤，亦唔會扣款。</p>
   <form id="waitlist-form" autocomplete="off" novalidate hidden>
     <label for="waitlist-email">接收早鳥連結嘅 Email</label>
-    <input id="waitlist-email" type="email" maxlength="254" required disabled autocomplete="off" placeholder="name@example.com" aria-describedby="waitlist-privacy waitlist-status">
+    <input id="waitlist-email" type="email" maxlength="254" required disabled autocomplete="off" placeholder="name@example.com" aria-describedby="waitlist-closed waitlist-privacy waitlist-status">
     <button class="jy-submit" id="waitlist-submit" type="submit" disabled>為我留低早鳥名額</button>
   </form>
   <p class="jy-notice jy-error" id="waitlist-status" role="status"></p>
+  <p id="waitlist-local" hidden>今次冇送出電郵，亦未保留名額。開通後先可以正式登記。</p>
   <p id="waitlist-success" hidden>多謝你等玄與九爺。完整版命書準備好嗰日，我哋會優先寄早鳥連結畀你；今次冇傳送生辰資料，亦冇扣款。</p>
   <button class="jy-close" id="close-purchase" type="button">先返去睇免費手記</button>
 </dialog>

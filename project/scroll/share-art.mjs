@@ -1,5 +1,6 @@
 // Visual layer only. The caller supplies approved short copy and labels, not a chart or a form value.
-export const WIDTH = 1080, HEIGHT = 1920;
+export const WIDTH = 720, HEIGHT = 1280;
+const ART_WIDTH = 1080, ART_HEIGHT = 1920;
 export const TOPICS = Object.freeze({career:'事業', love:'愛情', family:'家庭', wealth:'財運', direction:'未來方向'});
 const serif = '"Songti TC","Noto Serif CJK TC","Noto Serif TC","PingFang TC",serif';
 const sans = '"PingFang TC","Noto Sans CJK TC",system-ui,sans-serif';
@@ -8,9 +9,9 @@ export function checkedSignature(value) {
   if (typeof value !== 'string') return null;
   const s = value.normalize('NFKC').trim().replace(/ +/g,' ');
   if (!s) return '';
-  return /^[\p{L}\p{M} ·・'-]{1,12}$/u.test(s) &&
+  return /^[\p{L}\p{M} ·・'-]{1,18}$/u.test(s) &&
     !/^(?:男|女|男性|女性|male|female|man|woman)$/i.test(s) &&
-    !/[〇零一二三四五六七八九十]{2,}[年月日點時]/u.test(s) ? s : null;
+    !/[〇零一二三四五六七八九十廿卅兩]{4,}|[〇零一二三四五六七八九十廿卅兩]+[年月日號點時]/u.test(s) ? s : null;
 }
 
 export function checkedArtwork({topic, pattern, quote, signature = ''}) {
@@ -53,12 +54,14 @@ export function paintShareArtwork(canvas, fields, {portrait, qr}) {
   canvas.width=WIDTH; canvas.height=HEIGHT;
   const c=canvas.getContext('2d');
   if (!c) throw new Error('暫時未畫到判詞卡。');
+  c.setTransform(WIDTH / ART_WIDTH, 0, 0, HEIGHT / ART_HEIGHT, 0, 0);
   const gold='#c9a14e', light='#f5e7c6', muted='#d2b675';
-  fillGradient(c,0,0,0,HEIGHT,[[0,'#10221a'],[1,'#050807']],0,0,WIDTH,HEIGHT);
+  fillGradient(c,0,0,0,ART_HEIGHT,[[0,'#10221a'],[1,'#050807']],0,0,ART_WIDTH,ART_HEIGHT);
   // Only the left close-up from the original reference sheet; both ears and the jade pendant stay in frame.
   const plate=canvas.ownerDocument.createElement('canvas');
   plate.width=1000; plate.height=970;
   const ink=plate.getContext('2d');
+  if (!ink) throw new Error('暫時未畫到判詞卡。');
   ink.drawImage(portrait,0,0,836,902,-40,2,1020,1101);
   ink.globalCompositeOperation='destination-in';
   fillGradient(ink,0,0,0,970,[[0,'transparent'],[0.12,'#000'],[0.53,'#000'],[0.75,'#0009'],[1,'transparent']],0,0,1000,970);
@@ -94,6 +97,6 @@ export function paintShareArtwork(canvas, fields, {portrait, qr}) {
   rule(c,110,1550,970,'#665134');
   c.imageSmoothingEnabled=false; c.drawImage(qr,771,1594,195,195); c.imageSmoothingEnabled=true;
   draw(c,'九爺命格判詞',108,1680,light,'600 59px '+serif);
-  draw(c,TOPICS[v.topic]+'篇・免費入室讀你嗰一題',110,1755,muted,'500 34px '+sans);
+  draw(c,'玄與九爺・'+TOPICS[v.topic]+'篇',110,1755,muted,'500 34px '+sans);
   return canvas;
 }

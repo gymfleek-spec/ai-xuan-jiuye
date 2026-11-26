@@ -504,7 +504,7 @@ export function attachZiwei(dialog, content, paint, openBook, onTopicSelected) {
       const boundary=readingBoundary(question,focusPalace);
       const reply=boundary || (question && !topic ? '你提到嘅事，唔可以單憑張盤斷定。先由'+palaceTitle(focusPalace)+'嗰章對照你見過嘅情況。' : entry[1]);
       try { openBook({chart,input,alias,question,subject:reading.label,reply,offer:!boundary && !skipAfterword(topics),
-        topic:focusPalace,hasEmptyPalace:reading.opposite !== null}); }
+        topic:focusPalace}); }
       catch { showQuestion(); errorMessage({field:'question',message:'未能打開今次嘅命書。請核對資料再試。'}); }
     };
     if (globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {

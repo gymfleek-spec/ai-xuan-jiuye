@@ -749,8 +749,6 @@ test('integrated tea room: safety answers and offer gate apply even on a differe
       assert.equal(shown.offer,false,question);
       assert.ok(shown.reply.includes(answer),shown.reply);
       assert.equal(shown.topic,palace);
-      const natal=shown.chart.palaces.find(p=>p.name===palace);
-      assert.equal(shown.hasEmptyPalace,!natal.majorStars.some(s=>s.type==='major'));
     } finally {f.restore();}
   }
 });

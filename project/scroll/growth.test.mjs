@@ -23,20 +23,20 @@ test('only two independently reviewed HTTPS ingest routes may change the no-netw
 });
 
 const showcase=[
- ['enter_room',{entry_btn:'luopan_v1'}], ['topic_selected',{topic:'career'}],
- ['chart_generated',{topic:'family',has_empty_palace:true}], ['resonance_clicked',{topic:'love'}],
- ['share_card_downloaded',{topic:'wealth',method:'download'}], ['share_quote_copied',{topic:'direction'}],
+ ['enter_room',{}], ['topic_selected',{topic:'career'}],
+ ['chart_generated',{topic:'family'}], ['resonance_clicked',{topic:'love'}],
+ ['share_card_saved',{topic:'wealth'}], ['share_quote_copied',{topic:'direction'}],
  ['sku_selected',{sku:'single_88'}], ['unlock_modal_opened',{sku:'full_148',topic:'career'}],
- ['unlock_email_sent',{sku:'single_88',topic:'family'}]
+ ['unlock_email_submitted',{sku:'single_88',topic:'family'}]
 ];
 test('all nine event schemas remove personal fields and reject unlisted, invalid or inherited data',()=>{
   for(const [event,payload] of showcase) {
-    assert.deepEqual(analyticsEvent(event,{...payload,alias:'虛構稱呼',signature:'另填署名',birth:'1995-08-15',time:'09:30',gender:'male',email:'qa@example.invalid'}),{event,payload});
+    assert.deepEqual(analyticsEvent(event,{...payload,alias:'虛構稱呼',signature:'另填署名',birth:'1995-08-15',time:'09:30',gender:'male',email:'qa@example.invalid',entry_btn:'luopan_v1',has_empty_palace:true,method:'long_press'}),{event,payload});
   }
   for (const [event,payload] of [
-    ['__proto__',{topic:'career'}],['chart_generated',{topic:'career',has_empty_palace:'false'}],
-    ['topic_selected',{topic:'person@example.invalid'}],['unlock_email_sent',{topic:'career',sku:'full_388'}],
-    ['share_card_downloaded',{topic:'career',method:'saved_to_disks'}],['topic_selected',Object.create({topic:'career'})]
+    ['__proto__',{topic:'career'}],['chart_generated',{topic:'not_a_topic'}],
+    ['topic_selected',{topic:'person@example.invalid'}],['unlock_email_submitted',{topic:'career',sku:'full_388'}],
+    ['share_card_downloaded',{topic:'career'}],['topic_selected',Object.create({topic:'career'})]
   ]) assert.equal(analyticsEvent(event,payload),null);
 });
 const flush = () => new Promise(resolve=>setImmediate(resolve));
@@ -60,13 +60,13 @@ test('analytics without a collector is local; an enabled collector sends only al
     assert.deepEqual(records,[{event:'topic_selected',payload:{topic:'direction'}}]);
     assert.equal(requests.length,0);
     endpoint='https://events.example.invalid/xj';
-    track('share_card_downloaded',{topic:'wealth',method:'long_press',email:'qa@example.invalid'});
+    track('share_card_saved',{topic:'wealth',method:'long_press',email:'qa@example.invalid'});
     track('bogus',{});
     track('topic_selected',{get topic(){throw new Error('invalid input');}});
     await flush();
     assert.equal(requests.length,1);
     const r=requests[0];
-    assert.deepEqual(JSON.parse(r.body),{event:'share_card_downloaded',payload:{topic:'wealth',method:'long_press'}});
+    assert.deepEqual(JSON.parse(r.body),{event:'share_card_saved',payload:{topic:'wealth'}});
     assert.equal(r.credentials,'omit');assert.equal(r.redirect,'error');assert.equal(r.referrerPolicy,'no-referrer');
   });
 });
@@ -80,8 +80,8 @@ test('email checks dot placement, DNS labels, length and injection without calli
   ]) assert.equal(checkedEmail(value),null,value);
 });
 
-test('the waitlist sends its four fields only and requires a positive server receipt', async()=>{
-  const seen=[],record={email:' QA@share.example.invalid ',sku:'full_148',topic:'career',alias:'虛構',gender:'male',year:1995};
+test('the waitlist sends its three fields only and requires a positive server receipt', async()=>{
+  const seen=[],record={email:' QA@share.example.invalid ',sku:'full_148',topic:'career',alias:'虛構',gender:'male',year:1995,timestamp:'2026-01-01T00:00:00.000Z'};
   let reply={ok:true,json:async()=>({ok:true})};
   await withStubs({fetch:async (url,init)=>{seen.push({url,...init});return reply;}},async()=>{
     assert.equal(await registerWaitlist('',record),false);
@@ -91,8 +91,7 @@ test('the waitlist sends its four fields only and requires a positive server rec
     const scope=new AbortController();
     assert.equal(await registerWaitlist('/api/waitlist',record,scope.signal),true);
     const req=seen[0], payload=JSON.parse(req.body);
-    assert.deepEqual(payload,{email:'QA@share.example.invalid',sku:'full_148',topic:'career',timestamp:payload.timestamp});
-    assert.equal(new Date(payload.timestamp).toISOString(),payload.timestamp);
+    assert.deepEqual(payload,{email:'QA@share.example.invalid',sku:'full_148',topic:'career'});
     assert.equal(req.credentials,'omit');assert.equal(req.redirect,'error');assert.equal(req.referrerPolicy,'no-referrer');
     assert.equal(req.signal,scope.signal);
     for (const mock of [{ok:false,json:async()=>({ok:true})},{ok:true,json:async()=>({})},{ok:true,json:async()=>({ok:'true'})}]) {
@@ -112,14 +111,27 @@ function modalFixture(endpoint) {
   return {find,ctrl,submit:()=>find('waitlist-form').handlers.submit({preventDefault(){}})};
 }
 
-test('a disconnected waitlist shows no email field, never sends a request, and never claims a place',async()=>{
-  const f=modalFixture('');
-  await withStubs({fetch:async()=>assert.fail('closed form attempted a network request')},async()=>{
-    f.ctrl.open('full_148','wealth');f.find('waitlist-email').value='qa@example.invalid';
-    await f.submit();
-    assert.equal(f.find('waitlist-form').hidden,true);assert.equal(f.find('waitlist-email').disabled,true);
-    assert.equal(f.find('waitlist-success').hidden,true);assert.match(f.find('purchase-title').textContent,/早鳥/);
-    f.ctrl.clear();assert.equal(f.find('waitlist-email').value,'');assert.equal(f.find('purchase-dialog').open,false);
+test('the disconnected modal validates and clears the email locally without claiming a place or emitting a submit event',async()=>{
+  const f=modalFixture(''),events=[];
+  await withStubs({
+    fetch:async()=>assert.fail('unconfigured waitlist attempted a network request'),
+    dispatchEvent:e=>events.push(e.detail),
+    document:{querySelector:()=>null}
+  },async()=>{
+    f.ctrl.open('full_148','wealth');
+    assert.equal(f.find('waitlist-form').hidden,false);
+    assert.equal(f.find('waitlist-email').disabled,false);
+    assert.equal(f.find('waitlist-submit').textContent,'核對電郵格式');
+    f.find('waitlist-email').value='invalid';await f.submit();
+    assert.match(f.find('waitlist-status').textContent,/有效/);
+    f.find('waitlist-email').value='qa@example.invalid';await f.submit();await flush();
+    assert.equal(f.find('waitlist-local').hidden,false);
+    assert.equal(f.find('waitlist-form').hidden,true);assert.equal(f.find('waitlist-email').value,'');
+    assert.equal(f.find('waitlist-success').hidden,true);
+    assert.equal(f.find('purchase-title').textContent,'電郵格式已核對');
+    assert.deepEqual(events.map(e=>e.event),['unlock_modal_opened']);
+    f.ctrl.clear();
+    assert.equal(f.find('waitlist-local').hidden,true);assert.equal(f.find('purchase-dialog').open,false);
   });
 });
 
@@ -149,17 +161,18 @@ test('the configured modal waits for confirmation, shows failure safely, and ign
     await valid;await flush();
     assert.equal(f.find('purchase-title').textContent,'已為你留好位置');
     assert.equal(f.find('waitlist-email').value,'');
-    assert.deepEqual(events.filter(e=>e.event==='unlock_email_sent'),[{
-      event:'unlock_email_sent',payload:{sku:'full_148',topic:'career'}
+    assert.deepEqual(events.filter(e=>e.event==='unlock_email_submitted'),[{
+      event:'unlock_email_submitted',payload:{sku:'full_148',topic:'career'}
     }]);
   });
 });
 
-test('share art is chart-led for each topic, but text output is blind to birth data, gender and intake alias',()=>{
+test('share art is chart-led for each topic, but text output is blind to birth data, gender and unfiltered intake text',()=>{
   const engineBox={self:{}};
   runInNewContext(readFileSync(new URL('../vendor/iztro-v2.6.5.min.js',import.meta.url),'utf8'),engineBox);
   const engine=engineBox.self.iztro, book=makeBook(EXAMPLE,engine), alternate=makeBook({...EXAMPLE,time:'09:30'},engine);
   const drawlog=[], ctx={
+    setTransform(a,b,c,d,e,f){assert.deepEqual([a,b,c,d,e,f],[2/3,0,0,2/3,0,0]);},
     createLinearGradient:()=>({addColorStop(){}}),fillRect(){},strokeRect(){},beginPath(){},moveTo(){},lineTo(){},stroke(){},drawImage(){},
     measureText(s){return {width:s.length*55};},fillText(s){drawlog.push(s);}
   };
@@ -171,11 +184,11 @@ test('share art is chart-led for each topic, but text output is blind to birth d
     assert.ok(c.stars.every(s=>fields.pattern.includes(s)));
     assert.notEqual(fields.pattern,shareFields(alternate.chapters.find(x=>x.key===c.key),alternate.element).pattern);
     quotes.add(fields.quote);
-    for (const signature of ['', '阿澄','1995-08-15','19:30','qa@example.invalid','female','一九九五年八月']) {
+    for (const signature of ['', '阿澄','1995-08-15','19:30','qa@example.invalid','female','一九九五年八月','三月三日']) {
       drawlog.length=0;paintShareArtwork(canvas,{...fields,signature},{portrait:{},qr:{}});
-      assert.deepEqual([canvas.width,canvas.height],[1080,1920]);
+      assert.deepEqual([canvas.width,canvas.height],[720,1280]);
       assert.equal(drawlog.includes('寫畀 阿澄'),signature==='阿澄');
-      assert.doesNotMatch(drawlog.join(''),/虛構化名|虛構原句|1995|19:30|female|example.invalid|一九九五年/);
+      assert.doesNotMatch(drawlog.join(''),/虛構化名|虛構原句|1995|19:30|female|example.invalid|一九九五年|三月三日/);
       assert.ok(drawlog.join('').includes(fields.quote.replaceAll('\n','')));
     }
   }
