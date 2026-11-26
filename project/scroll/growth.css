@@ -7,9 +7,6 @@
 .jy-keepsake h3 {font:600 19px/1.35 var(--jy-serif);margin:0 0 10px}
 .jy-card-stage {width:min(170px,100%);aspect-ratio:9/16;margin-inline:auto;background:#0a1510;box-shadow:0 10px 28px #02050396}
 .jy-card-stage :is(canvas,img) {display:block;width:100%;height:auto}
-.jy-sign {display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px;font:14px/1.3 var(--body)}
-.jy-sign small {color:var(--jy-muted)}
-.jy-sign input {min-width:0;width:128px;min-height:38px;padding:4px 8px;background:#0b160f;color:var(--jy-pale);border:1px solid #806a39;border-radius:6px;font:16px/1.35 var(--body)}
 .jy-copy-buffer {position:fixed;inset:0 auto auto -9999px;width:1px;height:1px;opacity:0}
 .jy-error {color:#ffc0b2}
 #share-quote {margin-inline:auto;max-width:24em;color:var(--jy-pale);user-select:text}

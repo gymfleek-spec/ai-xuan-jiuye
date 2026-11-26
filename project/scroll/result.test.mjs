@@ -45,7 +45,6 @@ test('result safely renders a hostile alias, switches without replacing the char
     const result=attachResult(f.report),native=chart('19:30'),before=JSON.stringify(native);
     const alias='<img src=x onerror=alert(1)>';
     result.show({chart:native,alias,subject:'財運',offer:true});
-    assert.equal(f.find('share-signature').value,'');
     assert.equal(f.names[0].textContent,alias);assert.ok(f.find('empathy-headline').textContent.startsWith(alias));
     const grid=f.find('result-grid').children;
     assert.equal(grid.length,13);assert.equal(grid.filter(n=>n.tagName==='button').length,12);
@@ -80,6 +79,8 @@ test('result uses half-visible clues, an accessible teaser tail and a single cul
   assert.equal((html.match(/class="lock-blur" aria-hidden="true"/g)||[]).length,7);
   assert.equal((html.match(/玄與九爺陪你睇清選擇，唔替你決定。/g)||[]).length,1);
   assert.match(js,/tail.setAttribute\('aria-hidden','true'\)/);assert.match(js,/tail.setAttribute\('inert',''\)/);
+  const card = html.match(/<section[^>]*id="share-card"[^>]*>[\s\S]*?<\/section>/)?.[0];
+  assert.ok(card);assert.doesNotMatch(card,/<input\b|<textarea\b|contenteditable/);
   assert.match(html,/id="purchase-cta"/);assert.match(html,/id="purchase-dialog"/);
   assert.match(html,/<input id="waitlist-email" type="email"[^>]+disabled/);
   assert.match(html,/id="waitlist-local" hidden>今次冇送出電郵，亦未保留名額/);
@@ -132,8 +133,8 @@ test('the entry topic stays free across selectors, twelve palaces, chapter previ
     assert.ok(f.find('jiuye-quote').textContent.includes(career.line));
     assert.equal(f.find('share-card').hidden,false);
     assert.match(f.find('share-quote').textContent,/總係頂到最後嗰個/);
-    assert.equal(f.find('share-signature').value,'一題');
-    f.find('share-signature').value='另填署名';
+    assert.match(f.find('empathy-headline').textContent,/一題/);
+    assert.doesNotMatch(f.find('share-quote').textContent,/一題/);
     const chapters = f.find('chapter-previews').children, previews = f.find('topic-previews').children;
     assert.deepEqual(chapters.map(c=>c.children[0].textContent),[
       '第一章：本命內耗與天賦','第二章：2026–2028 財運與轉折','第三章：緣分與貴人磁場','第四章：穩陣 vs 破局雙選擇'
@@ -147,7 +148,6 @@ test('the entry topic stays free across selectors, twelve palaces, chapter previ
     f.find('topic-select').handlers.change({target:{value:'夫妻'}});
     assert.equal(f.find('resonance').hidden,true);
     assert.equal(f.find('share-card').hidden,true);
-    assert.equal(f.find('share-signature').value,'');
     assert.equal(f.find('share-quote').textContent,'');
     for(const id of ['empathy-body','chapter-previews','topic-previews']) {
       assert.ok(!allText(f.find(id)).includes(love.people),'locked prose is not in the DOM');
@@ -170,7 +170,6 @@ test('the entry topic stays free across selectors, twelve palaces, chapter previ
     assert.equal(family.open,false);assert.equal(f.find('purchase-plan').textContent,'事業・單題拆局書');
     assert.ok(allText(f.find('empathy-body')).includes(career.other));
     assert.equal(f.find('share-card').hidden,false);
-    assert.equal(f.find('share-signature').value,'');
     const shape=f.find('wealth-line').getAttribute('d');assert.match(shape,/^M12 /);assert.match(shape,/L308 /);
     assert.ok(allText(f.find('basis-detail')).includes('太陰化忌在子女宮'));
     result.clear();for(const id of ['chapter-previews','topic-previews'])assert.equal(f.find(id).children.length,0);

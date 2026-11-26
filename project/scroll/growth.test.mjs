@@ -5,7 +5,7 @@ import {runInNewContext} from 'node:vm';
 import {EXAMPLE,makeBook} from './book.mjs';
 import {analyticsEvent,track} from './analytics.mjs';
 import {checkedEmail,registerWaitlist,attachWaitlist} from './waitlist.mjs';
-import {checkedSignature,paintShareArtwork} from './share-art.mjs';
+import {paintShareArtwork} from './share-art.mjs';
 import {shareFields,needsShareImage} from '../shareCard.js';
 import {growthEndpoints} from '../growth-config.mjs';
 
@@ -184,18 +184,17 @@ test('share art is chart-led for each topic, but text output is blind to birth d
     assert.ok(c.stars.every(s=>fields.pattern.includes(s)));
     assert.notEqual(fields.pattern,shareFields(alternate.chapters.find(x=>x.key===c.key),alternate.element).pattern);
     quotes.add(fields.quote);
-    for (const signature of ['', '阿澄','1995-08-15','19:30','qa@example.invalid','female','一九九五年八月','三月三日']) {
-      drawlog.length=0;paintShareArtwork(canvas,{...fields,signature},{portrait:{},qr:{}});
+    const art = {portrait:{},qr:{}};
+    drawlog.length=0;paintShareArtwork(canvas,fields,art);
+    const approvedText = [...drawlog];
+    assert.ok(approvedText.join('').includes(fields.quote.replaceAll('\n','')));
+    for (const signature of ['阿澄','1995-08-15','19:30','qa@example.invalid','female','八八 年 七 月 十六 日','捌捌 年 柒 月 拾陸 日']) {
+      drawlog.length=0;paintShareArtwork(canvas,{...fields,signature,alias:signature,birth:EXAMPLE},art);
       assert.deepEqual([canvas.width,canvas.height],[720,1280]);
-      assert.equal(drawlog.includes('寫畀 阿澄'),signature==='阿澄');
-      assert.doesNotMatch(drawlog.join(''),/虛構化名|虛構原句|1995|19:30|female|example.invalid|一九九五年|三月三日/);
-      assert.ok(drawlog.join('').includes(fields.quote.replaceAll('\n','')));
+      assert.deepEqual(drawlog,approvedText,'personal input cannot change any exported card text');
     }
   }
   assert.equal(quotes.size,5);assert.equal(shareFields({key:'官祿',stars:['不屬於命盤']},book.element),null);
-  assert.equal(checkedSignature(' 阿澄 '),'阿澄');
-  assert.equal(checkedSignature(''),'');
-  assert.equal(checkedSignature('阿\u202e澄'),null);
 });
 
 test('iOS, embedded WhatsApp/Instagram and browsers without download get the long-press image',()=>{

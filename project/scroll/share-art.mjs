@@ -5,24 +5,15 @@ export const TOPICS = Object.freeze({career:'事業', love:'愛情', family:'家
 const serif = '"Songti TC","Noto Serif CJK TC","Noto Serif TC","PingFang TC",serif';
 const sans = '"PingFang TC","Noto Sans CJK TC",system-ui,sans-serif';
 const clean = (s) => typeof s === 'string' ? s.normalize('NFC').replace(/\s+/g, ' ').trim() : '';
-export function checkedSignature(value) {
-  if (typeof value !== 'string') return null;
-  const s = value.normalize('NFKC').trim().replace(/ +/g,' ');
-  if (!s) return '';
-  return /^[\p{L}\p{M} ·・'-]{1,18}$/u.test(s) &&
-    !/^(?:男|女|男性|女性|male|female|man|woman)$/i.test(s) &&
-    !/[〇零一二三四五六七八九十廿卅兩]{4,}|[〇零一二三四五六七八九十廿卅兩]+[年月日號點時]/u.test(s) ? s : null;
-}
-
-export function checkedArtwork({topic, pattern, quote, signature = ''}) {
+export function checkedArtwork({topic, pattern, quote}) {
   const breaks = typeof quote === 'string' ? quote.split(/\r?\n/).map(clean) : [];
-  const tag = clean(pattern), line = breaks.join(''), sign = checkedSignature(signature) || '';
+  const tag = clean(pattern), line = breaks.join('');
   if (!Object.hasOwn(TOPICS, topic) || breaks.length > 4 || breaks.some(part=>!part)
     || !/^[\p{Script=Han}・、]{3,24}$/u.test(tag)
     || !/^[\p{Script=Han} ，。？！、；：「」『』…]+$/u.test(line) || [...line].length > 55 || !/\p{Script=Han}/u.test(line)) {
     throw new TypeError('判詞未齊，請稍後再試。');
   }
-  return {topic, tag, line, breaks, sign};
+  return {topic, tag, line, breaks};
 }
 const startPunctuation = /^[，。？！、；：」』…]/u;
 function linesFor(ctx, text, width) {
@@ -92,7 +83,6 @@ export function paintShareArtwork(canvas, fields, {portrait, qr}) {
   // One punctuation glyph may hang outside the text measure, still inside the frame.
   if (rows.length>4 || rows.some(row=>c.measureText(row).width>900)) throw new Error('判詞太長，未能放入卡面。');
   rows.forEach((row,i)=>draw(c,row,105,1168+i*(size+13),light,'600 '+size+'px '+serif));
-  if(v.sign) draw(c,'寫畀 '+v.sign,109,1500,muted,'500 40px '+sans);
 
   rule(c,110,1550,970,'#665134');
   c.imageSmoothingEnabled=false; c.drawImage(qr,771,1594,195,195); c.imageSmoothingEnabled=true;

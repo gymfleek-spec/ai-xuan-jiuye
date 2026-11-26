@@ -1,6 +1,6 @@
 import { TOPIC_CODE, track } from './scroll/analytics.mjs';
 import { STAR_COPY } from './scroll/empathy-copy.mjs';
-import { checkedArtwork, checkedSignature, paintShareArtwork } from './scroll/share-art.mjs';
+import { checkedArtwork, paintShareArtwork } from './scroll/share-art.mjs';
 
 const SHARE_QUOTES = Object.freeze({
   官祿:'總係頂到最後嗰個，\n唔係唔識推，只係太想\n件事有交帶。今晚放低一份，\n唔等於你唔負責任。',
@@ -30,9 +30,9 @@ function shareImageSource(canvas) {
 
 export function attachShareCard(find) {
   const section=find('share-card'), stage=find('share-stage'), canvas=find('share-canvas'), image=find('share-image');
-  const signature=find('share-signature'), save=find('share-save'), copy=find('share-copy');
-  const quote=find('share-quote'), notice=find('share-notice'), hint=find('share-hint'), signError=find('share-sign-error');
-  let fields=null, pictures=null, picturesReady=null, observer=null, useImage=false, drawTimer, pressTimer, press;
+  const save=find('share-save'), copy=find('share-copy');
+  const quote=find('share-quote'), notice=find('share-notice'), hint=find('share-hint');
+  let fields=null, pictures=null, picturesReady=null, observer=null, useImage=false, pressTimer, press;
   const load = src => new Promise((resolve,reject)=>{
     const img = new Image();
     img.onload=()=>resolve(img); img.onerror=reject; img.src=src;
@@ -40,16 +40,13 @@ export function attachShareCard(find) {
   function stopPress() { clearTimeout(pressTimer); press=null; }
   function renderCard() {
     if (!fields || !picturesReady) return;
-    const sign = checkedSignature(signature.value);
-    signError.hidden = sign !== null;
-    signature.setAttribute('aria-invalid', String(sign === null));
     try {
-      paintShareArtwork(canvas,{...fields,signature:sign ?? ''},picturesReady);
-      const description = fields.pattern+'。'+fields.quote.replaceAll('\n','')+(sign?' 寫畀 '+sign:'');
+      paintShareArtwork(canvas,fields,picturesReady);
+      const description = fields.pattern+'。'+fields.quote.replaceAll('\n','');
       canvas.setAttribute('aria-label', description); image.alt=description;
       stage.hidden=false; canvas.hidden=useImage; image.hidden=!useImage;
       if (useImage) image.src=shareImageSource(canvas);
-      save.disabled = sign === null;
+      save.disabled=false;
       hint.hidden=!useImage;
     } catch {
       stage.hidden=hint.hidden=true; save.disabled=true; quote.hidden=false;
@@ -74,13 +71,12 @@ export function attachShareCard(find) {
       }
     });
   }
-  function set(next, preferredSignature = '') {
-    observer?.disconnect(); observer=null; clearTimeout(drawTimer); stopPress();
-    fields=next; section.hidden=!next; signature.value=next ? checkedSignature(preferredSignature) || '' : '';
-    signature.setAttribute('aria-invalid','false');
+  function set(next) {
+    observer?.disconnect(); observer=null; stopPress();
+    fields=next; section.hidden=!next;
     canvas.width=canvas.height=0; canvas.setAttribute('aria-label',''); canvas.hidden=true;
     image.removeAttribute('src'); image.alt=''; image.hidden=true;
-    stage.hidden=signError.hidden=hint.hidden=quote.hidden=true; save.disabled=true; notice.textContent='';
+    stage.hidden=hint.hidden=quote.hidden=true; save.disabled=true; notice.textContent='';
     quote.textContent=next ? next.quote.replaceAll('\n','') : '';
     if (!next) return;
     stage.hidden=false;
@@ -91,12 +87,8 @@ export function attachShareCard(find) {
       observer.observe(section);
     } else prepareCard();
   }
-  signature.addEventListener('input',()=>{
-    if (!fields) return;
-    stopPress(); clearTimeout(drawTimer); drawTimer=setTimeout(renderCard,100);
-  });
   save.addEventListener('click',()=>{
-    if (!fields || !picturesReady || checkedSignature(signature.value) === null) return;
+    if (!fields || !picturesReady) return;
     renderCard();
     if (save.disabled) return;
     if (useImage) { image.scrollIntoView({block:'nearest'}); return; }
