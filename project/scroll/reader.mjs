@@ -1,6 +1,7 @@
 import { attachSceneSequence } from '../motion/motion.mjs';
 import { attachZiwei } from '../ziwei.js';
-import { attachResult } from './result.mjs';
+import { attachResult, guardGrowthOffer } from './result.mjs';
+import { READING_TOPICS } from './chart.mjs';
 import { TOPIC_CODE, track } from './analytics.mjs';
 
 const byId=id=>document.getElementById(id);
@@ -20,7 +21,8 @@ function paintStep(html,step){
   if(step==='career-ritual')player.pause();
   else if(phase==='consult' && !document.hidden)void player.play();
 }
-function showBook({chart,input,alias,question,subject,reply,offer,topic}){
+function showBook(reading){
+  const {chart,input,alias,question,subject,reply,offer}=guardGrowthOffer(reading);
   results.show({chart,alias,subject,offer,reply});
   byId('edition-label').textContent='本次命盤　／　'+alias;
   byId('chart-label').textContent=[input.year,input.month,input.day].join('-')+' · '+input.time+' · '+(input.gender==='male'?'男':'女')+' ｜ '+chart.fiveElementsClass;
@@ -29,9 +31,16 @@ function showBook({chart,input,alias,question,subject,reply,offer,topic}){
   byId('visit-answer').textContent='九爺：'+reply;
   phase='reading';player.pause();dialog.close();content.replaceChildren();report.hidden=false;
   window.scrollTo(0,0);byId('cover-title').focus({preventScroll:true});
+  const topic=Object.keys(READING_TOPICS).find(key=>READING_TOPICS[key].label===subject);
   track('chart_generated',{topic:TOPIC_CODE[topic]});
 }
-const ask=attachZiwei(dialog,content,paintStep,showBook,topic=>track('topic_selected',{topic:TOPIC_CODE[topic]}));
+const ask=attachZiwei(dialog,content,paintStep,showBook);
+content.addEventListener('click',event=>{
+  const topic=event.target?.closest?.('button[data-ziwei="focus"]')?.dataset.palace;
+  if (phase==='consult' && dialog.dataset.phase==='career-setup' && Object.hasOwn(TOPIC_CODE,topic)) {
+    track('topic_selected',{topic:TOPIC_CODE[topic]});
+  }
+});
 
 function meet(normal){
   if(phase!=='entering')return;

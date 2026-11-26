@@ -5,6 +5,21 @@ import { TOPIC_CODE, SKU_CODE, track } from './analytics.mjs';
 import { attachShareCard, shareFields } from './shareCard.mjs';
 import { attachWaitlist } from './waitlist.mjs';
 
+export function guardGrowthOffer(reading) {
+  if (!reading.offer || typeof reading.question!=='string') return reading;
+  const text=reading.question.normalize('NFKC').trim();
+  const boundaries=[
+    [/自殺|自殘|自傷|想死|唔想生存|唔想活|想傷害自己|人身危險/,'如果而家有即時危險，請聯絡當地緊急服務，或者搵信得過嘅人陪你。安唔安全，唔靠張盤判斷。'],
+    [/恐嚇|威脅|跟蹤|家暴|打(?:咗|過|傷)?我|郁手打|動手打|唔[畀俾]我走|唔准我走|鎖住我|逼我見面/,'如果你覺得唔安全，唔使即刻回覆或者單獨見面。先去安全嘅地方，搵信得過嘅人陪你。'],
+    [/^(?:我)?(?:唔想再|不想再|唔好再|不要再)(?:聯絡|聯繫)[。.!！?？\s]*$|(?:話|講明|表明|明確表示|叫我)(?:咗|過)?[「『：:\s]*(?:唔好再|不要再|唔想再|唔想我再)(?:搵|見|傳|發|約|聯絡|聯繫)|(?:封鎖|拉黑|block)(?:咗)?我|拒絕(?:再)?(?:聯絡|聯繫)/i,'先留返空間，唔靠張盤催你再聯絡。講明唔想聯絡，就尊重嗰條界線。'],
+    [/醫療|睇醫生|停藥|食藥|用藥|藥物|診斷|手術|病情|癌症|腫瘤|治療|幾時病好/,'醫療問題唔靠命盤判斷。可以搵合資格醫護，講清楚你而家嘅情況。'],
+    [/六合彩|彩票|幸運(?:號碼|數字)|賭(?:波|馬|錢|博)|下注|投注|冧巴/,'我唔會用命盤估中獎號碼，亦唔會畀你下注貼士。'],
+    [/股票|邊隻股|買咩股|買股|炒股|基金|虛擬貨幣|加密貨幣|比特幣|買入|沽出|投資|入市|放盤價/,'我唔會用張盤幫你揀股票，亦唔會話你應該幾時買賣。']
+  ];
+  const boundary=boundaries.find(([match])=>match.test(text));
+  return boundary ? {...reading,offer:false,reply:boundary[1]} : reading;
+}
+
 export function resultFromChart(chart, subject) {
   const book = bookFromChart(chart), readings = chart.palaces.map(p => getPalaceReading(chart, p.name));
   if (readings.length !== 12 || readings.some(r => !r)) throw new Error('十二宮資料未能核對，請返回出生資料。');
@@ -86,7 +101,7 @@ export function attachResult(report) {
     parts.push('按所填當地鐘錶時間，未校真太陽時；採農曆年界，所以1月1日未必已轉流年。');
     put('basis-detail', parts.join('\n\n'));
   }
-  function topic(key, initialSignature = '') {
+  function topic(key) {
     const chapter = chapterFor(key); if (!chapter) return;
     activeTopic = key; purchaseTopic = key; find('topic-select').value = key;
     find('chart-reading').scrollTop = 0;
@@ -99,7 +114,7 @@ export function attachResult(report) {
       : [teaser(chapter.label + '・另一半慢慢拆', chapter.teaser)]));
     put('jiuye-quote', !canOffer ? safeReply : free ? chapter.question + ' 可以試吓講：' + chapter.line : READING_TOPICS[key].question);
     find('resonance').hidden = !free || !canOffer;
-    share.set(free && canOffer ? shareFields(chapter, current.book.element) : null, initialSignature);
+    share.set(free && canOffer ? shareFields(chapter, current.book.element) : null);
     find('resonance').setAttribute('aria-pressed','false'); put('resonance','呢句講中咗 ✦');
     basis(chapter); find('basis').open = false; pricing(plan); palace(key); paintRelating(key);
   }
@@ -166,7 +181,7 @@ export function attachResult(report) {
         button.addEventListener('click',() => palace(p.name)); grid.append(button);
       }
       const center = node('div','','palace-center'); center.append(node('strong','紫微斗數'),node('span',current.book.element),node('span','本命十二宮')); grid.append(center);
-      topic(current.selected, name); paintTiming(); paintChapterPreviews();
+      topic(current.selected); paintTiming(); paintChapterPreviews();
       find('chart-details').open = find('topic-menu').open = false;
     },
     clear() {

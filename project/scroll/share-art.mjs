@@ -5,13 +5,42 @@ export const TOPICS = Object.freeze({career:'事業', love:'愛情', family:'家
 const serif = '"Songti TC","Noto Serif CJK TC","Noto Serif TC","PingFang TC",serif';
 const sans = '"PingFang TC","Noto Sans CJK TC",system-ui,sans-serif';
 const clean = (s) => typeof s === 'string' ? s.normalize('NFC').replace(/\s+/g, ' ').trim() : '';
+const CARD_NICKNAMES = Object.freeze({guest:'夜茶客', listener:'聽雨人', friend:'九巷茶友'});
+// Fixed public homepage; drawing modules avoids image requests and cannot encode visitor data.
+const HOME_QR = [
+  '11111110101111110101000001100',
+  '10000010010010110001011011101',
+  '10111010001001111010101111110',
+  '10111010010110011011010101101',
+  '10111010010111011001111111001',
+  '10000010001001001011100010010',
+  '11111110001011111011101011100',
+  '00000000101111010000100011000',
+  '10101011010000011100111110111',
+  '10010001011010110010110110000',
+  '11010111100101110001010011001',
+  '11001101001100010111001110111',
+  '00100111111010100111000001100',
+  '10110001010001110000000010101',
+  '11001110001001110100111111100',
+  '10000100110001111001101110011',
+  '11101110000111111001001100001',
+  '11101100101000101000010101000',
+  '10110011011110010000001000000',
+  '01101000011010110011000010110',
+  '10000010100110110100111001110',
+  '00000000100001001001000000000',
+  '11111110101010101010101111111',
+  '10000010010111101010001000001',
+  '10111010010011001111101011101',
+  '10111010110100100100101011101',
+  '10111010111010101010101011101',
+  '10000010111111100100101000001',
+  '11111110001000101100001111111',
+];
+
 export function checkedSignature(value) {
-  if (typeof value !== 'string') return null;
-  const s = value.normalize('NFKC').trim().replace(/ +/g,' ');
-  if (!s) return '';
-  return /^[\p{L}\p{M} ·・'-]{1,18}$/u.test(s) &&
-    !/^(?:男|女|男性|女性|male|female|man|woman)$/i.test(s) &&
-    !/[〇零一二三四五六七八九十廿卅兩]{4,}|[〇零一二三四五六七八九十廿卅兩]+[年月日號點時]/u.test(s) ? s : null;
+  return value === '' ? '' : typeof value === 'string' && Object.hasOwn(CARD_NICKNAMES,value) ? CARD_NICKNAMES[value] : null;
 }
 
 export function checkedArtwork({topic, pattern, quote, signature = ''}) {
@@ -49,7 +78,7 @@ function rule(c, x1, y, x2, color) {
   c.strokeStyle=color; c.lineWidth=2;
   c.beginPath(); c.moveTo(x1,y); c.lineTo(x2,y); c.stroke();
 }
-export function paintShareArtwork(canvas, fields, {portrait, qr}) {
+export function paintShareArtwork(canvas, fields, portrait) {
   const v=checkedArtwork(fields);
   canvas.width=WIDTH; canvas.height=HEIGHT;
   const c=canvas.getContext('2d');
@@ -81,7 +110,13 @@ export function paintShareArtwork(canvas, fields, {portrait, qr}) {
   draw(c,'九',924,268,light,'600 43px '+serif,'center');
   draw(c,'爺',924,323,light,'600 43px '+serif,'center');
 
-  draw(c,v.tag,109,1026,muted,'500 45px '+sans);
+  const tagFont='500 45px '+sans;
+  c.font=tagFont;c.fillStyle='#183127';
+  const tagWidth=Math.min(875,c.measureText(v.tag).width+58);
+  if (typeof c.roundRect==='function') {
+    c.beginPath();c.roundRect(97,976,tagWidth,70,35);c.fill();
+  } else c.fillRect(97,976,tagWidth,70);
+  draw(c,v.tag,120,1026,muted,tagFont);
   rule(c,110,1060,242,gold);
   let size=78, rows=[];
   do {
@@ -95,8 +130,14 @@ export function paintShareArtwork(canvas, fields, {portrait, qr}) {
   if(v.sign) draw(c,'寫畀 '+v.sign,109,1500,muted,'500 40px '+sans);
 
   rule(c,110,1550,970,'#665134');
-  c.imageSmoothingEnabled=false; c.drawImage(qr,771,1594,195,195); c.imageSmoothingEnabled=true;
+  const x=750,y=1587,step=6,quiet=4,edge=(HOME_QR.length+quiet*2)*step;
+  c.fillStyle='#fff';c.fillRect(x,y,edge,edge);
+  c.fillStyle='#101411';
+  HOME_QR.forEach((row,r)=>[...row].forEach((module,col)=>{
+    if(module==='1') c.fillRect(x+(col+quiet)*step,y+(r+quiet)*step,step,step);
+  }));
   draw(c,'九爺命格判詞',108,1680,light,'600 59px '+serif);
-  draw(c,'玄與九爺・'+TOPICS[v.topic]+'篇',110,1755,muted,'500 34px '+sans);
+  draw(c,'玄與九爺・'+TOPICS[v.topic]+'篇',110,1744,muted,'500 34px '+sans);
+  draw(c,'xuan-jiuye-preview.pages.dev',110,1800,light,'500 24px '+sans);
   return canvas;
 }

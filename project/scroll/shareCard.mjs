@@ -31,8 +31,8 @@ function shareImageSource(canvas) {
 export function attachShareCard(find) {
   const section=find('share-card'), stage=find('share-stage'), canvas=find('share-canvas'), image=find('share-image');
   const signature=find('share-signature'), save=find('share-save'), copy=find('share-copy');
-  const quote=find('share-quote'), notice=find('share-notice'), hint=find('share-hint'), signError=find('share-sign-error');
-  let fields=null, pictures=null, picturesReady=null, observer=null, useImage=false, drawTimer, pressTimer, press;
+  const quote=find('share-quote'), notice=find('share-notice'), hint=find('share-hint');
+  let fields=null, pictures=null, picturesReady=null, observer=null, useImage=false, pressTimer, press;
   const load = src => new Promise((resolve,reject)=>{
     const img = new Image();
     img.onload=()=>resolve(img); img.onerror=reject; img.src=src;
@@ -40,16 +40,14 @@ export function attachShareCard(find) {
   function stopPress() { clearTimeout(pressTimer); press=null; }
   function renderCard() {
     if (!fields || !picturesReady) return;
-    const sign = checkedSignature(signature.value);
-    signError.hidden = sign !== null;
-    signature.setAttribute('aria-invalid', String(sign === null));
+    const sign = checkedSignature(signature.value) || '';
     try {
-      paintShareArtwork(canvas,{...fields,signature:sign ?? ''},picturesReady);
+      paintShareArtwork(canvas,{...fields,signature:signature.value},picturesReady);
       const description = fields.pattern+'。'+fields.quote.replaceAll('\n','')+(sign?' 寫畀 '+sign:'');
       canvas.setAttribute('aria-label', description); image.alt=description;
       stage.hidden=false; canvas.hidden=useImage; image.hidden=!useImage;
       if (useImage) image.src=shareImageSource(canvas);
-      save.disabled = sign === null;
+      save.disabled=false;
       hint.hidden=!useImage;
     } catch {
       stage.hidden=hint.hidden=true; save.disabled=true; quote.hidden=false;
@@ -61,8 +59,8 @@ export function attachShareCard(find) {
     const visible=fields;
     if (!visible || !section.dataset.portrait) return;
     if (!pictures) {
-      pictures = Promise.all([load(section.dataset.portrait),load(section.dataset.qr),document.fonts?.ready])
-        .then(([portrait,qr])=>({portrait,qr}))
+      pictures = Promise.all([load(section.dataset.portrait),document.fonts?.ready])
+        .then(([portrait])=>portrait)
         .catch(()=>null);
     }
     void pictures.then(assets=>{
@@ -74,13 +72,12 @@ export function attachShareCard(find) {
       }
     });
   }
-  function set(next, preferredSignature = '') {
-    observer?.disconnect(); observer=null; clearTimeout(drawTimer); stopPress();
-    fields=next; section.hidden=!next; signature.value=next ? checkedSignature(preferredSignature) || '' : '';
-    signature.setAttribute('aria-invalid','false');
+  function set(next) {
+    observer?.disconnect(); observer=null; stopPress();
+    fields=next; section.hidden=!next; signature.value='';
     canvas.width=canvas.height=0; canvas.setAttribute('aria-label',''); canvas.hidden=true;
     image.removeAttribute('src'); image.alt=''; image.hidden=true;
-    stage.hidden=signError.hidden=hint.hidden=quote.hidden=true; save.disabled=true; notice.textContent='';
+    stage.hidden=hint.hidden=quote.hidden=true; save.disabled=true; notice.textContent='';
     quote.textContent=next ? next.quote.replaceAll('\n','') : '';
     if (!next) return;
     stage.hidden=false;
@@ -91,12 +88,9 @@ export function attachShareCard(find) {
       observer.observe(section);
     } else prepareCard();
   }
-  signature.addEventListener('input',()=>{
-    if (!fields) return;
-    stopPress(); clearTimeout(drawTimer); drawTimer=setTimeout(renderCard,100);
-  });
+  signature.addEventListener('change',()=>{stopPress();renderCard();});
   save.addEventListener('click',()=>{
-    if (!fields || !picturesReady || checkedSignature(signature.value) === null) return;
+    if (!fields || !picturesReady) return;
     renderCard();
     if (save.disabled) return;
     if (useImage) { image.scrollIntoView({block:'nearest'}); return; }
@@ -104,14 +98,14 @@ export function attachShareCard(find) {
       const link=document.createElement('a'); link.href=shareImageSource(canvas);
       link.download='jiuye-'+fields.topic+'.png';
       document.body.append(link); try {link.click();} finally {link.remove();}
-      track('share_card_saved',{topic:fields.topic});
+      track('share_card_downloaded',{topic:fields.topic});
     } catch { useImage=true; renderCard(); }
   });
   image.addEventListener('pointerdown', e=>{
     if (e.pointerType !== 'touch' || !fields || !useImage) return;
     stopPress(); press={x:e.clientX,y:e.clientY};
     pressTimer=setTimeout(()=>{
-      if (fields && press) track('share_card_saved',{topic:fields.topic});
+      if (fields && press) track('share_card_downloaded',{topic:fields.topic});
       stopPress();
     },550);
   });
@@ -122,7 +116,7 @@ export function attachShareCard(find) {
   // Some in-app browsers open their image menu before a pointer hold completes.
   image.addEventListener('contextmenu', e=>{
     if (e.isTrusted && fields && useImage && press) {
-      track('share_card_saved',{topic:fields.topic}); stopPress();
+      track('share_card_downloaded',{topic:fields.topic}); stopPress();
     }
   });
   copy.addEventListener('click',async()=>{

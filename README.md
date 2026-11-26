@@ -1,6 +1,6 @@
-# 玄與九爺 v0.18.0｜九爺判詞與早鳥登記
+# 玄與九爺 v0.18.0｜九爺判詞與早鳥通知
 
-[公開預覽](https://xuan-jiuye-preview.pages.dev/)｜整合分支 `feat/v0.18-growth-validation`，以 v0.17.2 的 `0e9cf58` 為基準。
+[公開預覽](https://xuan-jiuye-preview.pages.dev/)｜今次整合分支 `feat/v0.18-growth-share`，基準 v0.17.2（`0e9cf58`）。
 
 ```sh
 cd project
@@ -8,10 +8,10 @@ npm run build && npm test
 python3 -m http.server 4187 --bind 127.0.0.1 --directory public-preview
 ```
 
-Node.js 24+、原生 ES Modules、固定 iztro 2.6.5，毋須安裝 npm 依賴。**唯一發布目錄是 `project/public-preview/`**，只部署本次建置的檔案。根目錄舊 `public-preview/` 已退出工作樹，仍可從 Git 歷史還原；歷史 ZIP 不是發布來源。
+Node.js 24+、原生 ES Modules、固定 iztro 2.6.5，毋須安裝 npm 依賴。**唯一發布目錄是 `project/public-preview/`**。根目錄舊 `public-preview/` 已從工作樹退役，仍可在 Git 歷史還原；歷史 ZIP 不是發布來源。
 
-- `scroll/shareCard.mjs`／`share-art.mjs`：只在入室原選的一題合成 720×1280 判詞卡；同一副本命盤的五行局及本宮／借星、定稿判詞、選填署名及固定首頁 QR。只預填可刪改的化名；不讀出生資料、不外傳。可下載、長按高清圖或複製金句，不自動發帖。
-- `scroll/waitlist.mjs`：HK$88／HK$148 方案及早鳥視窗，不收款；未配置收集端點時只在頁內核對電郵格式，不送出、不作登記。非聯絡同意、危險、投資／彩票等分流同時停用判詞卡、推介及登記。
-- `scroll/analytics.mjs`：九個動作只輸出白名單欄位；預設只在本頁觸發，不儲存、不傳出去。詳見[工程說明](project/README.md)。下載及長按事件代表操作意圖，不能判定相簿已儲存。
+- 原選題可本機合成 720×1280 判詞卡；包含盤面格局、金句及指向茶室首頁的 QR。稱呼可留空或選預設稱呼；不讀入排盤化名、生辰、時辰或性別，也不自動發帖。
+- 早鳥窗顯示 HK$88／HK$148 方案。未接收集服務時，電郵只經本人按掣後暫存目前分頁，沒有送出、留位、通知或收款。
+- 9 個匿名事件只留當頁記憶體，沒有外傳。遇安全、不聯絡、投資、彩票或醫療分流時，照常停止推介，不顯示判詞卡或早鳥入口。
 
-舊版對照：[v0.17.1 三盤](docs/CAPTIONS-v0.17.1.md)｜[v0.17.0 交付留檔](DELIVERY-v0.17.0.md)。
+390×844 瀏覽器截圖：[判詞卡](docs/screenshots-v0.18.0/01-share-card.png)｜[早鳥窗](docs/screenshots-v0.18.0/02-waitlist.png)｜[工程說明](project/README.md)

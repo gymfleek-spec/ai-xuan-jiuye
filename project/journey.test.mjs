@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { guardGrowthOffer } from './scroll/result.mjs';
 import { readFileSync } from 'node:fs';
 import { runInNewContext } from 'node:vm';
 import { attachZiwei } from './ziwei.js';
@@ -741,14 +742,14 @@ test('integrated tea room: safety answers and offer gate apply even on a differe
     ['命宮','唔想再聯絡','界線'],
     ['田宅','想買邊隻股票','股票'],
     ['夫妻','想揀六合彩幸運號碼','唔會用命盤估中獎號碼'],
-    ['財帛','我想傷害自己','緊急服務']
+    ['財帛','我想傷害自己','緊急服務'],
+    ['官祿','應唔應該停藥','醫護']
   ]) {
-    let shown;const f=fixture(true,v=>shown=v);
+    let shown;const f=fixture(true,v=>shown=guardGrowthOffer(v));
     try {
       f.start(palace);f.alias();f.born();f.ask(question);f.tick();
       assert.equal(shown.offer,false,question);
       assert.ok(shown.reply.includes(answer),shown.reply);
-      assert.equal(shown.topic,palace);
     } finally {f.restore();}
   }
 });

@@ -7,7 +7,6 @@
 <meta name="referrer" content="no-referrer">
 <meta name="prototype-version" content="@@VERSION@@">
 <meta name="waitlist-endpoint" content="@@WAITLIST_ENDPOINT@@">
-<meta name="analytics-endpoint" content="@@ANALYTICS_ENDPOINT@@">
 <meta http-equiv="Content-Security-Policy" content="@@POLICY@@">
 <meta name="description" content="跟玄與灰狐九爺，沿香港一個夜晚讀一張紫微盤。事業、愛情、家庭、財運同未來，一卷讀完。">
 <title>玄與九爺｜你嘅命格往後將點樣流轉</title>
@@ -68,19 +67,19 @@
     <div class="card-actions"><button class="pill" id="resonance" type="button" aria-pressed="false">呢句講中咗 ✦</button></div>
     <details id="basis"><summary>查看命盤依據</summary><div class="basis-copy" role="region" aria-label="命盤依據全文" tabindex="0"><p id="basis-detail"></p></div></details>
   </div></div>
-  <section class="jy-keepsake" id="share-card" aria-labelledby="share-title" data-portrait="@@SHARE_PORTRAIT@@" data-qr="@@SHARE_QR@@" hidden>
-    <h3 id="share-title">九爺留畀你嘅一張判詞</h3>
+  <section class="jy-keepsake" id="share-card" aria-labelledby="share-title" data-portrait="@@SHARE_PORTRAIT@@" hidden>
+    <p class="jy-keepsake-kicker">九爺留俾你嘅一張判詞</p>
+    <h3 id="share-title">想記低今晚呢句說話？</h3>
     <div class="jy-card-stage" id="share-stage" hidden>
-      <canvas id="share-canvas" role="img" hidden></canvas>
+      <canvas id="share-canvas" width="720" height="1280" role="img" hidden></canvas>
       <img id="share-image" width="720" height="1280" alt="" hidden>
     </div>
     <p id="share-hint" class="jy-notice" hidden>長按上方圖片儲存至相簿</p>
     <p id="share-quote" class="jy-notice" hidden></p>
-    <p class="jy-notice">化名可以改或刪走；唔會印出生日期、時辰或性別。</p>
-    <div class="jy-sign"><label for="share-signature">卡片署名 <small>（可刪）</small></label>
-      <input id="share-signature" maxlength="18" autocomplete="off" placeholder="留空就唔印" aria-describedby="share-sign-error">
+    <div class="jy-sign"><label for="share-signature">卡片稱呼</label>
+      <select id="share-signature" aria-describedby="share-privacy"><option value="">唔印稱呼</option><option value="guest">夜茶客</option><option value="listener">聽雨人</option><option value="friend">九巷茶友</option></select>
     </div>
-    <p class="jy-notice jy-error" id="share-sign-error" role="alert" hidden>署名只用文字，唔好填生辰、性別或聯絡資料。</p>
+    <p id="share-privacy" class="jy-notice">卡面唔會印你填嘅生辰、性別或姓名。</p>
     <div class="jy-card-actions"><button id="share-save" class="jy-save" type="button" disabled>儲存 9:16 判詞卡發 IG Story</button><button id="share-copy" type="button">複製呢句金句</button></div>
     <p id="share-notice" class="jy-notice" role="status"></p>
   </section>
@@ -118,14 +117,14 @@
 <div class="sticky-cta-wrap" id="purchase-wrap" hidden><button class="plaque-btn" id="purchase-cta" type="button" hidden aria-haspopup="dialog">解鎖 <span class="js-user-name">例盤讀者</span> 嘅<span id="cta-book">完整命書</span>（<span id="cta-price">HK$148</span>）</button></div>
 <dialog class="jy-early" id="purchase-dialog" aria-labelledby="purchase-title">
   <div class="jy-top"><p class="jy-plan" id="purchase-plan">全盤三年命書</p><strong class="jy-price" id="purchase-price">HK$148</strong></div>
-  <h2 id="purchase-title" tabindex="-1">為你保留早鳥優惠名額</h2>
-  <p id="waitlist-closed">早鳥登記暫未開放。可以先核對電郵格式，唔會送出或保留名額。</p>
-  <p id="waitlist-intro" hidden>完整版命書仲做緊最後校對。開通嗰日會優先寄早鳥連結畀你，唔會寄其他宣傳信。</p>
+  <h2 id="purchase-title" tabindex="-1">早鳥優先通知</h2>
+  <p id="waitlist-closed">早鳥未開放。如果你想留低電郵，只會喺呢個分頁暫存，冇送出、冇留位，亦唔會扣款。</p>
+  <p id="waitlist-intro" hidden>完整版命書仲做緊最後校對。登記之後，開通嗰陣會優先寄早鳥連結畀你。</p>
   <p class="jy-help" id="waitlist-privacy" hidden>只會記低 Email、所選方案同課題，唔會傳送生辰或命盤，亦唔會扣款。</p>
   <form id="waitlist-form" autocomplete="off" novalidate hidden>
-    <label for="waitlist-email">接收早鳥連結嘅 Email</label>
+    <label for="waitlist-email">你嘅電郵地址</label>
     <input id="waitlist-email" type="email" maxlength="254" required disabled autocomplete="off" placeholder="name@example.com" aria-describedby="waitlist-closed waitlist-privacy waitlist-status">
-    <button class="jy-submit" id="waitlist-submit" type="submit" disabled>為我留低早鳥名額</button>
+    <button class="jy-submit" id="waitlist-submit" type="submit" disabled>登記優先通知</button>
   </form>
   <p class="jy-notice jy-error" id="waitlist-status" role="status"></p>
   <p id="waitlist-local" hidden>今次冇送出電郵，亦未保留名額。開通後先可以正式登記。</p>

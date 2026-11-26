@@ -7,27 +7,25 @@ import {analyticsEvent,track} from './analytics.mjs';
 import {checkedEmail,registerWaitlist,attachWaitlist} from './waitlist.mjs';
 import {checkedSignature,paintShareArtwork} from './share-art.mjs';
 import {shareFields,needsShareImage} from './shareCard.mjs';
-import {growthEndpoints} from '../growth-config.mjs';
+import {waitlistEndpoint} from '../growth-config.mjs';
 
-test('only two independently reviewed HTTPS ingest routes may change the no-network defaults',()=>{
-  assert.deepEqual(growthEndpoints(),{waitlist:'',analytics:''});
-  assert.deepEqual(growthEndpoints({WAITLIST_ENDPOINT:'/api/waitlist',ANALYTICS_ENDPOINT:'https://events.example.invalid/xj/collect'}),{
-    waitlist:'https://xuan-jiuye-preview.pages.dev/api/waitlist',analytics:'https://events.example.invalid/xj/collect'
-  });
+test('only a reviewed dedicated HTTPS waitlist route may relax the no-network default',()=>{
+  assert.equal(waitlistEndpoint(),'');
+  assert.equal(waitlistEndpoint('/api/waitlist'),'https://xuan-jiuye-preview.pages.dev/api/waitlist');
+  assert.equal(waitlistEndpoint('https://forms.example.invalid/xuan/a'),'https://forms.example.invalid/xuan/a');
   for (const endpoint of [
     'http://example.invalid/api/collect','//example.invalid/api/collect','https://example.invalid/',
     'https://example.invalid/api/','https://example.invalid/api/../collect','https://example.invalid/api?email=a',
     'https://a:b@example.invalid/api','https://example.invalid/api#data','https://example.invalid/a b',"'self'"
-  ]) assert.throws(()=>growthEndpoints({WAITLIST_ENDPOINT:endpoint}));
-  assert.throws(()=>growthEndpoints({WAITLIST_ENDPOINT:'https://a.example/path',ANALYTICS_ENDPOINT:'https://a.example/path'}));
+  ]) assert.throws(()=>waitlistEndpoint(endpoint));
 });
 
 const showcase=[
  ['enter_room',{}], ['topic_selected',{topic:'career'}],
  ['chart_generated',{topic:'family'}], ['resonance_clicked',{topic:'love'}],
- ['share_card_saved',{topic:'wealth'}], ['share_quote_copied',{topic:'direction'}],
+ ['share_card_downloaded',{topic:'wealth'}], ['share_quote_copied',{topic:'direction'}],
  ['sku_selected',{sku:'single_88'}], ['unlock_modal_opened',{sku:'full_148',topic:'career'}],
- ['unlock_email_submitted',{sku:'single_88',topic:'family'}]
+ ['unlock_email_sent',{sku:'single_88',topic:'family'}]
 ];
 test('all nine event schemas remove personal fields and reject unlisted, invalid or inherited data',()=>{
   for(const [event,payload] of showcase) {
@@ -35,8 +33,8 @@ test('all nine event schemas remove personal fields and reject unlisted, invalid
   }
   for (const [event,payload] of [
     ['__proto__',{topic:'career'}],['chart_generated',{topic:'not_a_topic'}],
-    ['topic_selected',{topic:'person@example.invalid'}],['unlock_email_submitted',{topic:'career',sku:'full_388'}],
-    ['share_card_downloaded',{topic:'career'}],['topic_selected',Object.create({topic:'career'})]
+    ['topic_selected',{topic:'person@example.invalid'}],['unlock_email_sent',{topic:'career',sku:'full_388'}],
+    ['share_card_saved',{topic:'career'}],['topic_selected',Object.create({topic:'career'})]
   ]) assert.equal(analyticsEvent(event,payload),null);
 });
 const flush = () => new Promise(resolve=>setImmediate(resolve));
@@ -47,27 +45,28 @@ async function withStubs(bindings, fn) {
   finally { for (const [k,v] of Object.entries(before)) v ? Object.defineProperty(globalThis,k,v) : delete globalThis[k]; }
 }
 
-test('analytics without a collector is local; an enabled collector sends only allowed data and cannot block reading',async()=>{
-  let endpoint='', records=[], requests=[];
+test('anonymous events dispatch asynchronously and leave only a bounded page-local history, with no network',async()=>{
+  const records=[],requests=[];
   await withStubs({
-    document:{querySelector:()=>({content:endpoint})},
-    dispatchEvent:e=>records.push(e.detail),
-    fetch:async(url,options)=>{requests.push({url,...options});throw new Error('offline');}
+    __XUAN_EVENTS__:[],
+    dispatchEvent:e=>records.push([e.type,e.detail]),
+    fetch:(...args)=>{requests.push(args);return Promise.reject(new Error('unexpected analytics network'));}
   },async()=>{
     track('topic_selected',{topic:'direction',name:'虛構稱呼'});
-    assert.equal(records.length,0,'the reader never waits for the event sink');
+    assert.equal(records.length,0,'reading never waits for the event sink');
     await flush();
-    assert.deepEqual(records,[{event:'topic_selected',payload:{topic:'direction'}}]);
-    assert.equal(requests.length,0);
-    endpoint='https://events.example.invalid/xj';
-    track('share_card_saved',{topic:'wealth',method:'long_press',email:'qa@example.invalid'});
+    assert.deepEqual(records,[['xuan:track',{event:'topic_selected',payload:{topic:'direction'}}]]);
+    track('share_card_downloaded',{topic:'wealth',method:'long_press',email:'qa@example.invalid'});
     track('bogus',{});
     track('topic_selected',{get topic(){throw new Error('invalid input');}});
     await flush();
-    assert.equal(requests.length,1);
-    const r=requests[0];
-    assert.deepEqual(JSON.parse(r.body),{event:'share_card_saved',payload:{topic:'wealth'}});
-    assert.equal(r.credentials,'omit');assert.equal(r.redirect,'error');assert.equal(r.referrerPolicy,'no-referrer');
+    assert.deepEqual(globalThis.__XUAN_EVENTS__.slice(-2),records.map(r=>r[1]));
+    assert.ok(Object.isFrozen(globalThis.__XUAN_EVENTS__));assert.equal(records.length,2);
+    for(let i=0;i<135;i++)track('enter_room',{time:'09:30',birth:'1988-07-16'});
+    await flush();
+    assert.equal(globalThis.__XUAN_EVENTS__.length,128);
+    assert.ok(globalThis.__XUAN_EVENTS__.every(e=>e.event==='enter_room'&&Object.keys(e.payload).length===0));
+    assert.equal(requests.length,0);
   });
 });
 
@@ -111,27 +110,50 @@ function modalFixture(endpoint) {
   return {find,ctrl,submit:()=>find('waitlist-form').handlers.submit({preventDefault(){}})};
 }
 
-test('the disconnected modal validates and clears the email locally without claiming a place or emitting a submit event',async()=>{
-  const f=modalFixture(''),events=[];
+test('the disconnected modal saves one session draft only after validation; the event stays anonymous',async()=>{
+  const f=modalFixture(''),events=[],saved=new Map(),requests=[];
   await withStubs({
-    fetch:async()=>assert.fail('unconfigured waitlist attempted a network request'),
+    fetch:(...args)=>{requests.push(args);return Promise.reject(new Error('unexpected offline network'));},
     dispatchEvent:e=>events.push(e.detail),
-    document:{querySelector:()=>null}
+    sessionStorage:{setItem:(key,value)=>saved.set(key,value)}
   },async()=>{
     f.ctrl.open('full_148','wealth');
     assert.equal(f.find('waitlist-form').hidden,false);
     assert.equal(f.find('waitlist-email').disabled,false);
-    assert.equal(f.find('waitlist-submit').textContent,'核對電郵格式');
+    assert.equal(f.find('waitlist-submit').textContent,'暫存電郵');
     f.find('waitlist-email').value='invalid';await f.submit();
-    assert.match(f.find('waitlist-status').textContent,/有效/);
+    assert.match(f.find('waitlist-status').textContent,/有效/);assert.equal(saved.size,0);
     f.find('waitlist-email').value='qa@example.invalid';await f.submit();await flush();
     assert.equal(f.find('waitlist-local').hidden,false);
     assert.equal(f.find('waitlist-form').hidden,true);assert.equal(f.find('waitlist-email').value,'');
     assert.equal(f.find('waitlist-success').hidden,true);
-    assert.equal(f.find('purchase-title').textContent,'電郵格式已核對');
-    assert.deepEqual(events.map(e=>e.event),['unlock_modal_opened']);
+    assert.match(f.find('purchase-title').textContent,/分頁暫存/);
+    assert.match(f.find('waitlist-local').textContent,/冇傳出，亦未正式留位/);
+    assert.deepEqual(JSON.parse(saved.get('xuan:waitlist-draft')),{email:'qa@example.invalid',sku:'full_148',topic:'wealth'});
+    assert.deepEqual(events,[{event:'unlock_modal_opened',payload:{sku:'full_148',topic:'wealth'}},{event:'unlock_email_sent',payload:{sku:'full_148',topic:'wealth'}}]);
     f.ctrl.clear();
     assert.equal(f.find('waitlist-local').hidden,true);assert.equal(f.find('purchase-dialog').open,false);
+    f.ctrl.open('single_88','family');f.find('waitlist-email').value='other@example.invalid';await f.submit();await flush();
+    assert.equal(saved.size,1);assert.deepEqual(JSON.parse(saved.get('xuan:waitlist-draft')),{email:'other@example.invalid',sku:'single_88',topic:'family'});
+    assert.equal(requests.length,0);
+  });
+});
+
+test('blocked session storage and an unreviewed runtime endpoint cannot claim saving or sending the email',async()=>{
+  const events=[],requests=[];
+  await withStubs({
+    document:{querySelector:()=>({content:''})},__XUAN_WAITLIST_ENDPOINT__:'https://unreviewed.example.invalid/intake',
+    sessionStorage:{setItem(){throw new Error('storage disabled');}},
+    fetch:(...args)=>{requests.push(args);return Promise.reject(new Error('unexpected network'));},
+    dispatchEvent:e=>events.push(e.detail)
+  },async()=>{
+    const f=modalFixture();
+    assert.equal(globalThis.__XUAN_WAITLIST_ENDPOINT__,'');
+    f.ctrl.open('single_88','career');f.find('waitlist-email').value='qa@example.invalid';await f.submit();await flush();
+    assert.equal(f.find('purchase-title').textContent,'電郵格式已核對');
+    assert.match(f.find('waitlist-local').textContent,/留唔低電郵/);
+    assert.equal(f.find('waitlist-success').hidden,true);
+    assert.deepEqual(events.map(e=>e.event),['unlock_modal_opened']);assert.equal(requests.length,0);
   });
 });
 
@@ -161,8 +183,8 @@ test('the configured modal waits for confirmation, shows failure safely, and ign
     await valid;await flush();
     assert.equal(f.find('purchase-title').textContent,'已為你留好位置');
     assert.equal(f.find('waitlist-email').value,'');
-    assert.deepEqual(events.filter(e=>e.event==='unlock_email_submitted'),[{
-      event:'unlock_email_submitted',payload:{sku:'full_148',topic:'career'}
+    assert.deepEqual(events.filter(e=>e.event==='unlock_email_sent'),[{
+      event:'unlock_email_sent',payload:{sku:'full_148',topic:'career'}
     }]);
   });
 });
@@ -171,9 +193,9 @@ test('share art is chart-led for each topic, but text output is blind to birth d
   const engineBox={self:{}};
   runInNewContext(readFileSync(new URL('../vendor/iztro-v2.6.5.min.js',import.meta.url),'utf8'),engineBox);
   const engine=engineBox.self.iztro, book=makeBook(EXAMPLE,engine), alternate=makeBook({...EXAMPLE,time:'09:30'},engine);
-  const drawlog=[], ctx={
+  const drawlog=[], qrMarks=[], ctx={
     setTransform(a,b,c,d,e,f){assert.deepEqual([a,b,c,d,e,f],[2/3,0,0,2/3,0,0]);},
-    createLinearGradient:()=>({addColorStop(){}}),fillRect(){},strokeRect(){},beginPath(){},moveTo(){},lineTo(){},stroke(){},drawImage(){},
+    createLinearGradient:()=>({addColorStop(){}}),fillRect(x,y,w,h){if(x>=750&&y>=1587)qrMarks.push([x,y,w,h]);},strokeRect(){},beginPath(){},moveTo(){},lineTo(){},stroke(){},drawImage(){},
     measureText(s){return {width:s.length*55};},fillText(s){drawlog.push(s);}
   };
   const canvas={getContext:()=>ctx,ownerDocument:{createElement:()=>({getContext:()=>ctx})}};
@@ -184,16 +206,20 @@ test('share art is chart-led for each topic, but text output is blind to birth d
     assert.ok(c.stars.every(s=>fields.pattern.includes(s)));
     assert.notEqual(fields.pattern,shareFields(alternate.chapters.find(x=>x.key===c.key),alternate.element).pattern);
     quotes.add(fields.quote);
-    for (const signature of ['', '阿澄','1995-08-15','19:30','qa@example.invalid','female','一九九五年八月','三月三日']) {
-      drawlog.length=0;paintShareArtwork(canvas,{...fields,signature},{portrait:{},qr:{}});
+    for (const signature of ['', 'guest','阿澄','1995-08-15','19:30','qa@example.invalid','female','一九九五年八月','三月三日','八八 年 七 月 十六 日','捌捌 年 柒 月 拾陸 日']) {
+      drawlog.length=qrMarks.length=0;paintShareArtwork(canvas,{...fields,signature},{});
       assert.deepEqual([canvas.width,canvas.height],[720,1280]);
-      assert.equal(drawlog.includes('寫畀 阿澄'),signature==='阿澄');
-      assert.doesNotMatch(drawlog.join(''),/虛構化名|虛構原句|1995|19:30|female|example.invalid|一九九五年|三月三日/);
+      assert.equal(drawlog.includes('寫畀 夜茶客'),signature==='guest');
+      assert.deepEqual(qrMarks[0],[750,1587,222,222]);assert.ok(qrMarks.length>300);
+      assert.ok(drawlog.includes('xuan-jiuye-preview.pages.dev'));
+      assert.doesNotMatch(drawlog.join(''),/虛構化名|虛構原句|1995|19:30|female|example.invalid|一九九五年|三月三日|八八|捌捌|阿澄/);
       assert.ok(drawlog.join('').includes(fields.quote.replaceAll('\n','')));
     }
   }
   assert.equal(quotes.size,5);assert.equal(shareFields({key:'官祿',stars:['不屬於命盤']},book.element),null);
-  assert.equal(checkedSignature(' 阿澄 '),'阿澄');
+  assert.equal(checkedSignature('guest'),'夜茶客');
+  assert.equal(checkedSignature(' 阿澄 '),null);
+  assert.equal(checkedSignature('八八 年 七 月 十六 日'),null);
   assert.equal(checkedSignature(''),'');
   assert.equal(checkedSignature('阿\u202e澄'),null);
 });
