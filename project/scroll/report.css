@@ -1,0 +1,20 @@
+:root { color-scheme:dark; font:16px/1.8 "PingFang TC","Noto Sans TC",sans-serif; color:#f3e7d2; background:#0c1612 }
+* {box-sizing:border-box} body {margin:0} [hidden]{display:none!important}
+.letter {width:min(100% - 28px,680px);margin:26px auto;padding:clamp(18px,5vw,42px);border:1px solid #937447;background:linear-gradient(145deg,#192920,#0e1913);box-shadow:0 0 0 4px #15231b;overflow-wrap:anywhere}
+.letter header {border-bottom:1px solid #937447;padding-block-end:12px}
+.letter h1,.letter h2 {font-family:"Songti TC","Noto Serif TC",serif;line-height:1.38;color:#f0d49b}
+.letter h1 {margin:.3em 0}.letter .brand{font-size:.88rem;color:#acd4bf;letter-spacing:.12em}
+#report-content section {margin-top:22px;padding-top:12px;border-top:1px solid #93744777}
+#report-content section:first-child {border:0;margin-top:10px}
+#report-controls {display:flex;gap:12px;flex-wrap:wrap;margin-top:26px}
+#report-note {margin-top:22px;padding-top:12px;border-top:1px solid #93744777;font-size:.85rem}
+#report-privacy {color:#c7bb9e;font-size:.92rem}
+#report-controls a,.letter button {min-height:44px;padding:7px 14px;border:1px solid #caaa6c;border-radius:8px;background:#27362a;color:#f2dbad;font:inherit;text-decoration:none;cursor:pointer}
+.letter button:focus-visible,#report-controls a:focus-visible {outline:2px solid #eac86c;outline-offset:3px}
+@media print {
+  :root,.letter{color:#181710;background:white;box-shadow:none}
+  .letter{width:100%;margin:0;padding:0;border:0} .letter h1,.letter h2,.letter .brand {color:#332410}
+  #report-controls,#report-privacy,#report-state,#report-ready {display:none!important}
+  #report-content h2 {break-after:avoid}
+  p {orphans:3;widows:3}
+}

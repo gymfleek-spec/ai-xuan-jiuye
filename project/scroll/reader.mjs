@@ -9,7 +9,8 @@ const stage=byId('film-stage'), video=byId('scene-video'), poster=byId('scene-po
 const media=byId('scene-media'), deskScene=byId('desk-scene'), panel=byId('consult-body');
 const reception=poster.getAttribute('src'), desk=stage.dataset.desk;
 const invitation=byId('invitation');
-const results=attachResult(report);
+const commercial=document.documentElement.dataset?.commercial==='true';
+const results=attachResult(report,commercial);
 let phase='home';
 
 function paintStep(html,step){
@@ -21,7 +22,8 @@ function paintStep(html,step){
   else if(phase==='consult' && !document.hidden)void player.play();
 }
 function showBook({chart,input,alias,question,subject,reply,offer,topic}){
-  results.show({chart,alias,subject,offer,reply});
+  const checkoutData=commercial && offer ? {birth:input,nickname:alias,topic:TOPIC_CODE[topic]} : null;
+  results.show({chart,alias,subject,offer,reply,checkoutData});
   byId('edition-label').textContent='本次命盤　／　'+alias;
   byId('chart-label').textContent=[input.year,input.month,input.day].join('-')+' · '+input.time+' · '+(input.gender==='male'?'男':'女')+' ｜ '+chart.fiveElementsClass;
   byId('visit-label').textContent='枱邊嗰句　／　'+subject;
@@ -31,7 +33,7 @@ function showBook({chart,input,alias,question,subject,reply,offer,topic}){
   window.scrollTo(0,0);byId('cover-title').focus({preventScroll:true});
   track('chart_generated',{topic:TOPIC_CODE[topic]});
 }
-const ask=attachZiwei(dialog,content,paintStep,showBook,topic=>track('topic_selected',{topic:TOPIC_CODE[topic]}));
+const ask=attachZiwei(dialog,content,paintStep,showBook,topic=>track('topic_selected',{topic:TOPIC_CODE[topic]}),commercial);
 
 function meet(normal){
   if(phase!=='entering')return;

@@ -6,7 +6,7 @@ import {EXAMPLE,makeBook} from './book.mjs';
 import {analyticsEvent,track} from './analytics.mjs';
 import {checkedEmail,registerWaitlist,attachWaitlist} from './waitlist.mjs';
 import {checkedSignature,paintShareArtwork} from './share-art.mjs';
-import {shareFields,needsShareImage} from './shareCard.mjs';
+import {shareFields,needsShareImage} from '../shareCard.js';
 import {growthEndpoints} from '../growth-config.mjs';
 
 test('only two independently reviewed HTTPS ingest routes may change the no-network defaults',()=>{

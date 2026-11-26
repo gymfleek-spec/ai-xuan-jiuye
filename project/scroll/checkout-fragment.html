@@ -1,0 +1,10 @@
+  <p id="checkout-sandbox" class="jy-help" hidden>結帳演練：唔會扣款，只用指定嘅測試電郵同測試卡。</p>
+  <form id="checkout-form" autocomplete="off" novalidate hidden>
+    <p id="checkout-scope" class="jy-help"></p>
+    <label for="checkout-email">接收永久閱讀連結嘅 Email</label>
+    <input id="checkout-email" type="email" required maxlength="254" autocomplete="email" placeholder="name@example.com" aria-describedby="checkout-purpose checkout-status">
+    <p id="checkout-purpose" class="jy-help">同意後，茶室會保存本次化名、生辰、命盤同電郵，用嚟整理同交付。Stripe 處理付款；寄信服務只會收到電郵同命書連結，兩個服務都唔會收到生辰。命書準備好後會寄去呢個信箱。</p>
+    <label class="commerce-consent"><input id="checkout-consent" type="checkbox" required>我已睇清方案同價錢，同意為呢份命書使用上述資料。</label>
+    <button class="jy-submit" id="checkout-submit" type="submit" disabled>前往安全付款</button>
+  </form>
+  <p id="checkout-status" class="jy-notice" role="status"></p>

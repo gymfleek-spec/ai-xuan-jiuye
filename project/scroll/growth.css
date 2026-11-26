@@ -55,3 +55,6 @@
 @media print {#share-card,#purchase-dialog{display:none!important}}
 
 .sku-options small {white-space:nowrap;color:#e9cd8f;font-size:.86em}
+
+.jy-early .commerce-consent{display:flex;align-items:flex-start;gap:8px;font-size:13px}
+.jy-early .commerce-consent input{width:18px;height:18px;min-height:0;margin:2px 0 0;flex:none;accent-color:#c9a14e}

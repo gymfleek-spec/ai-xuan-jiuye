@@ -422,7 +422,7 @@ function drawNotebookDial(svg, palaces, {palace, branch}) {
   add('text',{x:160,y:179,'text-anchor':'middle',fill:'#dbc199','font-size':12},branch+' 位');
 }
 
-export function attachZiwei(dialog, content, paint, openBook, onTopicSelected) {
+export function attachZiwei(dialog, content, paint, openBook, onTopicSelected, commercial = false) {
   const emptyInput = () => ({ year: '', month: '', day: '', precision: 'unknown', time: '', gender: '', place: '' });
   let alias = '', question = '', chosenTopic = '', ritualTimer;
   let activeHouse = '', cardFromChart = false, lastAction = '';
@@ -433,7 +433,9 @@ export function attachZiwei(dialog, content, paint, openBook, onTopicSelected) {
   let input = emptyInput(), chart = null, reviewed = null, active = false, focusPalace = '';
   const action = (label, name, kind = 'primary', palace) => `<button class="button ${kind}" type="button" data-ziwei="${name}"${palace ? ` data-palace="${palace}"` : ''}>${label}</button>`;
   const label = '';
-  const privacy = '<p class="privacy-note">只用虛構資料；資料只留本頁，不保存。</p>';
+  const privacy = commercial
+    ? '<p class="privacy-note">寫化名就得。只睇免費手記，生辰會留喺呢一頁。</p>'
+    : '<p class="privacy-note">只用虛構資料；資料只留本頁，不保存。</p>';
   const rules = '<details class="ziwei-rules"><summary>排盤方式</summary><p>採用西曆及出生地當地鐘錶時間，不校正夏令時間或真太陽時。23:00起按翌日排盤；閏月初一至十五按前月，十六日起按後月。按本命四化與當期運限，整理2026–2028嘅節奏。</p></details>';
 
   function text(tag, value, className) {
@@ -474,7 +476,7 @@ export function attachZiwei(dialog, content, paint, openBook, onTopicSelected) {
   }
   function showNotebookBirth() {
     chart = reviewed = null;
-    paint(`<p class="desk-speaker">玄 · 生辰入盤　02 / 03</p><h2 id="dialog-title">留低出生時間，等玄為你開盤。</h2><form id="career-birth-form" autocomplete="off" novalidate><div class="profile-fields"><label for="ziwei-date">西曆出生日期<input id="ziwei-date" type="date" min="1900-01-01" required></label><label for="ziwei-time">出生地當地時間<input id="ziwei-time" type="time" required></label><label for="ziwei-gender">性別<select id="ziwei-gender" required><option value="">請選擇</option><option value="male">男</option><option value="female">女</option></select></label></div><p class="privacy-note">只用虛構生辰試閱；未知時辰時，先確認資料，唔使勉強估。</p>${formError}<div class="dialog-actions"><button class="button primary" type="submit">下一步</button>${action('返回稱呼','edit-alias','secondary')}</div></form>`, 'career-setup');
+    paint(`<p class="desk-speaker">玄 · 生辰入盤　02 / 03</p><h2 id="dialog-title">留低出生時間，等玄為你開盤。</h2><form id="career-birth-form" autocomplete="off" novalidate><div class="profile-fields"><label for="ziwei-date">西曆出生日期<input id="ziwei-date" type="date" min="1900-01-01" required></label><label for="ziwei-time">出生地當地時間<input id="ziwei-time" type="time" required></label><label for="ziwei-gender">性別<select id="ziwei-gender" required><option value="">請選擇</option><option value="male">男</option><option value="female">女</option></select></label></div><p class="privacy-note">${commercial ? '免費排盤喺本機完成；未知時辰，唔使勉強估。' : '只用虛構生辰試閱；未知時辰時，先確認資料，唔使勉強估。'}</p>${formError}<div class="dialog-actions"><button class="button primary" type="submit">下一步</button>${action('返回稱呼','edit-alias','secondary')}</div></form>`, 'career-setup');
     get('ziwei-date').value = input.day ? [input.year,input.month,input.day].join('-') : '';
     get('ziwei-time').value = input.time;
     get('ziwei-gender').value = input.gender;
@@ -482,7 +484,7 @@ export function attachZiwei(dialog, content, paint, openBook, onTopicSelected) {
   function showQuestion() {
     chosenTopic = '';
     chart = reviewed = null;
-    paint(`<p class="desk-speaker">玄 · 一事一問　03 / 03</p><h2 id="dialog-title">${notebook().question}</h2><p id="career-summary" class="career-summary"></p><form id="career-question-form" autocomplete="off" novalidate><div class="profile-fields"><label for="ziwei-question">寫低想問嘅事（選填）<textarea id="ziwei-question" maxlength="240" rows="3" placeholder="${notebook().example}"></textarea></label></div><p class="privacy-note">${notebook().privacy}</p>${formError}<div class="dialog-actions"><button class="button primary" type="submit">起盤睇免費手記</button><button class="button question-skip" type="submit" value="skip-question" aria-label="略過提問，直接起盤">略過提問</button>${action('修改生辰','career-birth','secondary')}</div></form>`, 'career-setup');
+    paint(`<p class="desk-speaker">玄 · 一事一問　03 / 03</p><h2 id="dialog-title">${notebook().question}</h2><p id="career-summary" class="career-summary"></p><form id="career-question-form" autocomplete="off" novalidate><div class="profile-fields"><label for="ziwei-question">寫低想問嘅事（選填）<textarea id="ziwei-question" maxlength="240" rows="3" placeholder="${notebook().example}"></textarea></label></div><p class="privacy-note">${commercial ? '只講想傾嘅事就得，唔需要寫真名、地址或聯絡資料。' : notebook().privacy}</p>${formError}<div class="dialog-actions"><button class="button primary" type="submit">起盤睇免費手記</button><button class="button question-skip" type="submit" value="skip-question" aria-label="略過提問，直接起盤">略過提問</button>${action('修改生辰','career-birth','secondary')}</div></form>`, 'career-setup');
     get('career-summary').textContent = alias + '　／　' + [input.year,input.month,input.day].join(' · ') + '　' + input.time + '　' + (input.gender === 'male' ? '男' : '女');
     get('ziwei-question').value = question;
   }

@@ -1,0 +1,14 @@
+name = "xuan-jiuye-preview"
+pages_build_output_dir = "./project/public-preview"
+compatibility_date = "2026-10-01"
+
+[vars]
+COMMERCIAL_MODE = "off"
+
+# Local binding only. Do not deploy this placeholder file with remote credentials.
+# Remote deploy requires a separately reviewed config with the actual D1 ID(s).
+[[d1_databases]]
+binding = "DB"
+database_name = "xuan-jiuye-commercial-local"
+database_id = "00000000-0000-0000-0000-000000000000"
+migrations_dir = "migrations"

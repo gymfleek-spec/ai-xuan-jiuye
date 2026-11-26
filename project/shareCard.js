@@ -1,6 +1,6 @@
-import { TOPIC_CODE, track } from './analytics.mjs';
-import { STAR_COPY } from './empathy-copy.mjs';
-import { checkedArtwork, checkedSignature, paintShareArtwork } from './share-art.mjs';
+import { TOPIC_CODE, track } from './scroll/analytics.mjs';
+import { STAR_COPY } from './scroll/empathy-copy.mjs';
+import { checkedArtwork, checkedSignature, paintShareArtwork } from './scroll/share-art.mjs';
 
 const SHARE_QUOTES = Object.freeze({
   官祿:'總係頂到最後嗰個，\n唔係唔識推，只係太想\n件事有交帶。今晚放低一份，\n唔等於你唔負責任。',

@@ -1,17 +1,29 @@
-# 玄與九爺 v0.18.0｜九爺判詞與早鳥登記
+# 玄與九爺 v0.18.0｜路線二商業化候選
 
-[公開預覽](https://xuan-jiuye-preview.pages.dev/)｜整合分支 `feat/v0.18-growth-validation`，以 v0.17.2 的 `0e9cf58` 為基準。
+現行 [公開預覽站](https://xuan-jiuye-preview.pages.dev/) 是既有免費版；路線二在 `feat/v0.18-commercial-mvp` 完成同版驗收前不得合併 `main`、覆蓋公開站或啟用真收款。
 
 ```sh
 cd project
-npm run build && npm test
-python3 -m http.server 4187 --bind 127.0.0.1 --directory public-preview
+npm run build -- --mode=production && npm test
 ```
 
-Node.js 24+、原生 ES Modules、固定 iztro 2.6.5，毋須安裝 npm 依賴。**唯一發布目錄是 `project/public-preview/`**，只部署本次建置的檔案。根目錄舊 `public-preview/` 已退出工作樹，仍可從 Git 歷史還原；歷史 ZIP 不是發布來源。
+前端仍為零外部 npm 依賴、Vanilla ES Modules、固定 iztro 2.6.5。保留免費看盤、720×1280 判詞卡、原有安全分流；只在訪客確認結帳後送出生辰等排盤資料。完整四章只由後端從同盤生成；回站的 `paid=1` 不解鎖，必須有已核實嘅 Stripe 付款通知。免登入命書連結等同存取憑證，不可公開。
 
-- `scroll/shareCard.mjs`／`share-art.mjs`：只在入室原選的一題合成 720×1280 判詞卡；同一副本命盤的五行局及本宮／借星、定稿判詞、選填署名及固定首頁 QR。只預填可刪改的化名；不讀出生資料、不外傳。可下載、長按高清圖或複製金句，不自動發帖。
-- `scroll/waitlist.mjs`：HK$88／HK$148 方案及早鳥視窗，不收款；未配置收集端點時只在頁內核對電郵格式，不送出、不作登記。非聯絡同意、危險、投資／彩票等分流同時停用判詞卡、推介及登記。
-- `scroll/analytics.mjs`：九個動作只輸出白名單欄位；預設只在本頁觸發，不儲存、不傳出去。詳見[工程說明](project/README.md)。下載及長按事件代表操作意圖，不能判定相簿已儲存。
+唯一站檔輸出為 `project/public-preview/`。根目錄舊 `public-preview/` 已在 Git 歷史封存；勿把歷史 ZIP、私人設定、`functions/` 原始碼或資料庫打包成靜態網站。既有 Pages 的網頁上傳不會編譯 `functions/`，此版必須用 Wrangler。
 
-舊版對照：[v0.17.1 三盤](docs/CAPTIONS-v0.17.1.md)｜[v0.17.0 交付留檔](DELIVERY-v0.17.0.md)。
+## Cloudflare 測試及發布
+
+1. 先用 Wrangler 本機測試：在倉庫根目錄執行 `wrangler d1 migrations apply DB --local` 和 `wrangler pages dev project/public-preview`。提交內 `wrangler.toml` 只放本機資料庫佔位值，結帳預設關閉。**唔好將呢份佔位設定部署到遠端。**
+2. 用私密設定接駁隔離的測試 D1 及已批准測試收件地址；先核對寄件網域已關閉開信／連結追蹤，唔用追蹤網址包住命書連結。合併前只可部署測試分支。在同一工作目錄用已核對真實綁定及環境的設定執行 `wrangler d1 migrations apply DB --remote --env preview`，再執行 `wrangler pages deploy project/public-preview --project-name xuan-jiuye-preview --branch route2-test`。不要將同一個測試 D1 綁去真正收款環境。
+3. 測試域名與 `PUBLIC_BASE_URL` 必須相同。Stripe 測試通知只訂閱 `checkout.session.completed` 指向該域名的 `/api/webhooks/stripe`。同版完成測試卡、回站及重新開啟四章、列印、寄信收件、重複通知、404 與安全基線；不能用替身測試當收款驗收。
+4. 全部通過先准合併 `main`，用同一提交部署原公開站；仍以測試模式走一次，沒有真扣款。正式開賣由主理人另作最終確認：核對私隱告知及保存安排、正式 D1／收件設定，並用 Cloudflare 私密變數配置正確的 Stripe live key、同域 live webhook secret，再把 `COMMERCIAL_MODE` 切為 `live`；勿將 live key 傳入測試域名或群組。
+
+### 私密設定
+
+- `STRIPE_SECRET_KEY`、`STRIPE_WEBHOOK_SECRET`、`RESEND_API_KEY`：服務端秘密，只能用 Vault／私密表單或平台秘密綁定。
+- `COMMERCIAL_MODE`：`off`、`test` 或 `live`。金鑰類型必須與模式相符。
+- `PUBLIC_BASE_URL`：確切公開來源，例如已批准嘅測試分支 HTTPS 網址；無路徑、參數或登入資料。
+- `RESEND_FROM`：Resend 已驗證寄件地址。`TEST_ORDER_EMAIL`：已批准的唯一測試收件地址。
+- `DB`：D1 綁定。遠端 Wrangler 需已有授權登入，或從私密保管讀 `CLOUDFLARE_API_TOKEN`，不提交任何密鑰。
+
+付款後的命書即使暫停新結帳仍可重開（保留原域名和 D1）。投遞服務無回覆時，已付款訪客仍可由 Stripe 回站閱讀。通知重送以訂單狀態、交易及發信鍵防止再建章或再寄；超出已知安全重試窗的寄件由主理人先查寄送記錄，唔好盲目再寄。

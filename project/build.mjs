@@ -12,6 +12,7 @@ const output=join(root,'public-preview'), single=join(root,'玄與九爺-港島�
 const assets=join(src,'art');
 const read=(...path)=>readFileSync(join(...path),'utf8');
 const {version}=JSON.parse(read(root,'package.json'));
+const production=process.argv.slice(2).includes('--mode=production');
 const endpoints=growthEndpoints(process.env);
 const bindEndpoints=(page,{waitlist='',analytics=''}={})=>page.replace('@@WAITLIST_ENDPOINT@@',esc(waitlist)).replace('@@ANALYTICS_ENDPOINT@@',esc(analytics));
 const out=(path,data)=>{mkdirSync(dirname(path),{recursive:true});writeFileSync(path,data);};
@@ -31,16 +32,23 @@ const paragraphs=lines=>lines.map(v=>'<p>'+esc(v)+'</p>').join('');
 const chapters=bookPreviews(book,exampleTopic).map(c=>'<section class="chapter-preview"><h3>'+esc(c.title)+'</h3>'+paragraphs(c.lines)+'</section>').join('\n');
 const topicPeeks=book.chapters.filter(c=>c.key!==exampleTopic).map(c=>'<details name="other-topics" data-topic="'+esc(c.key)+'"><summary>'+esc(c.label)+'</summary><div class="topic-peek">'+paragraphs(c.teaser)+'<div class="teaser-fade" aria-hidden="true" inert><span>────────　──────</span></div></div></details>').join('\n');
 let html=read(src,'page.html').replaceAll('@@VERSION@@',version).replace('@@BOOK_ART@@',()=>frame('seat')).replace('@@ELEMENT@@',esc(book.element)).replace('@@CHART_LABEL@@',esc('1995-08-15 · 19:30 · 男 ｜ '+book.element)).replace('@@CHAPTERS@@',()=>chapters).replace('@@TOPIC_PEEKS@@',()=>topicPeeks);
+const pageMode=(page,commercial)=> {
+  if (!commercial) return page.replace('@@COMMERCIAL@@','').replace('@@CHECKOUT_FIELDS@@','');
+  return page.replace('@@COMMERCIAL@@','data-commercial="true"')
+    .replace('@@CHECKOUT_FIELDS@@',()=>read(src,'checkout-fragment.html'))
+    .replaceAll('虛構例盤','閱讀樣本')
+    .replace('複製呢句金句</button>','複製金句發 Threads</button>');
+};
 const withoutModules=s=>s.replace(/^import [^\n]+;\n/gm,'').replace(/^export \{[^\n]+ from [^\n]+;\n/gm,'').replace(/^export /gm,'');
-const app="(()=>{\n'use strict';\n"+getBirthDateError.toString()+'\n'+['scroll/empathy-copy.mjs','scroll/chart.mjs','scroll/book.mjs','motion/motion.mjs','ziwei.js','scroll/analytics.mjs','scroll/share-art.mjs','scroll/shareCard.mjs','scroll/waitlist.mjs','scroll/result.mjs','scroll/reader.mjs'].map(f=>withoutModules(read(root,f))).join('\n')+'\n})();';
+const app="(()=>{\n'use strict';\n"+getBirthDateError.toString()+'\n'+['scroll/empathy-copy.mjs','scroll/chart.mjs','scroll/book.mjs','motion/motion.mjs','ziwei.js','scroll/analytics.mjs','scroll/share-art.mjs','shareCard.js','scroll/waitlist.mjs','customer.js','scroll/checkout.mjs','scroll/result.mjs','scroll/reader.mjs'].map(f=>withoutModules(read(root,f))).join('\n')+'\n})();';
 assert.doesNotMatch(app,/^import |^export |<\/script/mi);assert.doesNotMatch(engine,/<\/script/i);
 const css=['style.css','visit.css','growth.css'].map(name=>read(src,name)).join('\n');
 const common="; form-action 'none'; base-uri 'none'; object-src 'none'; frame-src 'none'";
 const hashSrc=s=>"'sha256-"+createHash('sha256').update(s).digest('base64')+"'";
-const policy=(offline)=>"default-src 'none'; script-src "+(offline?[hashSrc(engine),hashSrc(app)].join(' '):"'self'")+"; style-src "+(offline?hashSrc(css):"'self'")+"; img-src "+(offline?"data:":"'self' data:")+"; media-src "+(offline?"data:":"'self'")+"; connect-src "+((!offline && Object.values(endpoints).filter(Boolean).join(" ")) || "'none'")+common;
-let inline=bindEndpoints(html).replace('@@POLICY@@',policy(true)).replace('<head>',()=>'<head>\n<!-- '+notices.replaceAll('-->','-- >')+' -->').replace('@@STYLE@@',()=>'<style>'+css+'</style>').replace('@@SCRIPTS@@',()=>'<script>'+engine+'</script><script>'+app+'</script>');
+const policy=(offline)=>"default-src 'none'; script-src "+(offline?[hashSrc(engine),hashSrc(app)].join(' '):"'self'")+"; style-src "+(offline?hashSrc(css):"'self'")+"; img-src "+(offline?"data:":"'self' data:")+"; media-src "+(offline?"data:":"'self'")+"; connect-src "+((!offline && (production ? "'self' https://api.stripe.com" : Object.values(endpoints).filter(Boolean).join(" "))) || "'none'")+common;
+let inline=bindEndpoints(pageMode(html,false)).replace('@@POLICY@@',policy(true)).replace('<head>',()=>'<head>\n<!-- '+notices.replaceAll('-->','-- >')+' -->').replace('@@STYLE@@',()=>'<style>'+css+'</style>').replace('@@SCRIPTS@@',()=>'<script>'+engine+'</script><script>'+app+'</script>');
 const files=new Map([['reading.css',css],['reading.js',app],['iztro-2.6.5.js',engine],['THIRD_PARTY_NOTICES.txt',notices]]);
-let pub=bindEndpoints(html,endpoints).replace('@@POLICY@@',policy(false)).replace('@@STYLE@@','<link rel="stylesheet" href="reading.css?v='+sha(css).slice(0,9)+'">').replace('@@SCRIPTS@@','<script defer src="iztro-2.6.5.js"></script><script defer src="reading.js?v='+sha(app).slice(0,9)+'"></script>');
+let pub=bindEndpoints(pageMode(html,production),production?{}:endpoints).replace('@@POLICY@@',policy(false)).replace('@@STYLE@@','<link rel="stylesheet" href="reading.css?v='+sha(css).slice(0,9)+'">').replace('@@SCRIPTS@@','<script defer src="iztro-2.6.5.js"></script><script defer src="reading.js?v='+sha(app).slice(0,9)+'"></script>');
 const photo=readFileSync(join(src,artwork));
 assert.ok(photo.length<700_000 && photo.readUInt16BE(0)===0xffd8);
 const photoSrc='src="'+artwork+'"';
@@ -56,6 +64,12 @@ for(const [key,[name,mime]] of Object.entries(media)){
   inline=inline.replaceAll(marker,()=> 'data:'+mime+';base64,'+bytes.toString('base64'));
 }
 files.set('index.html',pub);
+files.set('report-shell.html',read(src,'report-shell.html'));
+files.set('report.css',read(src,'report.css'));
+const reportApp="(()=>{\n'use strict';\n"+['customer.js','scroll/report.mjs'].map(f=>withoutModules(read(root,f))).join('\n')+'\n})();';
+assert.doesNotMatch(reportApp,/^import |^export |<\/script/mi);
+files.set('report.js',reportApp);
+files.set('_routes.json',JSON.stringify({version:1,include:['/api/*','/r/*'],exclude:[]})+'\n');
 for(const page of [pub,inline])assert.doesNotMatch(page,/@@[A-Z_]+@@|韓國範山|HK\$248/);
 assert.doesNotMatch(inline,/<script[^>]+src=|(?:src|href)="(?:art\/|reading\.|iztro-)/i);
 for(const [name,value] of files) out(join(output,name),value);
@@ -64,4 +78,4 @@ assert.deepEqual(disk,[...files.keys()].sort(),'unexpected file in publish direc
 const info={version,artwork:4,views:5,bytes:[...files.values()].reduce((n,s)=>n+Buffer.byteLength(s),0),files:Object.fromEntries([...files].map(([p,v])=>[p,sha(v)])),portable_sha256:sha(inline)};
 out(single,inline);
 out(join(root,'index.html'),inline);out(join(root,'release-manifest.json'),JSON.stringify(info,null,2)+'\n');
-console.log(JSON.stringify({version:info.version,mode:'release',files:files.size,publicBytes:info.bytes,singleFileBytes:Buffer.byteLength(inline),portable_sha256:info.portable_sha256}));
+console.log(JSON.stringify({version:info.version,mode:production?'production':'release',files:files.size,publicBytes:info.bytes,singleFileBytes:Buffer.byteLength(inline),portable_sha256:info.portable_sha256}));

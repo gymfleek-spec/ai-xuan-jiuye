@@ -2,8 +2,9 @@ import { getPalaceReading, readingFact, palaceTitle, READING_TOPICS, periodTempo
 import { bookFromChart, bookPreviews } from './book.mjs';
 import { relatingPrompts } from './empathy-copy.mjs';
 import { TOPIC_CODE, SKU_CODE, track } from './analytics.mjs';
-import { attachShareCard, shareFields } from './shareCard.mjs';
+import { attachShareCard, shareFields } from '../shareCard.js';
 import { attachWaitlist } from './waitlist.mjs';
+import { attachCheckout } from './checkout.mjs';
 
 export function resultFromChart(chart, subject) {
   const book = bookFromChart(chart), readings = chart.palaces.map(p => getPalaceReading(chart, p.name));
@@ -11,7 +12,7 @@ export function resultFromChart(chart, subject) {
   return { chart, book, readings, selected: book.chapters.find(c => c.label === subject)?.key || '命宮' };
 }
 
-export function attachResult(report) {
+export function attachResult(report, commercial = false) {
   const find = id => report.querySelector('#' + id);
   const node = (tag, value, cls) => {
     const el = document.createElement(tag); el.textContent = value;
@@ -19,24 +20,26 @@ export function attachResult(report) {
     return el;
   };
   const put = (id, value) => { find(id).textContent = value; };
-  const share = attachShareCard(find), waitlist = attachWaitlist(find);
+  const share = attachShareCard(find), purchase = commercial ? attachCheckout(find) : attachWaitlist(find);
   const positions = { 寅:[4,1], 卯:[3,1], 辰:[2,1], 巳:[1,1], 午:[1,2], 未:[1,3], 申:[1,4], 酉:[2,4], 戌:[3,4], 亥:[4,4], 子:[4,3], 丑:[4,2] };
   const prices = { full:[388,240,148], single:[228,140,88] };
-  let current = null, name = '', canOffer = false, activeTopic = '', purchaseTopic = '', safeReply = '', plan = 'full';
+  let current = null, name = '', canOffer = false, activeTopic = '', purchaseTopic = '', safeReply = '', plan = 'full', checkoutData = null;
   const chapterFor = key => current?.book.chapters.find(c => c.key === key);
   function pricing(key) {
     plan = key;
     const [original, discount, total] = prices[key];
     put('price-original', 'HK$' + original); put('price-discount', '-HK$' + discount);
     for (const id of ['price-final','cta-price','purchase-price']) put(id, 'HK$' + total);
-    const label = chapterFor(purchaseTopic || activeTopic)?.label || '';
+    const label = chapterFor(commercial ? current?.selected : (purchaseTopic || activeTopic))?.label || '';
     put('purchase-plan', key === 'full' ? '全盤三年命書' : (label ? label + '・' : '') + '單題拆局書');
     put('cta-book', key === 'full' ? '完整命書' : label + '拆局書');
     for (const sku of ['full','single']) find('sku-' + sku).setAttribute('aria-pressed', String(sku === key));
   }
   function openPurchase(sku = plan, key = purchaseTopic || activeTopic) {
     if (!current || !canOffer) return;
-    purchaseTopic = key; pricing(sku); waitlist.open(SKU_CODE[sku], TOPIC_CODE[key]);
+    purchaseTopic = key; pricing(sku);
+    if (commercial) purchase.open(sku,checkoutData,{sku:SKU_CODE[sku],topic:checkoutData?.topic});
+    else purchase.open(SKU_CODE[sku], TOPIC_CODE[key]);
   }
   for (const key of ['full','single']) find('sku-' + key).addEventListener('click', () => {
     if (current && canOffer) { pricing(key); track('sku_selected', {sku:SKU_CODE[key]}); }
@@ -149,8 +152,8 @@ export function attachResult(report) {
     if (pressed) track('resonance_clicked',{topic:TOPIC_CODE[activeTopic]});
   });
   return {
-    show({chart,alias,subject,offer = false,reply = ''}) {
-      waitlist.clear();
+    show({chart,alias,subject,offer = false,reply = '',checkoutData: purchaseData = null}) {
+      purchase.clear(); checkoutData = purchaseData;
       current = resultFromChart(chart,subject); name = alias; canOffer = offer === true; safeReply = reply || '今晚唔使急住作決定。可以先同自己講：「我想留返空間，照顧好自己。」'; activeTopic = current.selected;
       find('offer').hidden = find('purchase-wrap').hidden = find('purchase-cta').hidden = !canOffer; pricing('full');
       for (const el of report.querySelectorAll('.js-user-name')) el.textContent = alias;
@@ -170,7 +173,7 @@ export function attachResult(report) {
       find('chart-details').open = find('topic-menu').open = false;
     },
     clear() {
-      waitlist.clear(); share.set(null);
+      purchase.clear(); share.set(null); checkoutData=null;
       current = null; name = safeReply = ''; canOffer = false; activeTopic = purchaseTopic = '';
       find('offer').hidden = find('purchase-wrap').hidden = find('purchase-cta').hidden = find('book-previews').hidden = true; pricing('full');
       for (const id of ['pattern-badge','empathy-headline','empathy-body','jiuye-quote','basis-detail','result-grid','palace-detail','chapter-previews','topic-previews','decadal-label','curve-high','curve-low','turn-year',...Array.from({length:5},(_,i) => 'fate-' + i)]) find(id).replaceChildren();
