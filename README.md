@@ -1,6 +1,6 @@
-# 玄與九爺 v0.18.0｜九爺判詞與早鳥通知
+# 玄與九爺 v0.18.6｜線上版源碼備份
 
-[公開預覽](https://xuan-jiuye-preview.pages.dev/)｜增長驗證 `feat/v0.18-growth-validation`。沿 v0.17.2（`0e9cf58`）同現行免費公開版增量更新。
+[公開預覽](https://xuan-jiuye-preview.pages.dev/)｜本備份包括完整入座插畫同命書過渡、焦點框修正，以及移除結果頁右上話題選單。
 
 ```sh
 cd project

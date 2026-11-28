@@ -34,11 +34,11 @@ function fixture(){
   }
   const names=Array.from({length:3},()=>new Node('span')),nodes=new Map();
   const find=id=>{if(!nodes.has(id))nodes.set(id,new Node('div'));return nodes.get(id);};
-  const report={querySelector:s=>find(s.slice(1)),querySelectorAll:()=>names};
+  const report={querySelector:s=>['#topic-menu','#topic-select'].includes(s)?null:find(s.slice(1)),querySelectorAll:()=>names};
   return {Node,names,find,report};
 }
 
-test('result safely renders a hostile alias, switches without replacing the chart, and clears personal DOM/state',()=>{
+test('result safely renders a hostile alias, inspects palaces without replacing the chart or entry topic, and clears personal DOM/state',()=>{
   const f=fixture(),old=globalThis.document;
   globalThis.document={createElement:tag=>new f.Node(tag)};
   try{
@@ -50,15 +50,12 @@ test('result safely renders a hostile alias, switches without replacing the char
     const grid=f.find('result-grid').children;
     assert.equal(grid.length,13);assert.equal(grid.filter(n=>n.tagName==='button').length,12);
     assert.match(f.find('pattern-badge').textContent,/財帛宮.*午位.*天同、太陰/);
-    f.find('topic-select').handlers.change({target:{value:'田宅'}});
-    assert.match(f.find('empathy-headline').textContent,/家庭/);assert.equal(f.find('result-grid').children,grid);
+    grid.find(n=>n.dataset.palace==='田宅').handlers.click();
     assert.equal(f.find('palace-detail').children[0].textContent,'玄 · 田宅宮');
-    f.find('topic-select').handlers.change({target:{value:'__proto__'}});
-    assert.match(f.find('empathy-headline').textContent,/家庭/);
+    assert.match(f.find('empathy-headline').textContent,/財運/);
+    assert.equal(f.find('result-grid').children,grid);
     for(const button of grid.filter(n=>n.tagName==='button')){button.handlers.click();assert.ok(f.find('palace-detail').children.length>=4);}
     assert.equal(JSON.stringify(native),before);
-    f.find('resonance').handlers.click();assert.equal(f.find('resonance').getAttribute('aria-pressed'),'false');
-    f.find('topic-select').handlers.change({target:{value:'財帛'}});
     f.find('resonance').handlers.click();assert.equal(f.find('resonance').getAttribute('aria-pressed'),'true');
     result.clear();assert.equal(f.names[0].textContent,'');assert.equal(f.find('result-grid').children.length,0);
     assert.equal(f.find('empathy-headline').textContent,'');assert.equal(f.find('resonance').getAttribute('aria-pressed'),'false');
@@ -68,18 +65,19 @@ test('result safely renders a hostile alias, switches without replacing the char
   }finally{globalThis.document=old;}
 });
 
-test('result uses half-visible clues, an accessible teaser tail and a single cultural footer, with no payment collection',()=>{
+test('result keeps the brand link, half-visible clues and a single cultural footer, with no payment collection',()=>{
   const html=readFileSync(new URL('./page.html',import.meta.url),'utf8'),js=readFileSync(new URL('./result.mjs',import.meta.url),'utf8');
-  assert.match(html,/<option value="田宅">家庭/);
-  assert.match(html,/<details id="chart-details">/);assert.match(html,/<select id="topic-select">/);
-  assert.match(html,/id="chapter-previews"/);assert.match(html,/id="topic-previews"/);
+  assert.match(html,/<header class="result-bar"><a class="brand" href="#cover-title">[^\n]+<\/a><\/header>/);
+  assert.match(html,/<details id="chart-details">/);
+  assert.doesNotMatch(html+js,/topic-(?:menu|drawer|select)|睇其他話題|同一張盤，想睇邊個話題|翻開其他篇章/);
+  assert.match(html,/id="chapter-previews"/);
+  assert.doesNotMatch(html+js,/other-topics|topic-previews|topic-peeks|其他四個話題/);
   assert.doesNotMatch(html+js,/quarter-previews|action-previews|teaser-cta/);
   assert.match(html,/青玉鏡・想靠近嘅相處/);
   assert.doesNotMatch(html,/氣質線索|fate-years/);
   assert.doesNotMatch(html,/唔係今次命盤推算|未提供流年|未提供大限|只留喺今次頁面/);
-  assert.equal((html.match(/class="lock-blur" aria-hidden="true"/g)||[]).length,7);
+  assert.equal((html.match(/class="lock-blur" aria-hidden="true"/g)||[]).length,6);
   assert.equal((html.match(/玄與九爺陪你睇清選擇，唔替你決定。/g)||[]).length,1);
-  assert.match(js,/tail.setAttribute\('aria-hidden','true'\)/);assert.match(js,/tail.setAttribute\('inert',''\)/);
   assert.match(html,/id="purchase-cta"/);assert.match(html,/id="purchase-dialog"/);
   assert.match(html,/<input id="waitlist-email" type="email"[^>]+disabled/);
   assert.match(html,/id="waitlist-closed">早鳥登記暫未開放/);
@@ -93,32 +91,58 @@ test('result uses half-visible clues, an accessible teaser tail and a single cul
   assert.match(css,/filter:blur\(5\.5px\)/);assert.doesNotMatch(css,/body\.unlocked/);
 });
 
-test('original full/single prices stay synchronized, cannot grant access, and reset without overriding no-contact offers',()=>{
+test('the love chapter reuses the wealth divider, followed by four unbroken mirror pills and a permanent 2x2 seal grid',()=>{
+  const html=readFileSync(new URL('./page.html',import.meta.url),'utf8'),css=readFileSync(new URL('./style.css',import.meta.url),'utf8');
+  const heads=[...html.matchAll(/<header class="chapter-heading">([\s\S]*?)<\/header>/g)].map(m=>m[1]);
+  assert.equal(heads.length,2);
+  for(const [i,title] of ['財運','愛情'].entries()){
+    assert.ok(heads[i].includes('<div class="knot-divider" aria-hidden="true">◇</div>'));
+    assert.ok(heads[i].includes('data-text="'+title+'">'+title+'</h2>'));
+    assert.match(heads[i],/<h2 class="echo-chapter"/);
+  }
+  assert.match(heads[1],/講到底……<br>你最想睇清嘅，係<span class="gold-copy">邊個人先接得住你<\/span>吧？/);
+  assert.match(html,/<\/header>\s*<div class="inset"><section class="fate-card"/);
+  const mirror=html.split('aria-labelledby="fate-title"')[1].split('</dl>')[0];
+  assert.deepEqual([...mirror.matchAll(/<dt>([^<]+)<\/dt>/g)].map(m=>m[1]),['相處角度','被點對待','在意細節','關鍵節點']);
+  assert.match(css,/\.fate-card dt\s*{\s*white-space:nowrap;flex-shrink:0;padding:4px 10px;/);
+  const grid=html.split('<ul class="sealed-topics"')[1].split('</ul>')[0];
+  assert.deepEqual([...grid.matchAll(/class="sealed-stamp" aria-hidden="true">([^<]+)<\/span>([^<]+)<\/h3>/g)].map(m=>m.slice(1)),[['官','事業'],['財','財運'],['夫','愛情'],['命','抉擇']]);
+  assert.equal((grid.match(/<svg class="sealed-lock"/g)||[]).length,4);
+  assert.doesNotMatch(grid,/<details|<summary/);
+  assert.match(css,/\.sealed-topics\{display:grid;grid-template-columns:repeat\(2,1fr\);gap:10px/);
+  assert.match(css,/\.roll\{[^}]*padding-bottom:124px;/);
+  assert.doesNotMatch(css,/topic-drawer/);
+});
+
+test('both unlock buttons show the selected published price and respect safety gating',()=>{
   const f=fixture(),old=globalThis.document;
   globalThis.document={createElement:tag=>new f.Node(tag)};
   try{
     const result=attachResult(f.report);
     result.show({chart:chart('19:30'),alias:'甲',subject:'財運',offer:true});
-    const check=(original,discount,total)=>{
-      assert.equal(original-discount,total);
-      assert.equal(f.find('price-original').textContent,'HK$'+original);
-      assert.equal(f.find('price-discount').textContent,'-HK$'+discount);
-      for(const id of ['price-final','cta-price','purchase-price'])assert.equal(f.find(id).textContent,'HK$'+total);
+    const check=total=>{
+      for(const id of ['sealed-cta-price','cta-price','purchase-price'])assert.equal(f.find(id).textContent,'HK$'+total);
     };
-    check(388,240,148);assert.equal(f.find('sku-full').getAttribute('aria-pressed'),'true');
-    f.find('sku-single').handlers.click();check(228,140,88);
+    assert.equal(f.find('sealed-unlock').hidden,false);
+    check(148);assert.equal(f.find('sku-full').getAttribute('aria-pressed'),'true');
+    f.find('sku-single').handlers.click();check(88);
     assert.equal(f.find('sku-single').getAttribute('aria-pressed'),'true');
     assert.equal(f.find('sku-full').getAttribute('aria-pressed'),'false');
-    f.find('purchase-cta').handlers.click();assert.equal(f.find('purchase-dialog').open,true);
-    f.find('close-purchase').handlers.click();assert.equal(f.find('purchase-dialog').open,false);
-    f.find('purchase-cta').handlers.click();result.clear();
-    assert.equal(f.find('purchase-dialog').open,false);assert.equal(f.find('purchase-cta').hidden,true);check(388,240,148);
+    for(const id of ['sealed-purchase-cta','purchase-cta']){
+      f.find(id).handlers.click();assert.equal(f.find('purchase-dialog').open,true);
+      f.find('close-purchase').handlers.click();assert.equal(f.find('purchase-dialog').open,false);
+    }
+    f.find('sealed-purchase-cta').handlers.click();result.clear();
+    assert.equal(f.find('purchase-dialog').open,false);assert.equal(f.find('sealed-unlock').hidden,true);check(148);
     result.show({chart:chart('09:30'),alias:'乙',subject:'愛情',offer:false});
     assert.equal(f.find('purchase-cta').hidden,true);
-    f.find('purchase-cta').handlers.click();assert.equal(f.find('purchase-dialog').open,false);
-    f.find('sku-single').handlers.click();check(388,240,148);
+    assert.equal(f.find('sealed-unlock').hidden,true);
+    for(const id of ['sealed-purchase-cta','purchase-cta']){
+      f.find(id).handlers.click();assert.equal(f.find('purchase-dialog').open,false);
+    }
+    f.find('sku-single').handlers.click();check(148);
     result.clear();result.show({chart:chart('09:30'),alias:'丙',subject:'家庭',offer:true});
-    assert.equal(f.find('purchase-cta').hidden,false);check(388,240,148);
+    assert.equal(f.find('purchase-cta').hidden,false);check(148);
     assert.match(f.find('empathy-headline').textContent,/家庭/);
     assert.equal(f.find('result-grid').children.length,13);
   }finally{globalThis.document=old;}
@@ -126,62 +150,45 @@ test('original full/single prices stay synchronized, cannot grant access, and re
 
 const descendants = root => [root,...root.children.flatMap(descendants)];
 const allText = root => descendants(root).map(n=>n.textContent).join('');
-test('the entry topic stays free across selectors, twelve palaces, chapter previews and purchase buttons',()=>{
+test('the entry topic stays free across twelve palaces, chapter previews and purchase buttons',()=>{
   const f=fixture(), old=globalThis.document;globalThis.document={createElement:tag=>new f.Node(tag)};
   try {
     const result=attachResult(f.report), native=chart('09:30');result.show({chart:native,alias:'一題',subject:'事業',offer:true});
     const model=resultFromChart(native,'事業'), career=model.book.chapters[0], love=model.book.chapters[1];
-    assert.ok(allText(f.find('empathy-body')).includes(career.other));
+    assert.deepEqual(f.find('empathy-body').children.map(n=>n.textContent),[career.lens,career.people,career.other,career.resource]);
     assert.ok(f.find('jiuye-quote').textContent.includes(career.line));
     assert.equal(f.find('share-card').hidden,false);
     assert.match(f.find('share-quote').textContent,/總係頂到最後嗰個/);
     assert.equal(f.find('share-signature').value,'');
     f.find('share-signature').value='guest';
-    const chapters = f.find('chapter-previews').children, previews = f.find('topic-previews').children;
+    const chapters = f.find('chapter-previews').children;
     assert.deepEqual(chapters.map(c=>c.children[0].textContent),[
       '第一章：本命內耗與天賦','第二章：2026–2028 財運與轉折','第三章：緣分與貴人磁場','第四章：穩陣 vs 破局雙選擇'
     ]);
     assert.match(allText(chapters[1]),/化祿落本命/);
-    assert.deepEqual(previews.map(c=>c.dataset.topic),['夫妻','田宅','財帛','命宮']);
-    for(const item of previews) {
-      assert.equal(item.tagName,'details');assert.equal(item.getAttribute('name'),'other-topics');
-      assert.deepEqual(item.children[1].children.map(c=>c.tagName),['p','p','div']);
+    const freeProse=allText(f.find('empathy-body'));
+    for(const id of ['empathy-body','chapter-previews']) {
+      assert.ok(!allText(f.find(id)).includes(love.people),'other full prose is not in the DOM');
     }
-    f.find('topic-select').handlers.change({target:{value:'夫妻'}});
-    assert.equal(f.find('resonance').hidden,true);
-    assert.equal(f.find('share-card').hidden,true);
-    assert.equal(f.find('share-signature').value,'');
-    assert.equal(f.find('share-quote').textContent,'');
-    for(const id of ['empathy-body','chapter-previews','topic-previews']) {
-      assert.ok(!allText(f.find(id)).includes(love.people),'locked prose is not in the DOM');
-      assert.ok(!allText(f.find(id)).includes(love.other));
-    }
-    assert.ok(allText(f.find('empathy-body')).includes(love.teaser[0]));
     for(const button of f.find('result-grid').children.filter(n=>n.tagName==='button')) {
       button.handlers.click();assert.ok(!allText(f.find('palace-detail')).includes(love.people));
     }
-    for(const root of ['chapter-previews','topic-previews','empathy-body']) assert.ok(descendants(f.find(root)).every(n=>n.tagName!=='button'));
-    const tails=descendants(f.find('topic-previews')).filter(n=>n.className==='teaser-fade');
-    assert.equal(tails.length,4);for(const t of tails){assert.equal(t.getAttribute('aria-hidden'),'true');assert.equal(t.getAttribute('inert'),'');}
+    for(const root of ['chapter-previews','empathy-body']) assert.ok(descendants(f.find(root)).every(n=>n.tagName!=='button'));
     f.find('sku-single').handlers.click();
-    const family=previews[1];family.open=true;family.handlers.toggle();
-    assert.equal(f.find('purchase-dialog').open,false,'opening the preview does not open pricing');
-    f.find('purchase-cta').handlers.click();
-    assert.equal(f.find('purchase-price').textContent,'HK$88');assert.equal(f.find('purchase-plan').textContent,'家庭・單題拆局書');f.find('close-purchase').handlers.click();
-    assert.equal(f.find('empathy-body').children[0].className,'teaser-card','a price selection never grants access');
-    f.find('topic-select').handlers.change({target:{value:'官祿'}});
-    assert.equal(family.open,false);assert.equal(f.find('purchase-plan').textContent,'事業・單題拆局書');
-    assert.ok(allText(f.find('empathy-body')).includes(career.other));
+    assert.equal(f.find('purchase-dialog').open,false,'changing plan does not open the dialog');
+    f.find('sealed-purchase-cta').handlers.click();
+    assert.equal(f.find('purchase-price').textContent,'HK$88');assert.equal(f.find('purchase-plan').textContent,'事業・單題拆局書');f.find('close-purchase').handlers.click();
+    assert.equal(allText(f.find('empathy-body')),freeProse,'price and palace inspection never replace the free reading');
     assert.equal(f.find('share-card').hidden,false);
-    assert.equal(f.find('share-signature').value,'');
+    assert.equal(f.find('share-signature').value,'guest');
     const shape=f.find('wealth-line').getAttribute('d');assert.match(shape,/^M12 /);assert.match(shape,/L308 /);
     assert.ok(allText(f.find('basis-detail')).includes('太陰化忌在子女宮'));
-    result.clear();for(const id of ['chapter-previews','topic-previews'])assert.equal(f.find(id).children.length,0);
+    result.clear();assert.equal(f.find('chapter-previews').children.length,0);
     result.show({chart:native,alias:'界線',subject:'愛情',offer:false,reply:'唔靠張盤催你再聯絡。'});
     assert.equal(f.find('jiuye-quote').textContent,'唔靠張盤催你再聯絡。');
-    for (const id of ['book-previews','offer','purchase-wrap','share-card','resonance']) assert.equal(f.find(id).hidden,true);
+    for (const id of ['book-previews','offer','sealed-unlock','purchase-wrap','share-card','resonance']) assert.equal(f.find(id).hidden,true);
     f.find('purchase-cta').handlers.click();assert.equal(f.find('purchase-dialog').open,false);
-    for(const id of ['chapter-previews','topic-previews'])assert.equal(f.find(id).children.length,0);
+    assert.equal(f.find('chapter-previews').children.length,0);
     assert.ok(allText(f.find('empathy-body')).includes(love.other));
   } finally {globalThis.document=old;}
 });
@@ -196,7 +203,7 @@ test('the three delivery charts get distinct chart-led relationship rows and fre
   ];
   try {
     const result=attachResult(f.report);
-    const rows=()=>Array.from({length:5},(_,i)=>f.find('fate-'+i).textContent);
+    const rows=()=>Array.from({length:4},(_,i)=>f.find('fate-'+i).textContent);
     const rendered=samples.map(([date,time,gender,subject,spouse,ji,lu,...phrases])=>{
       const [year,month,day]=date.split('-');
       const native=calculateZiwei({...EXAMPLE,year,month,day,time,gender},box.self.iztro,{asOf:'2026-11-21'});
@@ -206,17 +213,16 @@ test('the three delivery charts get distinct chart-led relationship rows and fre
       assert.equal(free.length,4);assert.ok(free[2].includes(ji));assert.ok(free[3].includes(lu));
       assert.doesNotMatch(free.join('')+closing,/呢份用心唔係缺點|如果你認得呢一幕|留一個你負擔到嘅範圍/);
       assert.ok(clues[0].startsWith(spouse));
-      for(let i=0;i<4;i++)assert.ok(clues[i+1].includes(phrases[i]) && clues[i+1].endsWith('？'));
+      for(const [i,phrase] of [phrases[0],phrases[1],phrases[3]].entries())assert.ok(clues[i+1].includes(phrase) && clues[i+1].endsWith('？'));
       assert.ok(closing.includes(phrases[4]));
       const otherTopic = subject === '財運' ? '官祿' : '財帛';
-      f.find('topic-select').handlers.change({target:{value:otherTopic}});
-      assert.equal(rows()[0],clues[0],'switching topic retains the same chart evidence');
-      for(let i=1;i<5;i++) assert.notEqual(rows()[i],clues[i]);
-      assert.equal(f.find('resonance').hidden,true,'switching clues does not unlock free prose');
-      result.clear();assert.deepEqual(rows(),['','','','','']);
+      f.find('result-grid').children.find(n=>n.dataset.palace===otherTopic).handlers.click();
+      assert.deepEqual(rows(),clues,'viewing another palace retains the original reading');
+      assert.equal(f.find('resonance').hidden,false,'the entry topic remains active');
+      result.clear();assert.deepEqual(rows(),['','','','']);
       return {clues,ending:[...free.slice(1),closing]};
     });
-    for(let i=1;i<5;i++)assert.equal(new Set(rendered.map(r=>r.clues[i])).size,3);
+    for(let i=1;i<4;i++)assert.equal(new Set(rendered.map(r=>r.clues[i])).size,3);
     for(let i=0;i<4;i++)assert.equal(new Set(rendered.map(r=>r.ending[i])).size,3);
   } finally {globalThis.document=old;}
 });

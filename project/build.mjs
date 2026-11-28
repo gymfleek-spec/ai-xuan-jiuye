@@ -9,7 +9,6 @@ import { getBirthDateError } from './content.js';
 import { growthConnections, growthRoute, WAITLIST_ROUTE, EVENTS_ROUTE } from './growth-config.mjs';
 const root=fileURLToPath(new URL('./',import.meta.url)), src=join(root,'scroll');
 const output=join(root,'public-preview'), single=join(root,'玄與九爺-港島夜話.html');
-const assets=join(src,'art');
 const read=(...path)=>readFileSync(join(...path),'utf8');
 const {version}=JSON.parse(read(root,'package.json'));
 const waitlist= growthRoute(process.env.WAITLIST_ENDPOINT, WAITLIST_ROUTE), events= growthRoute(process.env.EVENTS_ENDPOINT, EVENTS_ROUTE);
@@ -22,15 +21,9 @@ assert.equal(sha(engine),'6d7993c30d76b4720ccd6c981893738e1c5d3d8c925115ea910c1a
 runInNewContext(engine,box);
 const book=makeBook(EXAMPLE,box.self.iztro,{asOf:'2026-11-21'}), exampleTopic='官祿';
 const bind=(key,value,tag='p')=>'<'+tag+' data-field="'+key+'"'+(value?'':' hidden')+'>'+esc(value)+'</'+tag+'>';
-const artwork='art/tea-room.jpg', views=JSON.parse(read(assets,'captions.json'));
-function frame(key){
-  const priority=key==='door'?' fetchpriority="high"':' loading="lazy"';
-  return '<div class="frame '+key+'"><img src="'+artwork+'" width="1536" height="1024" alt="'+esc(views[key].alt)+'"'+priority+'></div>';
-}
 const paragraphs=lines=>lines.map(v=>'<p>'+esc(v)+'</p>').join('');
 const chapters=bookPreviews(book,exampleTopic).map(c=>'<section class="chapter-preview"><h3>'+esc(c.title)+'</h3>'+paragraphs(c.lines)+'</section>').join('\n');
-const topicPeeks=book.chapters.filter(c=>c.key!==exampleTopic).map(c=>'<details name="other-topics" data-topic="'+esc(c.key)+'"><summary>'+esc(c.label)+'</summary><div class="topic-peek">'+paragraphs(c.teaser)+'<div class="teaser-fade" aria-hidden="true" inert><span>────────　──────</span></div></div></details>').join('\n');
-let html=read(src,'page.html').replaceAll('@@VERSION@@',version).replace('@@BOOK_ART@@',()=>frame('seat')).replace('@@ELEMENT@@',esc(book.element)).replace('@@CHAPTERS@@',()=>chapters).replace('@@TOPIC_PEEKS@@',()=>topicPeeks);
+let html=read(src,'page.html').replaceAll('@@VERSION@@',version).replace('@@ELEMENT@@',esc(book.element)).replace('@@CHAPTERS@@',()=>chapters);
 const withoutModules=s=>s.replace(/^import [^\n]+;\n/gm,'').replace(/^export \{[^\n]+ from [^\n]+;\n/gm,'').replace(/^export /gm,'');
 const app="(()=>{\n'use strict';\n"+getBirthDateError.toString()+'\n'+['scroll/empathy-copy.mjs','scroll/chart.mjs','scroll/book.mjs','motion/motion.mjs','ziwei.js','growth-config.mjs','scroll/analytics.mjs','scroll/share-art.mjs','shareCard.js','scroll/waitlist.mjs','scroll/result.mjs','scroll/reader.mjs'].map(f=>withoutModules(read(root,f))).join('\n')+'\n})();';
 assert.doesNotMatch(app,/^import |^export |<\/script/mi);assert.doesNotMatch(engine,/<\/script/i);
@@ -41,14 +34,7 @@ const policy=(offline)=>"default-src 'none'; script-src "+(offline?[hashSrc(engi
 let inline=bindEndpoint(html).replace('@@POLICY@@',policy(true)).replace('<head>',()=>'<head>\n<!-- '+notices.replaceAll('-->','-- >')+' -->').replace('@@STYLE@@',()=>'<style>'+css+'</style>').replace('@@SCRIPTS@@',()=>'<script>'+engine+'</script><script>'+app+'</script>');
 const files=new Map([['reading.css',css],['reading.js',app],['iztro-2.6.5.js',engine],['THIRD_PARTY_NOTICES.txt',notices]]);
 let pub=bindEndpoint(html,waitlist,events).replace('@@POLICY@@',policy(false)).replace('@@STYLE@@','<link rel="stylesheet" href="reading.css?v='+sha(css).slice(0,9)+'">').replace('@@SCRIPTS@@','<script defer src="iztro-2.6.5.js"></script><script defer src="reading.js?v='+sha(app).slice(0,9)+'"></script>');
-const photo=readFileSync(join(src,artwork));
-assert.ok(photo.length<700_000 && photo.readUInt16BE(0)===0xffd8);
-const photoSrc='src="'+artwork+'"';
-assert.equal(html.split(photoSrc).length-1,1);
-files.set(artwork,photo);
-pub=pub.replaceAll(photoSrc,'src="'+artwork+'?v='+sha(photo).slice(0,9)+'"');
-inline=inline.replaceAll(photoSrc,'src="data:image/jpeg;base64,'+photo.toString('base64')+'"');
-const media={ARRIVAL:['arrival-same-room-v2.mp4','video/mp4'],ENTRY:['office-entry-same-room-v1.mp4','video/mp4'],LOBBY:['desk-same-room-v2.jpg','image/jpeg'],DOOR:['office-door-a4.jpg','image/jpeg'],DESK:['desk-same-room-v2.jpg','image/jpeg'],SHARE_PORTRAIT:['jiuye-v2.png','image/png']};
+const media={ARRIVAL:['arrival-same-room-v2.mp4','video/mp4'],ENTRY:['office-entry-same-room-v1.mp4','video/mp4'],LOBBY:['desk-same-room-v2.jpg','image/jpeg'],DOOR:['office-door-a4.jpg','image/jpeg'],DESK:['desk-same-room-v2.jpg','image/jpeg'],SHARE_PORTRAIT:['jiuye-v2.png','image/png'],BOOK_ART:['book-seat.png','image/png']};
 for(const [key,[name,mime]] of Object.entries(media)){
   const path='assets/'+name, bytes=readFileSync(join(root,path)), marker='@@'+key+'@@';
   assert.ok(html.includes(marker)); files.set(path,bytes);

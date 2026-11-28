@@ -36,6 +36,8 @@
 .jy-early[open] {animation:jy-in 160ms ease-out both}
 .jy-early::backdrop {background:#030906bb}
 .jy-early h2 {margin:12px 0 8px;font:700 clamp(21px,5.6vw,27px)/1.4 var(--jy-serif)}
+/* The heading receives focus for screen readers, but is not a control. */
+#purchase-title:focus {outline:none}
 .jy-early p {margin:6px 0 12px;color:var(--jy-muted)}
 .jy-early .jy-top {display:flex;justify-content:space-between;align-items:center;gap:8px}
 .jy-early .jy-plan {margin:0;color:#efd093;font:600 13px/1.55 system-ui,sans-serif}
@@ -53,5 +55,3 @@
 @media (prefers-reduced-motion:reduce) {.jy-early[open]{animation:none}}
 
 @media print {#share-card,#purchase-dialog{display:none!important}}
-
-.sku-options small {white-space:nowrap;color:#e9cd8f;font-size:.86em}

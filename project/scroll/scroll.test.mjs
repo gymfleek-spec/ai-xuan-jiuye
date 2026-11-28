@@ -35,3 +35,12 @@ test('a missing or invalid birth field never returns a personal reading; running
   for(const patch of [{time:''},{time:'23:61'},{precision:'unknown',time:''},{gender:'withheld'},{day:'32'},{year:'2099'}])assert.throws(()=>makeBook({...EXAMPLE,...patch},engine));
   assert.throws(()=>makeBook(EXAMPLE,{}));assert.deepEqual(fixed(),fixed());
 });
+
+test('book panel keeps the full seat image and groups the quote with the chapter heading',()=>{
+  const html=readFileSync(new URL('./page.html',import.meta.url),'utf8');
+  const png=readFileSync(new URL('../assets/book-seat.png',import.meta.url));
+  const width=png.readUInt32BE(16), height=png.readUInt32BE(20);
+  const panel=html.match(/<div class="book-panel">([\s\S]*?)<\/div>/)?.[1] ?? '';
+  assert.ok(panel.includes(`<img src="@@BOOK_ART@@" width="${width}" height="${height}"`));
+  assert.match(panel,/<header class="book-opening">\s*<p class="book-opening-quote editorial">呢份，留低嘅唔係定論，[\s\S]*?id="edition-label"[\s\S]*?id="book-title"/);
+});

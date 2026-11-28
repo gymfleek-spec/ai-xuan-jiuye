@@ -1,4 +1,4 @@
-import { getPalaceReading, readingFact, palaceTitle, READING_TOPICS, periodTempo } from './chart.mjs';
+import { getPalaceReading, readingFact, palaceTitle, periodTempo } from './chart.mjs';
 import { bookFromChart, bookPreviews } from './book.mjs';
 import { relatingPrompts } from './empathy-copy.mjs';
 import { TOPIC_CODE, SKU_CODE, track } from './analytics.mjs';
@@ -36,54 +36,31 @@ export function attachResult(report) {
   const put = (id, value) => { find(id).textContent = value; };
   const share = attachShareCard(find), waitlist = attachWaitlist(find);
   const positions = { 寅:[4,1], 卯:[3,1], 辰:[2,1], 巳:[1,1], 午:[1,2], 未:[1,3], 申:[1,4], 酉:[2,4], 戌:[3,4], 亥:[4,4], 子:[4,3], 丑:[4,2] };
-  const prices = { full:[388,240,148], single:[228,140,88] };
-  let current = null, name = '', canOffer = false, activeTopic = '', purchaseTopic = '', safeReply = '', plan = 'full';
+  const prices = {full:148, single:88}, fateRows = ['fate-0','fate-1','fate-2','fate-3'];
+  let current = null, name = '', canOffer = false, safeReply = '', plan = 'full';
   const chapterFor = key => current?.book.chapters.find(c => c.key === key);
   function pricing(key) {
     plan = key;
-    const [original, discount, total] = prices[key];
-    put('price-original', 'HK$' + original); put('price-discount', '-HK$' + discount);
-    for (const id of ['price-final','cta-price','purchase-price']) put(id, 'HK$' + total);
-    const label = chapterFor(purchaseTopic || activeTopic)?.label || '';
+    for (const id of ['sealed-cta-price','cta-price','purchase-price']) put(id, 'HK$' + prices[key]);
+    const label = chapterFor(current?.selected)?.label || '';
     put('purchase-plan', key === 'full' ? '全盤三年命書' : (label ? label + '・' : '') + '單題拆局書');
-    put('cta-book', key === 'full' ? '完整命書' : label + '拆局書');
+    for (const id of ['sealed-cta-book','cta-book']) put(id, key === 'full' ? '完整命書' : label + '拆局書');
     for (const sku of ['full','single']) find('sku-' + sku).setAttribute('aria-pressed', String(sku === key));
   }
-  function openPurchase(sku = plan, key = purchaseTopic || activeTopic) {
+  function openPurchase() {
     if (!current || !canOffer) return;
-    purchaseTopic = key; pricing(sku); waitlist.open(SKU_CODE[sku], TOPIC_CODE[key]);
+    waitlist.open(SKU_CODE[plan], TOPIC_CODE[current.selected]);
   }
   for (const key of ['full','single']) find('sku-' + key).addEventListener('click', () => {
     if (current && canOffer) { pricing(key); track('sku_selected', {sku:SKU_CODE[key]}); }
   });
-  find('purchase-cta').addEventListener('click', () => openPurchase());
-  function teaserTail(lines = 1) {
-    // Decorative marks only: there is no full chapter hidden behind the fade.
-    const tail = node('div', '', 'teaser-fade'); tail.setAttribute('aria-hidden','true'); tail.setAttribute('inert','');
-    for (let i = 0; i < lines; i++) tail.append(node('span', '────────　──────'));
-    return tail;
-  }
-  function teaser(title, lines) {
-    const card = node('section', '', 'teaser-card');
-    card.append(node('h3', title), ...lines.map(line => node('p', line, 'teaser-intro')), teaserTail(3));
-    return card;
-  }
+  for (const id of ['sealed-purchase-cta','purchase-cta']) find(id).addEventListener('click', openPurchase);
   function paintChapterPreviews() {
     find('book-previews').hidden = !canOffer;
     find('chapter-previews').replaceChildren(...(canOffer ? bookPreviews(current.book, current.selected).map(c => {
       const card = node('section', '', 'chapter-preview');
       card.append(node('h3', c.title), ...c.lines.map(line => node('p', line)));
       return card;
-    }) : []));
-    find('topic-previews').replaceChildren(...(canOffer ? current.book.chapters.filter(c => c.key !== current.selected).map(c => {
-      const item = node('details', ''); item.setAttribute('name','other-topics'); item.dataset.topic = c.key;
-      const peek = node('div', '', 'topic-peek');
-      peek.append(...c.teaser.map(line => node('p', line)), teaserTail());
-      item.append(node('summary', c.label), peek);
-      item.addEventListener('toggle', () => {
-        if (item.open && current && canOffer) { purchaseTopic = c.key; pricing(plan); }
-      });
-      return item;
     }) : []));
   }
   function basis(chapter) {
@@ -101,20 +78,16 @@ export function attachResult(report) {
     parts.push('按所填當地鐘錶時間，未校真太陽時；採農曆年界，所以1月1日未必已轉流年。');
     put('basis-detail', parts.join('\n\n'));
   }
-  function topic(key) {
-    const chapter = chapterFor(key); if (!chapter) return;
-    activeTopic = key; purchaseTopic = key; find('topic-select').value = key;
+  function paintTopic() {
+    const key = current.selected, chapter = chapterFor(key);
+    if (!chapter) return;
     find('chart-reading').scrollTop = 0;
-    for (const item of find('topic-previews').querySelectorAll('details')) item.open = false;
     put('pattern-badge', current.book.element + ' · ' + chapter.source);
     put('empathy-headline', name + '，由' + chapter.label + '開始，一件一件慢慢拆。');
-    const free = key === current.selected;
-    find('empathy-body').replaceChildren(...(free
-      ? [chapter.lens, chapter.people, chapter.other, chapter.resource].map(v => node('p', v))
-      : [teaser(chapter.label + '・另一半慢慢拆', chapter.teaser)]));
-    put('jiuye-quote', !canOffer ? safeReply : free ? chapter.question + ' 可以試吓講：' + chapter.line : READING_TOPICS[key].question);
-    find('resonance').hidden = !free || !canOffer;
-    share.set(free && canOffer ? shareFields(chapter, current.book.element) : null);
+    find('empathy-body').replaceChildren(...[chapter.lens, chapter.people, chapter.other, chapter.resource].map(v => node('p', v)));
+    put('jiuye-quote', canOffer ? chapter.question + ' 可以試吓講：' + chapter.line : safeReply);
+    find('resonance').hidden = !canOffer;
+    share.set(canOffer ? shareFields(chapter, current.book.element) : null);
     find('resonance').setAttribute('aria-pressed','false'); put('resonance','呢句講中咗 ✦');
     basis(chapter); find('basis').open = false; pricing(plan); palace(key); paintRelating(key);
   }
@@ -152,22 +125,21 @@ export function attachResult(report) {
   }
   function paintRelating(key) {
     const { stars, theme, ji, lu } = chapterFor('夫妻');
-    const clues = [stars.join('、') + '・' + theme, ...relatingPrompts(key, stars.at(-1), ji.star, lu.star)];
-    clues.forEach((value,i) => put('fate-' + i,value));
-    put('fate-4-label', key === '官祿' ? '交接嗰一刻' : key === '財帛' ? '合作嗰一刻' : '想像一個晚上');
+    const [treatment, detail, , turningPoint] = relatingPrompts(key, stars.at(-1), ji.star, lu.star);
+    const clues = [stars.join('、') + '・' + theme, treatment, detail, turningPoint];
+    fateRows.forEach((id,i) => put(id,clues[i]));
   }
-  find('topic-select').addEventListener('change', e => topic(e.target.value));
   find('resonance').addEventListener('click', () => {
-    if (!current || !canOffer || activeTopic !== current.selected) return;
+    if (!current || !canOffer) return;
     const pressed = find('resonance').getAttribute('aria-pressed') !== 'true';
     find('resonance').setAttribute('aria-pressed',String(pressed)); put('resonance',pressed ? '留低呢句，再慢慢諗 ✦' : '呢句講中咗 ✦');
-    if (pressed) track('resonance_clicked',{topic:TOPIC_CODE[activeTopic]});
+    if (pressed) track('resonance_clicked',{topic:TOPIC_CODE[current.selected]});
   });
   return {
     show({chart,alias,subject,offer = false,reply = ''}) {
       waitlist.clear();
-      current = resultFromChart(chart,subject); name = alias; canOffer = offer === true; safeReply = reply || '今晚唔使急住作決定。可以先同自己講：「我想留返空間，照顧好自己。」'; activeTopic = current.selected;
-      find('offer').hidden = find('purchase-wrap').hidden = find('purchase-cta').hidden = !canOffer; pricing('full');
+      current = resultFromChart(chart,subject); name = alias; canOffer = offer === true; safeReply = reply || '今晚唔使急住作決定。可以先同自己講：「我想留返空間，照顧好自己。」';
+      find('offer').hidden = find('sealed-unlock').hidden = find('purchase-wrap').hidden = find('purchase-cta').hidden = !canOffer; pricing('full');
       for (const el of report.querySelectorAll('.js-user-name')) el.textContent = alias;
       const grid = find('result-grid'); grid.replaceChildren();
       for (const p of chart.palaces) {
@@ -181,18 +153,18 @@ export function attachResult(report) {
         button.addEventListener('click',() => palace(p.name)); grid.append(button);
       }
       const center = node('div','','palace-center'); center.append(node('strong','紫微斗數'),node('span',current.book.element),node('span','本命十二宮')); grid.append(center);
-      topic(current.selected); paintTiming(); paintChapterPreviews();
-      find('chart-details').open = find('topic-menu').open = false;
+      paintTopic(); paintTiming(); paintChapterPreviews();
+      find('chart-details').open = false;
     },
     clear() {
       waitlist.clear(); share.set(null);
-      current = null; name = safeReply = ''; canOffer = false; activeTopic = purchaseTopic = '';
-      find('offer').hidden = find('purchase-wrap').hidden = find('purchase-cta').hidden = find('book-previews').hidden = true; pricing('full');
-      for (const id of ['pattern-badge','empathy-headline','empathy-body','jiuye-quote','basis-detail','result-grid','palace-detail','chapter-previews','topic-previews','decadal-label','curve-high','curve-low','turn-year',...Array.from({length:5},(_,i) => 'fate-' + i)]) find(id).replaceChildren();
+      current = null; name = safeReply = ''; canOffer = false;
+      find('offer').hidden = find('sealed-unlock').hidden = find('purchase-wrap').hidden = find('purchase-cta').hidden = find('book-previews').hidden = true; pricing('full');
+      for (const id of ['pattern-badge','empathy-headline','empathy-body','jiuye-quote','basis-detail','result-grid','palace-detail','chapter-previews','decadal-label','curve-high','curve-low','turn-year',...fateRows]) find(id).replaceChildren();
       for (const id of ['wealth-line','career-line']) find(id).setAttribute('d','');
       for (const el of report.querySelectorAll('.js-user-name')) el.textContent = '';
-      find('basis').open = find('chart-details').open = find('topic-menu').open = false;
-      find('topic-select').value = '命宮'; find('resonance').setAttribute('aria-pressed','false'); put('resonance','呢句講中咗 ✦');
+      find('basis').open = find('chart-details').open = false;
+      find('resonance').setAttribute('aria-pressed','false'); put('resonance','呢句講中咗 ✦');
     }
   };
 }
